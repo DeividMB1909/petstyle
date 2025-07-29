@@ -1,0 +1,28 @@
+{
+  "name": "petstyle",
+  "version": "1.0.0",
+  "description": "E-commerce de accesorios para mascotas",
+  "main": "backend/server.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "build": "npm install",
+    "docker:build": "docker-compose up --build",
+    "docker:up": "docker-compose up",
+    "docker:down": "docker-compose down"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DeividMB1909/petstyle.git"
+  },
+  "keywords": ["ecommerce", "pets", "accessories", "mobile"],
+  "author": "David Gael Axel Martinez Badillo, Francisco Javier Esquivel Macias, Jose Alfredo Flores Rodriguez, Ulises Uriel Gomez Castro, Perla Daniel Muñoz Trujillo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DeividMB1909/petstyle/issues"
+  },
+  "homepage": "https://github.com/DeividMB1909/petstyle#readme"
+}

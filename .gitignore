@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+
+# Environment variables
+.env
+.env.local
+
+# Database
+data/
+
+# Logs
+logs/
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/settings.json
+.idea/
+
+# Build files
+dist/
+build/
+
+# Mobile
+mobile/platforms/
+mobile/plugins/
+mobile/www/
+
+# Docker
+docker/data/
