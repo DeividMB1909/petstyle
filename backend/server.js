@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 require('dotenv').config();
+const { SeedController } = require('./controllers');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -106,6 +107,16 @@ app.get('/test-models', async (req, res) => {
         });
     }
 });
+
+// API Routes
+const apiRoutes = require('./routes');
+app.use('/api', apiRoutes);
+
+// Ruta para poblar la base de datos con datos de prueba
+app.get('/seed', SeedController.seedDatabase);
+
+// Ruta para obtener estadísticas de la base de datos
+app.get('/stats', SeedController.getStats);
 
 // Manejo de errores 404
 app.use((req, res) => {
