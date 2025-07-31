@@ -18,11 +18,29 @@
     "type": "git",
     "url": "git+https://github.com/DeividMB1909/petstyle.git"
   },
-  "keywords": ["ecommerce", "pets", "accessories", "mobile"],
+  "keywords": [
+    "ecommerce",
+    "pets",
+    "accessories",
+    "mobile"
+  ],
   "author": "David Gael Axel Martinez Badillo, Francisco Javier Esquivel Macias, Jose Alfredo Flores Rodriguez, Ulises Uriel Gomez Castro, Perla Daniel Muñoz Trujillo",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/DeividMB1909/petstyle/issues"
   },
-  "homepage": "https://github.com/DeividMB1909/petstyle#readme"
+  "homepage": "https://github.com/DeividMB1909/petstyle#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cloudinary": "^2.7.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.1.0",
+    "mongoose": "^8.17.0",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "nodemon": "^3.1.10"
+  }
 }
