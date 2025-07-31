@@ -150,6 +150,63 @@ class CategoryController {
         }
     }
 
+    // Obtener categoría por nombre
+    static async getCategoryByName(req, res) {
+        try {
+            const { name } = req.params;
+            const category = await Category.findOne({ 
+                name: { $regex: new RegExp(name, 'i') } // Búsqueda insensible a mayúsculas
+            });
+            
+            if (!category) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Categoría no encontrada con ese nombre'
+                });
+            }
+
+            res.status(200).json({
+                success: true,
+                data: category,
+                message: 'Categoría obtenida exitosamente'
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error al obtener categoría por nombre',
+                error: error.message
+            });
+        }
+    }
+
+    // Eliminar categoría por nombre
+    static async deleteCategoryByName(req, res) {
+        try {
+            const { name } = req.params;
+            const deletedCategory = await Category.findOneAndDelete({ 
+                name: { $regex: new RegExp(name, 'i') }
+            });
+
+            if (!deletedCategory) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Categoría no encontrada con ese nombre'
+                });
+            }
+
+            res.status(200).json({
+                success: true,
+                message: `Categoría "${deletedCategory.name}" eliminada exitosamente`
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error al eliminar categoría por nombre',
+                error: error.message
+            });
+        }
+    }
+
     // Obtener categorías activas
     static async getActiveCategories(req, res) {
         try {

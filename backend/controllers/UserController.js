@@ -128,6 +128,65 @@ class UserController {
         }
     }
 
+    // Obtener usuario por email
+    static async getUserByEmail(req, res) {
+        try {
+            const { email } = req.params;
+            const user = await User.findOne({ email: email }).select('-password');
+            
+            if (!user) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Usuario no encontrado con ese email'
+                });
+            }
+
+            res.status(200).json({
+                success: true,
+                data: user,
+                message: 'Usuario obtenido exitosamente'
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error al obtener usuario por email',
+                error: error.message
+            });
+        }
+    }
+
+    // Eliminar usuario por email
+    static async deleteUserByEmail(req, res) {
+        try {
+            const { email } = req.params;
+            const deletedUser = await User.findOneAndDelete({ email: email });
+
+            if (!deletedUser) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Usuario no encontrado con ese email'
+                });
+            }
+
+            res.status(200).json({
+                success: true,
+                message: `Usuario ${deletedUser.name} eliminado exitosamente`,
+                data: {
+                    deletedUser: {
+                        name: deletedUser.name,
+                        email: deletedUser.email
+                    }
+                }
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error al eliminar usuario por email',
+                error: error.message
+            });
+        }
+    }
+
     // Eliminar usuario
     static async deleteUser(req, res) {
         try {

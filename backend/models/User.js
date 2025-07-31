@@ -27,10 +27,10 @@ const userSchema = new mongoose.Schema({
         match: [/^[0-9]{10}$/, 'Teléfono debe tener 10 dígitos']
     },
     address: {
-        street: { type: String, required: true },
-        city: { type: String, required: true },
-        state: { type: String, required: true },
-        zipCode: { type: String, required: true },
+        street: { type: String, required: false }, // ← CAMBIADO A false
+        city: { type: String, required: false },   // ← CAMBIADO A false
+        state: { type: String, required: false },  // ← CAMBIADO A false
+        zipCode: { type: String, required: false }, // ← CAMBIADO A false
         country: { type: String, default: 'México' }
     },
     role: {
@@ -49,21 +49,23 @@ const userSchema = new mongoose.Schema({
     avatar: {
         type: String,
         default: 'default-avatar.png'
+    },
+    lastLogin: {
+        type: Date
     }
 }, {
     timestamps: true // Agrega createdAt y updatedAt automáticamente
 });
 
-// Middleware para encriptar contraseña antes de guardar
+// ❌ COMENTADO: No necesario porque AuthController ya encripta
+/*
 userSchema.pre('save', async function(next) {
-    // Solo encriptar si la contraseña fue modificada
     if (!this.isModified('password')) return next();
-    
-    // Encriptar contraseña
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
     next();
 });
+*/
 
 // Método para comparar contraseñas
 userSchema.methods.comparePassword = async function(candidatePassword) {

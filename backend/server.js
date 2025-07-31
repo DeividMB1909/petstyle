@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 require('dotenv').config();
 const { SeedController } = require('./controllers');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,6 +31,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
+app.use(cookieParser());
 
 // Configurar EJS
 app.set('view engine', 'ejs');
@@ -111,6 +113,9 @@ app.get('/test-models', async (req, res) => {
 // API Routes
 const apiRoutes = require('./routes');
 app.use('/api', apiRoutes);
+
+const authRoutes = require('./routes/authRoutes');
+app.use('/api/auth', authRoutes);
 
 // Ruta para poblar la base de datos con datos de prueba
 app.get('/seed', SeedController.seedDatabase);

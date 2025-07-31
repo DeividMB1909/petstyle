@@ -24,4 +24,10 @@ router.put('/:id', ProductController.updateProduct);
 // DELETE /api/products/:id - Eliminar producto
 router.delete('/:id', ProductController.deleteProduct);
 
+// GET /api/products/name/:name - Obtener producto por nombre
+router.get('/name/:name', ProductController.getProductByName);
+
+// DELETE /api/products/name/:name - Eliminar producto por nombre
+router.delete('/name/:name', ProductController.deleteProductByName);
+
 module.exports = router;

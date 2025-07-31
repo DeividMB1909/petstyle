@@ -8,11 +8,17 @@
     "dev": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["api", "rest", "ecommerce", "pets"],
+  "keywords": [
+    "api",
+    "rest",
+    "ecommerce",
+    "pets"
+  ],
   "author": "David Gael Axel Martinez Badillo, Francisco Javier Esquivel Macias, Jose Alfredo Flores Rodriguez, Ulises Uriel Gomez Castro, Perla Daniel Muñoz Trujillo",
   "license": "MIT",
   "dependencies": {
     "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "ejs": "^3.1.10",

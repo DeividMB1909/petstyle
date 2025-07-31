@@ -13,18 +13,18 @@ class SeedController {
             // Crear usuarios de prueba
             const users = await User.insertMany([
                 {
-                    name: 'Juan Pérez',
-                    email: 'juan@example.com',
+                    name: 'David Badillo',
+                    email: 'deivid@example.com',
                     password: '123456',
                     role: 'admin',
                     address: {
                         street: 'Calle Principal 123',
-                        city: 'Ciudad de México',
-                        state: 'CDMX',
+                        city: 'Asientos',
+                        state: 'Aguascalientes',
                         zipCode: '12345',
                         country: 'México'
                     },
-                    phone: '8155556534'
+                    phone: '4492830878'
                 },
                 {
                     name: 'María García',

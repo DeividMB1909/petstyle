@@ -70,6 +70,63 @@ class ProductController {
         }
     }
 
+    // Obtener producto por nombre exacto
+    static async getProductByName(req, res) {
+        try {
+            const { name } = req.params;
+            const product = await Product.findOne({ 
+                name: { $regex: new RegExp(name, 'i') }
+            }).populate('category', 'name description');
+            
+            if (!product) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Producto no encontrado con ese nombre'
+                });
+            }
+
+            res.status(200).json({
+                success: true,
+                data: product,
+                message: 'Producto obtenido exitosamente'
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error al obtener producto por nombre',
+                error: error.message
+            });
+        }
+    }
+
+    // Eliminar producto por nombre
+    static async deleteProductByName(req, res) {
+        try {
+            const { name } = req.params;
+            const deletedProduct = await Product.findOneAndDelete({ 
+                name: { $regex: new RegExp(name, 'i') }
+            });
+
+            if (!deletedProduct) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Producto no encontrado con ese nombre'
+                });
+            }
+
+            res.status(200).json({
+                success: true,
+                message: `Producto "${deletedProduct.name}" eliminado exitosamente`
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error al eliminar producto por nombre',
+                error: error.message
+            });
+        }
+    }
+
     // Crear nuevo producto
     static async createProduct(req, res) {
         try {
