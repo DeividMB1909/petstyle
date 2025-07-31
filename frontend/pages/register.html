@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetStyle - Registro</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/components.css">
+</head>
+<body class="register-page">
+    <div class="auth-container">
+        <form class="auth-form" id="registerForm">
+            <div class="auth-header">
+                <img src="../assets/images/logo.png" alt="PetStyle" class="logo" onerror="this.style.display='none'">
+                <h1>Registro</h1>
+                <p>Crea tu cuenta en PetStyle</p>
+            </div>
+
+            <div class="form-group">
+                <label for="name" class="form-label">Nombre Completo</label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    class="form-input" 
+                    placeholder="Tu nombre completo"
+                    required
+                >
+                <div class="form-error" id="nameError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Correo Electrónico</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    class="form-input" 
+                    placeholder="tu@email.com"
+                    required
+                >
+                <div class="form-error" id="emailError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Contraseña</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    class="form-input" 
+                    placeholder="Mínimo 6 caracteres"
+                    required
+                >
+                <div class="form-error" id="passwordError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
+                <input 
+                    type="password" 
+                    id="confirmPassword" 
+                    class="form-input" 
+                    placeholder="Repite tu contraseña"
+                    required
+                >
+                <div class="form-error" id="confirmPasswordError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone" class="form-label">Teléfono (Opcional)</label>
+                <input 
+                    type="tel" 
+                    id="phone" 
+                    class="form-input" 
+                    placeholder="Tu número de teléfono"
+                >
+                <div class="form-error" id="phoneError"></div>
+            </div>
+
+            <button type="submit" class="btn-primary" id="registerBtn">
+                Registrarse
+            </button>
+
+            <div class="social-divider">
+                <span>o conecta con</span>
+            </div>
+
+            <div class="social-auth">
+                <button type="button" class="btn-outline mb-2" onclick="loginWithGoogle()">
+                    <span>🔍</span> Continuar con Google
+                </button>
+                <button type="button" class="btn-outline" onclick="loginWithFacebook()">
+                    <span>📘</span> Continuar con Facebook
+                </button>
+            </div>
+
+            <div class="auth-links">
+                <p>¿Ya tienes una cuenta? <a href="login.html">Iniciar sesión</a></p>
+            </div>
+        </form>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../config/config.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+
+    <script>
+        class RegisterPage {
+            constructor() {
+                this.api = new API();
+                this.auth = new AuthManager(this.api);
+                this.init();
+            }
+
+            init() {
+                // Verificar si ya está autenticado
+                if (this.auth.isAuthenticated()) {
+                    window.location.href = 'home.html';
+                    return;
+                }
+
+                this.bindEvents();
+            }
+
+            bindEvents() {
+                const form = document.getElementById('registerForm');
+                form.addEventListener('submit', (e) => this.handleRegister(e));
+
+                // Validación en tiempo real
+                document.getElementById('name').addEventListener('blur', (e) => {
+                    this.validateName(e.target.value);
+                });
+
+                document.getElementById('email').addEventListener('blur', (e) => {
+                    this.validateEmail(e.target.value);
+                });
+
+                document.getElementById('password').addEventListener('blur', (e) => {
+                    this.validatePassword(e.target.value);
+                });
+
+                document.getElementById('confirmPassword').addEventListener('blur', (e) => {
+                    this.validateConfirmPassword(e.target.value);
+                });
+
+                document.getElementById('phone').addEventListener('blur', (e) => {
+                    this.validatePhone(e.target.value);
+                });
+            }
+
+            validateName(name) {
+                if (!name || name.length < 2) {
+                    this.showFieldError('nameError', 'El nombre debe tener al menos 2 caracteres');
+                    return false;
+                } else {
+                    this.hideFieldError('nameError');
+                    return true;
+                }
+            }
+
+            validateEmail(email) {
+                if (!email) {
+                    this.showFieldError('emailError', 'El correo es requerido');
+                    return false;
+                } else if (!Utils.isValidEmail(email)) {
+                    this.showFieldError('emailError', 'El correo no es válido');
+                    return false;
+                } else {
+                    this.hideFieldError('emailError');
+                    return true;
+                }
+            }
+
+            validatePassword(password) {
+                if (!password) {
+                    this.showFieldError('passwordError', 'La contraseña es requerida');
+                    return false;
+                } else if (!Utils.isValidPassword(password)) {
+                    this.showFieldError('passwordError', 'La contraseña debe tener al menos 6 caracteres');
+                    return false;
+                } else {
+                    this.hideFieldError('passwordError');
+                    return true;
+                }
+            }
+
+            validateConfirmPassword(confirmPassword) {
+                const password = document.getElementById('password').value;
+                
+                if (!confirmPassword) {
+                    this.showFieldError('confirmPasswordError', 'Confirma tu contraseña');
+                    return false;
+                } else if (password !== confirmPassword) {
+                    this.showFieldError('confirmPasswordError', 'Las contraseñas no coinciden');
+                    return false;
+                } else {
+                    this.hideFieldError('confirmPasswordError');
+                    return true;
+                }
+            }
+
+            validatePhone(phone) {
+                // Teléfono es opcional, pero si se proporciona debe ser válido
+                if (phone && phone.length < 10) {
+                    this.showFieldError('phoneError', 'El teléfono debe tener al menos 10 dígitos');
+                    return false;
+                } else {
+                    this.hideFieldError('phoneError');
+                    return true;
+                }
+            }
+
+            showFieldError(fieldId, message) {
+                const errorElement = document.getElementById(fieldId);
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+            }
+
+            hideFieldError(fieldId) {
+                const errorElement = document.getElementById(fieldId);
+                errorElement.classList.remove('show');
+            }
+
+            async handleRegister(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const phone = document.getElementById('phone').value.trim();
+                const registerBtn = document.getElementById('registerBtn');
+
+                // Validar todos los campos
+                const isNameValid = this.validateName(name);
+                const isEmailValid = this.validateEmail(email);
+                const isPasswordValid = this.validatePassword(password);
+                const isConfirmPasswordValid = this.validateConfirmPassword(confirmPassword);
+                const isPhoneValid = this.validatePhone(phone);
+
+                if (!isNameValid || !isEmailValid || !isPasswordValid || !isConfirmPasswordValid || !isPhoneValid) {
+                    return;
+                }
+
+                // Mostrar estado de cargando
+                const originalText = registerBtn.textContent;
+                registerBtn.textContent = 'Creando cuenta...';
+                registerBtn.disabled = true;
+
+                try {
+                    const userData = {
+                        name,
+                        email,
+                        password,
+                        phone: phone || undefined
+                    };
+
+                    await this.auth.register(userData);
+                    
+                    // Redireccionar a home
+                    window.location.href = 'home.html';
+                } catch (error) {
+                    console.error('Register error:', error);
+                    
+                    // Mostrar error específico
+                    if (error.message.includes('email') || error.message.includes('existe')) {
+                        this.showFieldError('emailError', 'Este correo ya está registrado');
+                    } else {
+                        Utils.showToast(error.message || 'Error al crear la cuenta', 'error');
+                    }
+                } finally {
+                    // Restaurar botón
+                    registerBtn.textContent = originalText;
+                    registerBtn.disabled = false;
+                }
+            }
+        }
+
+        // Funciones para login social (placeholder)
+        function loginWithGoogle() {
+            Utils.showToast('Login con Google próximamente', 'info');
+        }
+
+        function loginWithFacebook() {
+            Utils.showToast('Login con Facebook próximamente', 'info');
+        }
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', () => {
+            new RegisterPage();
+        });
+    </script>
+</body>
+</html>

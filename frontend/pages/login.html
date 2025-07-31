@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetStyle - Iniciar Sesión</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/components.css">
+</head>
+<body class="login-page">
+    <div class="auth-container">
+        <form class="auth-form" id="loginForm">
+            <div class="auth-header">
+                <img src="../assets/images/logo.png" alt="PetStyle" class="logo" onerror="this.style.display='none'">
+                <h1>Iniciar Sesión</h1>
+                <p>Ingresa tus datos para continuar</p>
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Correo Electrónico</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    class="form-input" 
+                    placeholder="tu@email.com"
+                    required
+                >
+                <div class="form-error" id="emailError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Contraseña</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    class="form-input" 
+                    placeholder="Tu contraseña"
+                    required
+                >
+                <div class="form-error" id="passwordError"></div>
+            </div>
+
+            <button type="submit" class="btn-primary" id="loginBtn">
+                Iniciar Sesión
+            </button>
+
+            <div class="auth-links">
+                <p>¿No tienes una cuenta? <a href="register.html">Regístrate</a></p>
+                <p><a href="forgot-password.html">¿Olvidaste tu contraseña?</a></p>
+            </div>
+        </form>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../config/config.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+
+    <script>
+        class LoginPage {
+            constructor() {
+                this.api = new API();
+                this.auth = new AuthManager(this.api);
+                this.init();
+            }
+
+            init() {
+                // Verificar si ya está autenticado
+                if (this.auth.isAuthenticated()) {
+                    window.location.href = 'home.html';
+                    return;
+                }
+
+                this.bindEvents();
+            }
+
+            bindEvents() {
+                const form = document.getElementById('loginForm');
+                form.addEventListener('submit', (e) => this.handleLogin(e));
+
+                // Validación en tiempo real
+                document.getElementById('email').addEventListener('blur', (e) => {
+                    this.validateEmail(e.target.value);
+                });
+
+                document.getElementById('password').addEventListener('blur', (e) => {
+                    this.validatePassword(e.target.value);
+                });
+            }
+
+            validateEmail(email) {
+                const errorElement = document.getElementById('emailError');
+                
+                if (!email) {
+                    this.showFieldError('emailError', 'El correo es requerido');
+                    return false;
+                } else if (!Utils.isValidEmail(email)) {
+                    this.showFieldError('emailError', 'El correo no es válido');
+                    return false;
+                } else {
+                    this.hideFieldError('emailError');
+                    return true;
+                }
+            }
+
+            validatePassword(password) {
+                if (!password) {
+                    this.showFieldError('passwordError', 'La contraseña es requerida');
+                    return false;
+                } else if (!Utils.isValidPassword(password)) {
+                    this.showFieldError('passwordError', 'La contraseña debe tener al menos 6 caracteres');
+                    return false;
+                } else {
+                    this.hideFieldError('passwordError');
+                    return true;
+                }
+            }
+
+            showFieldError(fieldId, message) {
+                const errorElement = document.getElementById(fieldId);
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+            }
+
+            hideFieldError(fieldId) {
+                const errorElement = document.getElementById(fieldId);
+                errorElement.classList.remove('show');
+            }
+
+            async handleLogin(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+                const loginBtn = document.getElementById('loginBtn');
+
+                // Validar campos
+                const isEmailValid = this.validateEmail(email);
+                const isPasswordValid = this.validatePassword(password);
+
+                if (!isEmailValid || !isPasswordValid) {
+                    return;
+                }
+
+                // Mostrar estado de cargando
+                const originalText = loginBtn.textContent;
+                loginBtn.textContent = 'Iniciando sesión...';
+                loginBtn.disabled = true;
+
+                try {
+                    await this.auth.login(email, password);
+                    
+                    // Redireccionar a home
+                    window.location.href = 'home.html';
+                } catch (error) {
+                    console.error('Login error:', error);
+                    
+                    // Mostrar error específico
+                    if (error.message.includes('401') || error.message.includes('credenciales')) {
+                        this.showFieldError('passwordError', 'Credenciales incorrectas');
+                    } else {
+                        Utils.showToast(error.message || 'Error al iniciar sesión', 'error');
+                    }
+                } finally {
+                    // Restaurar botón
+                    loginBtn.textContent = originalText;
+                    loginBtn.disabled = false;
+                }
+            }
+        }
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', () => {
+            new LoginPage();
+        });
+    </script>
+</body>
+</html>

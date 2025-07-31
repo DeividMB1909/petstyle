@@ -1,0 +1,84 @@
+/* Estilos específicos para componentes */
+.categories-filter {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.category-filter-btn {
+    background: var(--white);
+    border: 2px solid var(--border);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.category-filter-btn.active {
+    background: var(--purple-primary);
+    color: var(--white);
+    border-color: var(--purple-primary);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0 0.5rem;
+}
+
+.filter-btn {
+    background: var(--purple-primary);
+    color: var(--white);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.filter-group {
+    margin-bottom: 1.5rem;
+}
+
+.filter-group h4 {
+    margin-bottom: 0.75rem;
+    color: var(--text-dark);
+}
+
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.price-range {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.price-display {
+    text-align: center;
+    font-weight: 600;
+    color: var(--purple-primary);
+}
+
+.error-state, .empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-light);
+    grid-column: 1 / -1;
+}
