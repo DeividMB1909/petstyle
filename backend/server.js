@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const path = require('path'); // ← AGREGADO: Necesario para rutas
 require('dotenv').config();
 const { SeedController } = require('./controllers');
 const cookieParser = require('cookie-parser');
@@ -33,46 +34,27 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(cookieParser());
 
-// Configurar EJS
+// Configurar EJS - CORREGIDO
 app.set('view engine', 'ejs');
-app.set('views', './views');
+app.set('views', path.join(__dirname, 'views')); // ← CORREGIDO: Usa path.join
 
-// Archivos estáticos
-app.use(express.static('public'));
+// Archivos estáticos - CORREGIDO
+app.use(express.static(path.join(__dirname, 'public'))); // ← CORREGIDO: Usa path.join
 
-// Ruta principal simple
+// Ruta principal simple - SIMPLIFICADO
 app.get('/', (req, res) => {
-    try {
-        res.render('index', { 
-            title: 'PetStyle - Accesorios para Mascotas',
-            message: '¡Bienvenido a PetStyle!',
-            dbStatus: mongoose.connection.readyState === 1 ? 'Conectado ✅' : 'Desconectado ❌'
-        });
-    } catch (error) {
-        res.json({
-            message: 'PetStyle Server funcionando',
-            status: 'OK',
-            timestamp: new Date()
-        });
-    }
+    res.render('index', { 
+        title: 'PetStyle - Accesorios para Mascotas',
+        message: '¡Bienvenido a PetStyle!',
+        dbStatus: mongoose.connection.readyState === 1 ? 'Conectado ✅' : 'Desconectado ❌'
+    });
 });
 
-// Ruta de documentación
+// Ruta de documentación - SIMPLIFICADO
 app.get('/docs', (req, res) => {
-    try {
-        res.render('docs', { 
-            title: 'PetStyle API - Documentación' 
-        });
-    } catch (error) {
-        res.json({
-            message: 'Documentación de PetStyle API',
-            endpoints: [
-                'GET / - Página principal',
-                'GET /docs - Esta documentación',
-                'GET /test - Test del servidor'
-            ]
-        });
-    }
+    res.render('docs', { 
+        title: 'PetStyle API - Documentación' 
+    });
 });
 
 // Ruta de prueba simple
