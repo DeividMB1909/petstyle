@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'La contraseña es obligatoria'],
         minlength: [6, 'La contraseña debe tener al menos 6 caracteres'],
-        select: false // No incluir en consultas por defecto
+        select: false
     },
     phone: {
         type: String,
@@ -27,10 +27,10 @@ const userSchema = new mongoose.Schema({
         match: [/^[0-9]{10}$/, 'Teléfono debe tener 10 dígitos']
     },
     address: {
-        street: { type: String, required: false }, // ← CAMBIADO A false
-        city: { type: String, required: false },   // ← CAMBIADO A false
-        state: { type: String, required: false },  // ← CAMBIADO A false
-        zipCode: { type: String, required: false }, // ← CAMBIADO A false
+        street: { type: String, required: false },
+        city: { type: String, required: false },
+        state: { type: String, required: false },
+        zipCode: { type: String, required: false },
         country: { type: String, default: 'México' }
     },
     role: {
@@ -46,33 +46,28 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    // ✅ ACTUALIZADO: Avatar con integración Cloudinary
     avatar: {
-        type: String,
-        default: 'default-avatar.png'
+        url: {
+            type: String,
+            default: 'https://res.cloudinary.com/dc5k61akp/image/upload/v1234567890/petstyle/default/default-avatar.png'
+        },
+        publicId: {
+            type: String,
+            default: null
+        }
     },
     lastLogin: {
         type: Date
     }
 }, {
-    timestamps: true // Agrega createdAt y updatedAt automáticamente
+    timestamps: true
 });
 
-// ❌ COMENTADO: No necesario porque AuthController ya encripta
-/*
-userSchema.pre('save', async function(next) {
-    if (!this.isModified('password')) return next();
-    const salt = await bcrypt.genSalt(12);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-});
-*/
-
-// Método para comparar contraseñas
 userSchema.methods.comparePassword = async function(candidatePassword) {
     return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Método para obtener datos públicos del usuario
 userSchema.methods.toPublicJSON = function() {
     const user = this.toObject();
     delete user.password;

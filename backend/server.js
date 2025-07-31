@@ -6,9 +6,13 @@ const morgan = require('morgan');
 require('dotenv').config();
 const { SeedController } = require('./controllers');
 const cookieParser = require('cookie-parser');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
+const uploadRoutes = require('./routes/uploadRoutes');
+
+
+
+app.use('/api/upload', uploadRoutes);
 
 // Conexión a MongoDB
 const connectDB = async () => {

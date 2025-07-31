@@ -27,8 +27,13 @@ const productSchema = new mongoose.Schema({
         max: [100, 'El descuento no puede ser mayor a 100%'],
         default: 0
     },
+    // ✅ ACTUALIZADO: Imágenes con integración completa Cloudinary
     images: [{
         url: {
+            type: String,
+            required: true
+        },
+        publicId: {
             type: String,
             required: true
         },
@@ -39,6 +44,9 @@ const productSchema = new mongoose.Schema({
         isPrimary: {
             type: Boolean,
             default: false
+        },
+        optimizedUrl: {
+            type: String // URL optimizada para thumbnails
         }
     }],
     category: {
@@ -130,11 +138,26 @@ productSchema.virtual('lowStock').get(function() {
     return this.stock <= this.minStock && this.stock > 0;
 });
 
+// ✅ NUEVO: Virtual para obtener imagen principal
+productSchema.virtual('primaryImage').get(function() {
+    const primaryImg = this.images.find(img => img.isPrimary);
+    return primaryImg || this.images[0] || null;
+});
+
 // Middleware para actualizar el precio con descuento
 productSchema.pre('save', function(next) {
     if (this.originalPrice && this.discount > 0) {
         this.price = this.originalPrice * (1 - this.discount / 100);
     }
+    
+    // ✅ NUEVO: Asegurar que hay una imagen principal
+    if (this.images && this.images.length > 0) {
+        const hasPrimary = this.images.some(img => img.isPrimary);
+        if (!hasPrimary) {
+            this.images[0].isPrimary = true;
+        }
+    }
+    
     next();
 });
 

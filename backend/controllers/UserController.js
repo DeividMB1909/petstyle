@@ -1,199 +1,117 @@
-const { User } = require('../models');
+const User = require('../models/User');
+const { validationResult } = require('express-validator');
+const { deleteImage } = require('../config/cloudinary');
 
 class UserController {
-    // Obtener todos los usuarios
-    static async getAllUsers(req, res) {
+    // ✅ NUEVO: Actualizar avatar del usuario
+    static updateAvatar = async (req, res) => {
         try {
-            const users = await User.find().select('-password'); // Excluir password por seguridad
-            res.status(200).json({
-                success: true,
-                data: users,
-                message: 'Usuarios obtenidos exitosamente'
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                message: 'Error al obtener usuarios',
-                error: error.message
-            });
-        }
-    }
+            const userId = req.user.userId;
 
-    // Obtener usuario por ID
-    static async getUserById(req, res) {
-        try {
-            const { id } = req.params;
-            const user = await User.findById(id).select('-password');
-            
-            if (!user) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Usuario no encontrado'
-                });
-            }
-
-            res.status(200).json({
-                success: true,
-                data: user,
-                message: 'Usuario obtenido exitosamente'
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                message: 'Error al obtener usuario',
-                error: error.message
-            });
-        }
-    }
-
-    // Crear nuevo usuario
-    static async createUser(req, res) {
-        try {
-            const userData = req.body;
-            
-            // Verificar si el email ya existe
-            const existingUser = await User.findOne({ email: userData.email });
-            if (existingUser) {
+            if (!req.file) {
                 return res.status(400).json({
                     success: false,
-                    message: 'El email ya está registrado'
+                    message: 'No se proporcionó archivo de imagen'
                 });
             }
 
-            const newUser = new User(userData);
-            await newUser.save();
-
-            // Remover password de la respuesta
-            const userResponse = newUser.toObject();
-            delete userResponse.password;
-
-            res.status(201).json({
-                success: true,
-                data: userResponse,
-                message: 'Usuario creado exitosamente'
-            });
-        } catch (error) {
-            res.status(400).json({
-                success: false,
-                message: 'Error al crear usuario',
-                error: error.message
-            });
-        }
-    }
-
-    // Actualizar usuario
-    static async updateUser(req, res) {
-        try {
-            const { id } = req.params;
-            const updateData = req.body;
-
-            // Si se está actualizando el email, verificar que no exista
-            if (updateData.email) {
-                const existingUser = await User.findOne({ 
-                    email: updateData.email, 
-                    _id: { $ne: id } 
-                });
-                if (existingUser) {
-                    return res.status(400).json({
-                        success: false,
-                        message: 'El email ya está en uso por otro usuario'
-                    });
-                }
-            }
-
-            const updatedUser = await User.findByIdAndUpdate(
-                id, 
-                updateData, 
-                { new: true, runValidators: true }
-            ).select('-password');
-
-            if (!updatedUser) {
+            const user = await User.findById(userId);
+            if (!user) {
                 return res.status(404).json({
                     success: false,
                     message: 'Usuario no encontrado'
                 });
             }
 
+            // Eliminar avatar anterior si existe
+            if (user.avatar.publicId) {
+                try {
+                    await deleteImage(user.avatar.publicId);
+                } catch (deleteError) {
+                    console.warn('Error al eliminar avatar anterior:', deleteError);
+                }
+            }
+
+            // Actualizar con nuevo avatar
+            user.avatar = {
+                url: req.file.path,
+                publicId: req.file.filename
+            };
+
+            await user.save();
+
             res.status(200).json({
                 success: true,
-                data: updatedUser,
-                message: 'Usuario actualizado exitosamente'
+                message: 'Avatar actualizado exitosamente',
+                data: {
+                    avatar: user.avatar
+                }
             });
+
         } catch (error) {
-            res.status(400).json({
+            console.error('Error al actualizar avatar:', error);
+            res.status(500).json({
                 success: false,
-                message: 'Error al actualizar usuario',
+                message: 'Error interno del servidor',
                 error: error.message
             });
         }
-    }
+    };
 
-    // Obtener usuario por email
-    static async getUserByEmail(req, res) {
+    // Métodos existentes permanecen igual...
+    static getProfile = async (req, res) => {
         try {
-            const { email } = req.params;
-            const user = await User.findOne({ email: email }).select('-password');
+            const userId = req.user.userId;
+            const user = await User.findById(userId).populate('favorites');
             
             if (!user) {
                 return res.status(404).json({
                     success: false,
-                    message: 'Usuario no encontrado con ese email'
+                    message: 'Usuario no encontrado'
                 });
             }
 
             res.status(200).json({
                 success: true,
-                data: user,
-                message: 'Usuario obtenido exitosamente'
+                data: user.toPublicJSON()
             });
+
         } catch (error) {
+            console.error('Error al obtener perfil:', error);
             res.status(500).json({
                 success: false,
-                message: 'Error al obtener usuario por email',
+                message: 'Error interno del servidor',
                 error: error.message
             });
         }
-    }
+    };
 
-    // Eliminar usuario por email
-    static async deleteUserByEmail(req, res) {
+    static updateProfile = async (req, res) => {
         try {
-            const { email } = req.params;
-            const deletedUser = await User.findOneAndDelete({ email: email });
-
-            if (!deletedUser) {
-                return res.status(404).json({
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
                     success: false,
-                    message: 'Usuario no encontrado con ese email'
+                    message: 'Errores de validación',
+                    errors: errors.array()
                 });
             }
 
-            res.status(200).json({
-                success: true,
-                message: `Usuario ${deletedUser.name} eliminado exitosamente`,
-                data: {
-                    deletedUser: {
-                        name: deletedUser.name,
-                        email: deletedUser.email
-                    }
-                }
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                message: 'Error al eliminar usuario por email',
-                error: error.message
-            });
-        }
-    }
+            const userId = req.user.userId;
+            const updates = req.body;
 
-    // Eliminar usuario
-    static async deleteUser(req, res) {
-        try {
-            const { id } = req.params;
-            const deletedUser = await User.findByIdAndDelete(id);
+            // No permitir actualizar campos sensibles
+            delete updates.password;
+            delete updates.role;
+            delete updates.email;
 
-            if (!deletedUser) {
+            const user = await User.findByIdAndUpdate(
+                userId,
+                updates,
+                { new: true, runValidators: true }
+            );
+
+            if (!user) {
                 return res.status(404).json({
                     success: false,
                     message: 'Usuario no encontrado'
@@ -202,16 +120,19 @@ class UserController {
 
             res.status(200).json({
                 success: true,
-                message: 'Usuario eliminado exitosamente'
+                message: 'Perfil actualizado exitosamente',
+                data: user.toPublicJSON()
             });
+
         } catch (error) {
+            console.error('Error al actualizar perfil:', error);
             res.status(500).json({
                 success: false,
-                message: 'Error al eliminar usuario',
+                message: 'Error interno del servidor',
                 error: error.message
             });
         }
-    }
+    };
 }
 
 module.exports = UserController;

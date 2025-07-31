@@ -1,43 +1,105 @@
 const express = require('express');
-const { CategoryController } = require('../controllers');
+const CategoryController = require('../controllers/CategoryController');
+const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+const { uploadCategory } = require('../config/cloudinary');
+const { body, param } = require('express-validator');
+const { handleValidationErrors } = require('../middleware/validation');
 
 const router = express.Router();
-const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 
-// Ver categorías - público
-router.get('/', CategoryController.getAllCategories);
-router.get('/active', CategoryController.getActiveCategories);
-router.get('/:id', CategoryController.getCategoryById);
-router.get('/name/:name', CategoryController.getCategoryByName);
+// ======================================
+// MIDDLEWARE DE MANEJO DE ERRORES
+// ======================================
+const handleCategoryUploadErrors = (error, req, res, next) => {
+    if (error) {
+        if (error.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({
+                success: false,
+                message: 'Imagen demasiado grande (máximo 3MB)'
+            });
+        }
+        return res.status(400).json({
+            success: false,
+            message: 'Error al subir imagen',
+            error: error.message
+        });
+    }
+    next();
+};
 
-// Gestionar categorías - solo admins
-router.post('/', authenticateToken, authorizeRoles('admin'), CategoryController.createCategory);
-router.put('/:id', authenticateToken, authorizeRoles('admin'), CategoryController.updateCategory);
-router.delete('/:id', authenticateToken, authorizeRoles('admin'), CategoryController.deleteCategory);
-router.delete('/name/:name', authenticateToken, authorizeRoles('admin'), CategoryController.deleteCategoryByName);
+// ======================================
+// VALIDACIONES
+// ======================================
+const categoryValidation = [
+    body('name')
+        .trim()
+        .isLength({ min: 2, max: 30 })
+        .withMessage('El nombre debe tener entre 2 y 30 caracteres'),
+    body('description')
+        .optional()
+        .trim()
+        .isLength({ max: 200 })
+        .withMessage('La descripción no puede exceder 200 caracteres'),
+    body('parentCategory')
+        .optional()
+        .isMongoId()
+        .withMessage('ID de categoría padre inválido'),
+    body('order')
+        .optional()
+        .isInt({ min: 0 })
+        .withMessage('El orden debe ser un número entero positivo')
+];
 
-// GET /api/categories - Obtener todas las categorías
-router.get('/', CategoryController.getAllCategories);
+// ======================================
+// RUTAS PÚBLICAS
+// ======================================
 
-// GET /api/categories/active - Obtener categorías activas
-router.get('/active', CategoryController.getActiveCategories);
+// GET /api/categories - Obtener categorías
+router.get('/', CategoryController.getCategories);
 
-// GET /api/categories/:id - Obtener categoría por ID
-router.get('/:id', CategoryController.getCategoryById);
+// GET /api/categories/:id - Obtener categoría específica
+router.get('/:id', [
+    param('id').isMongoId().withMessage('ID de categoría inválido'),
+    handleValidationErrors
+], CategoryController.getCategory);
 
-// POST /api/categories - Crear nueva categoría
-router.post('/', CategoryController.createCategory);
+// ======================================
+// RUTAS ADMIN
+// ======================================
+
+// POST /api/categories - Crear categoría (sin imagen)
+router.post('/', [
+    authenticateToken,
+    authorizeRoles('admin'),
+    ...categoryValidation,
+    handleValidationErrors
+], CategoryController.createCategory);
+
+// ✅ NUEVO: POST /api/categories/with-image - Crear categoría con imagen
+router.post('/with-image', [
+    authenticateToken,
+    authorizeRoles('admin'),
+    uploadCategory.single('image'),
+    handleCategoryUploadErrors,
+    ...categoryValidation,
+    handleValidationErrors
+], CategoryController.createCategoryWithImage);
 
 // PUT /api/categories/:id - Actualizar categoría
-router.put('/:id', CategoryController.updateCategory);
+router.put('/:id', [
+    authenticateToken,
+    authorizeRoles('admin'),
+    param('id').isMongoId().withMessage('ID de categoría inválido'),
+    ...categoryValidation,
+    handleValidationErrors
+], CategoryController.updateCategory);
 
 // DELETE /api/categories/:id - Eliminar categoría
-router.delete('/:id', CategoryController.deleteCategory);
-
-// GET /api/categories/name/:name - Obtener categoría por nombre
-router.get('/name/:name', CategoryController.getCategoryByName);
-
-// DELETE /api/categories/name/:name - Eliminar categoría por nombre
-router.delete('/name/:name', CategoryController.deleteCategoryByName);
+router.delete('/:id', [
+    authenticateToken,
+    authorizeRoles('admin'),
+    param('id').isMongoId().withMessage('ID de categoría inválido'),
+    handleValidationErrors
+], CategoryController.deleteCategory);
 
 module.exports = router;

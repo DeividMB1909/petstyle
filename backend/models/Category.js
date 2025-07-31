@@ -12,13 +12,27 @@ const categorySchema = new mongoose.Schema({
         type: String,
         maxlength: [200, 'La descripción no puede exceder 200 caracteres']
     },
+    // ✅ ACTUALIZADO: Ícono con integración Cloudinary
     icon: {
-        type: String,
-        default: 'default-category.png'
+        url: {
+            type: String,
+            default: 'https://res.cloudinary.com/dc5k61akp/image/upload/v1234567890/petstyle/default/default-category-icon.png'
+        },
+        publicId: {
+            type: String,
+            default: null
+        }
     },
+    // ✅ ACTUALIZADO: Imagen principal con integración Cloudinary
     image: {
-        type: String,
-        default: 'default-category-banner.png'
+        url: {
+            type: String,
+            default: 'https://res.cloudinary.com/dc5k61akp/image/upload/v1234567890/petstyle/default/default-category-banner.png'
+        },
+        publicId: {
+            type: String,
+            default: null
+        }
     },
     parentCategory: {
         type: mongoose.Schema.Types.ObjectId,
@@ -41,7 +55,6 @@ const categorySchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Índice para mejorar consultas
 categorySchema.index({ name: 1, parentCategory: 1 });
 
 module.exports = mongoose.model('Category', categorySchema);
