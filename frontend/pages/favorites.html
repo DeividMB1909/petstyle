@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favoritos - PetStyle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%);
+            padding: 60px 20px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 16px;
+            font-weight: 300;
+            position: relative;
+            z-index: 2;
+        }
+
+        .content {
+            padding: 20px;
+            padding-bottom: 100px;
+            min-height: calc(100vh - 200px);
+        }
+
+        .section-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '❤️';
+            font-size: 24px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #374151;
+        }
+
+        .empty-text {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        .browse-btn {
+            background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .browse-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+        }
+
+        /* Favorites Grid */
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .favorite-card {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            display: flex;
+            gap: 15px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .favorite-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.15);
+        }
+
+        .favorite-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 15px;
+            flex-shrink: 0;
+        }
+
+        .favorite-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .favorite-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            color: #1f2937;
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+
+        .favorite-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #059669;
+            margin-bottom: 5px;
+        }
+
+        .favorite-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .stars {
+            color: #fbbf24;
+        }
+
+        .favorite-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .remove-favorite {
+            background: #fee2e2;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #dc2626;
+            font-size: 16px;
+        }
+
+        .remove-favorite:hover {
+            background: #fecaca;
+            transform: scale(1.1);
+        }
+
+        .add-to-cart-small {
+            background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .add-to-cart-small:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px;
+            border-radius: 12px;
+        }
+
+        .nav-item.active {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8B5CF6;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(180deg); }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .favorite-card {
+            animation: slideInUp 0.6s ease forwards;
+        }
+
+        .favorite-card:nth-child(even) {
+            animation-delay: 0.1s;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #059669;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-weight: 500;
+            z-index: 1001;
+            animation: slideInUp 0.3s ease;
+        }
+
+        .toast.error {
+            background: #dc2626;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .bottom-nav {
+                max-width: 100%;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .favorites-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="logo">PetStyle</h1>
+            <p class="subtitle">Tus productos favoritos</p>
+        </div>
+
+        <div class="content">
+            <h2 class="section-title">Mis Favoritos</h2>
+            
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <div class="empty-icon">💔</div>
+                <h3 class="empty-title">No tienes favoritos aún</h3>
+                <p class="empty-text">Explora nuestros productos y guarda los que más te gusten tocando el corazón</p>
+                <a href="main.html" class="browse-btn">Explorar Productos</a>
+            </div>
+
+            <!-- Favorites Grid -->
+            <div class="favorites-grid" id="favoritesGrid">
+                <!-- Favorites will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <div class="nav-item" onclick="navigateTo('main.html')">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">Inicio</div>
+            </div>
+            <div class="nav-item active" onclick="navigateTo('favorites.html')">
+                <div class="nav-icon">❤️</div>
+                <div class="nav-label">Favoritos</div>
+            </div>
+            <div class="nav-item" onclick="navigateTo('carrito.html')" style="position: relative;">
+                <div class="nav-icon">🛒</div>
+                <div class="nav-label">Carrito</div>
+                <div class="cart-badge" id="cartBadge">0</div>
+            </div>
+            <div class="nav-item" onclick="navigateTo('profile.html')">
+                <div class="nav-icon">👤</div>
+                <div class="nav-label">Perfil</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Product data (same as main page)
+        const products = [
+            {
+                id: 1,
+                name: "Collar de Cuero Perro",
+                price: "$16.00",
+                image: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=300&h=300&fit=crop",
+                rating: 4.8,
+                category: "collars",
+                description: "Collar de cuero genuino con hebilla ajustable, perfecto para perros medianos y grandes. Resistente y cómodo."
+            },
+            {
+                id: 2,
+                name: "Collar con Campanita Gato",
+                price: "$9.99",
+                image: "https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?w=300&h=300&fit=crop",
+                rating: 4.6,
+                category: "collars",
+                description: "Collar suave con campanita para gatos, disponible en varios colores. Material hipoalergénico y seguro."
+            },
+            {
+                id: 3,
+                name: "Collar Reflectante Nocturno",
+                price: "$13.75",
+                image: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=300&h=300&fit=crop",
+                rating: 4.9,
+                category: "collars",
+                description: "Collar LED recargable con material reflectante para caminatas nocturnas. Incluye cable USB."
+            },
+            {
+                id: 4,
+                name: "Collar Ajustable Universal",
+                price: "$11.99",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop",
+                rating: 4.5,
+                category: "collars",
+                description: "Collar ajustable universal con diseño colorido y resistente. Ideal para mascotas de todos los tamaños."
+            },
+            {
+                id: 5,
+                name: "Cama Ortopédica Premium",
+                price: "$45.99",
+                image: "https://images.unsplash.com/photo-1583512603805-3cc6b41f3eaf?w=300&h=300&fit=crop",
+                rating: 4.9,
+                category: "beds",
+                description: "Cama ortopédica con espuma de memoria, ideal para mascotas mayores. Funda lavable incluida."
+            },
+            {
+                id: 6,
+                name: "Juguete Interactivo",
+                price: "$22.50",
+                image: "https://images.unsplash.com/photo-1605568427561-40dd23c2acea?w=300&h=300&fit=crop",
+                rating: 4.7,
+                category: "toys",
+                description: "Juguete interactivo que estimula la mente de tu mascota. Incluye premios y diferentes niveles de dificultad."
+            }
+        ];
+
+        let favorites = [];
+        let cart = [];
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFavorites();
+            loadCart();
+            renderFavorites();
+            updateCartBadge();
+            setActiveNavItem();
+        });
+
+        function loadFavorites() {
+            const savedFavorites = localStorage.getItem('petStyle_favorites');
+            if (savedFavorites) {
+                favorites = JSON.parse(savedFavorites);
+            }
+        }
+
+        function loadCart() {
+            const savedCart = localStorage.getItem('petStyle_cart');
+            if (savedCart) {
+                cart = JSON.parse(savedCart);
+            }
+        }
+
+        function saveFavorites() {
+            localStorage.setItem('petStyle_favorites', JSON.stringify(favorites));
+        }
+
+        function saveCart() {
+            localStorage.setItem('petStyle_cart', JSON.stringify(cart));
+        }
+
+        function renderFavorites() {
+            const grid = document.getElementById('favoritesGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            if (favorites.length === 0) {
+                emptyState.style.display = 'block';
+                grid.style.display = 'none';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            grid.style.display = 'grid';
+
+            const favoriteProducts = products.filter(product => 
+                favorites.includes(product.id)
+            );
+
+            grid.innerHTML = favoriteProducts.map(product => `
+                <div class="favorite-card">
+                    <img src="${product.image}" alt="${product.name}" class="favorite-image">
+                    <div class="favorite-info">
+                        <h3 class="favorite-name">${product.name}</h3>
+                        <div class="favorite-price">${product.price}</div>
+                        <div class="favorite-rating">
+                            <span class="stars">${'⭐'.repeat(Math.floor(product.rating))}</span>
+                            <span>${product.rating}</span>
+                        </div>
+                    </div>
+                    <div class="favorite-actions">
+                        <button class="remove-favorite" onclick="removeFromFavorites(${product.id})" title="Quitar de favoritos">
+                            💔
+                        </button>
+                        <button class="add-to-cart-small" onclick="addToCart(${product.id})">
+                            Agregar
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removeFromFavorites(productId) {
+            const index = favorites.indexOf(productId);
+            if (index > -1) {
+                favorites.splice(index, 1);
+                saveFavorites();
+                renderFavorites();
+                showToast('Producto eliminado de favoritos', 'error');
+            }
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                cart.push(product);
+                saveCart();
+                updateCartBadge();
+                showToast('¡Producto agregado al carrito!');
+            }
+        }
+
+        function updateCartBadge() {
+            document.getElementById('cartBadge').textContent = cart.length;
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideInUp 0.3s ease reverse';
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 2000);
+        }
+
+        // Navigation functions
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+
+        function setActiveNavItem() {
+            const currentPage = window.location.pathname.split('/').pop();
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => item.classList.remove('active'));
+            
+            switch(currentPage) {
+                case 'home.html':
+                case 'main.html':
+                case '':
+                    navItems[0].classList.add('active');
+                    break;
+                case 'favorites.html':
+                    navItems[1].classList.add('active');
+                    break;
+                case 'carrito.html':
+                    navItems[2].classList.add('active');
+                    break;
+                case 'profile.html':
+                    navItems[3].classList.add('active');
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>

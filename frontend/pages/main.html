@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetStyle - Accesorios para Mascotas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%);
+            padding: 60px 20px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 16px;
+            font-weight: 300;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Search Bar */
+        .search-container {
+            padding: 20px;
+            background: white;
+            position: relative;
+            z-index: 3;
+            margin-top: -15px;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+        }
+
+        .search-bar:focus {
+            border-color: #8B5CF6;
+            background: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
+        }
+
+        /* Categories */
+        .categories {
+            padding: 0 20px 20px;
+        }
+
+        .categories-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+
+        .category-chips {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .category-chip {
+            background: #f3f4f6;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #6b7280;
+        }
+
+        .category-chip.active,
+        .category-chip:hover {
+            background: #8B5CF6;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        /* Featured Section */
+        .section {
+            padding: 0 20px 30px;
+        }
+
+        .section-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '⭐';
+            font-size: 20px;
+        }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .product-card:hover::before {
+            left: 100%;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        .product-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1f2937;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .product-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #059669;
+            margin-bottom: 5px;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .stars {
+            color: #fbbf24;
+        }
+
+        /* Favorite Button */
+        .favorite-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255,255,255,0.95);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            z-index: 20;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .favorite-btn:hover {
+            background: rgba(255,255,255,1);
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .favorite-btn.active {
+            background: rgba(255, 240, 240, 0.95);
+        }
+
+        .favorite-btn.active:hover {
+            background: rgba(255, 240, 240, 1);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px;
+            border-radius: 12px;
+        }
+
+        .nav-item.active {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8B5CF6;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* Cart Badge */
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* Product Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: flex-end;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 414px;
+            margin: 0 auto;
+            border-radius: 25px 25px 0 0;
+            padding: 30px 20px;
+            transform: translateY(100%);
+            animation: slideUp 0.4s ease forwards;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        /* Modal Favorite Button */
+        .modal-favorite-btn {
+            background: rgba(255,255,255,0.95);
+            border: 2px solid #e5e7eb;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-right: 10px;
+        }
+
+        .modal-favorite-btn:hover {
+            background: rgba(255,255,255,1);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-color: #8B5CF6;
+        }
+
+        .modal-favorite-btn.active {
+            background: rgba(255, 240, 240, 0.95);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        .modal-favorite-btn.active:hover {
+            background: rgba(255, 240, 240, 1);
+        }
+
+        .modal-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: #f3f4f6;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #e5e7eb;
+            transform: rotate(90deg);
+        }
+
+        .modal-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #1f2937;
+        }
+
+        .modal-price {
+            font-size: 28px;
+            font-weight: 700;
+            color: #059669;
+            margin-bottom: 15px;
+        }
+
+        .modal-description {
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .add-to-cart-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .add-to-cart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(180deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            to { transform: translateY(0); }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .product-card {
+            animation: slideInUp 0.6s ease forwards;
+        }
+
+        .product-card:nth-child(even) {
+            animation-delay: 0.1s;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .bottom-nav {
+                max-width: 100%;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .product-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Add margin bottom to avoid bottom nav overlap */
+        .content {
+            padding-bottom: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="logo">PetStyle</h1>
+            <p class="subtitle">Accesorios únicos para tu mascota</p>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" class="search-bar" placeholder="Buscar productos...">
+        </div>
+
+        <div class="content">
+            <!-- Categories -->
+            <div class="categories">
+                <h2 class="categories-title">Categorías</h2>
+                <div class="category-chips">
+                    <button class="category-chip active" data-category="all">Todos</button>
+                    <button class="category-chip" data-category="collars">Collares</button>
+                    <button class="category-chip" data-category="toys">Juguetes</button>
+                    <button class="category-chip" data-category="beds">Camas</button>
+                    <button class="category-chip" data-category="food">Comida</button>
+                </div>
+            </div>
+
+            <!-- Featured Products -->
+            <div class="section">
+                <h2 class="section-title">Destacados</h2>
+                <div class="product-grid" id="productGrid">
+                    <!-- Products will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="navigateTo('main.html')">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">Inicio</div>
+            </div>
+            <div class="nav-item" onclick="navigateTo('favorites.html')">
+                <div class="nav-icon">❤️</div>
+                <div class="nav-label">Favoritos</div>
+            </div>
+            <div class="nav-item" onclick="navigateTo('carrito.html')" style="position: relative;">
+                <div class="nav-icon">🛒</div>
+                <div class="nav-label">Carrito</div>
+                <div class="cart-badge" id="cartBadge">0</div>
+            </div>
+            <div class="nav-item" onclick="navigateTo('profile.html')">
+                <div class="nav-icon">👤</div>
+                <div class="nav-label">Perfil</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin: 0; color: #8B5CF6; font-family: 'Poppins', sans-serif;">Detalle del Producto</h3>
+                <div class="modal-actions">
+                    <button class="modal-favorite-btn" id="modalFavoriteBtn" onclick="toggleModalFavorite()">
+                        🤍
+                    </button>
+                    <button class="close-btn" onclick="closeModal()">×</button>
+                </div>
+            </div>
+            <img class="modal-image" id="modalImage" src="" alt="">
+            <h2 class="modal-title" id="modalTitle"></h2>
+            <div class="modal-price" id="modalPrice"></div>
+            <div class="modal-rating" style="margin-bottom: 15px;">
+                <span class="stars" id="modalStars"></span>
+                <span id="modalRating"></span>
+            </div>
+            <p class="modal-description" id="modalDescription"></p>
+            <button class="add-to-cart-btn" onclick="addToCart()">Agregar al Carrito</button>
+        </div>
+    </div>
+
+    <script>
+        // Product data
+        const products = [
+            {
+                id: 1,
+                name: "Collar de Cuero Perro",
+                price: "$16.00",
+                image: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=300&h=300&fit=crop",
+                rating: 4.8,
+                category: "collars",
+                description: "Collar de cuero genuino con hebilla ajustable, perfecto para perros medianos y grandes. Resistente y cómodo."
+            },
+            {
+                id: 2,
+                name: "Collar con Campanita Gato",
+                price: "$9.99",
+                image: "https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?w=300&h=300&fit=crop",
+                rating: 4.6,
+                category: "collars",
+                description: "Collar suave con campanita para gatos, disponible en varios colores. Material hipoalergénico y seguro."
+            },
+            {
+                id: 3,
+                name: "Collar Reflectante Nocturno",
+                price: "$13.75",
+                image: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=300&h=300&fit=crop",
+                rating: 4.9,
+                category: "collars",
+                description: "Collar LED recargable con material reflectante para caminatas nocturnas. Incluye cable USB."
+            },
+            {
+                id: 4,
+                name: "Collar Ajustable Universal",
+                price: "$11.99",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop",
+                rating: 4.5,
+                category: "collars",
+                description: "Collar ajustable universal con diseño colorido y resistente. Ideal para mascotas de todos los tamaños."
+            },
+            {
+                id: 5,
+                name: "Cama Ortopédica Premium",
+                price: "$45.99",
+                image: "https://images.unsplash.com/photo-1583512603805-3cc6b41f3eaf?w=300&h=300&fit=crop",
+                rating: 4.9,
+                category: "beds",
+                description: "Cama ortopédica con espuma de memoria, ideal para mascotas mayores. Funda lavable incluida."
+            },
+            {
+                id: 6,
+                name: "Juguete Interactivo",
+                price: "$22.50",
+                image: "https://images.unsplash.com/photo-1605568427561-40dd23c2acea?w=300&h=300&fit=crop",
+                rating: 4.7,
+                category: "toys",
+                description: "Juguete interactivo que estimula la mente de tu mascota. Incluye premios y diferentes niveles de dificultad."
+            }
+        ];
+
+        let cart = [];
+        let favorites = [];
+        let currentCategory = 'all';
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFavorites();
+            loadCart();
+            renderProducts();
+            updateCartBadge();
+            setActiveNavItem();
+            
+            // Category filter event listeners
+            document.querySelectorAll('.category-chip').forEach(chip => {
+                chip.addEventListener('click', function() {
+                    document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    currentCategory = this.dataset.category;
+                    renderProducts();
+                });
+            });
+
+            // Search functionality
+            document.querySelector('.search-bar').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                renderProducts(searchTerm);
+            });
+
+            // Modal click outside to close
+            document.getElementById('productModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+        });
+
+        function loadFavorites() {
+            if (window.petStyleData && window.petStyleData.favorites) {
+                favorites = window.petStyleData.favorites;
+            }
+        }
+
+        function loadCart() {
+            if (window.petStyleData && window.petStyleData.cart) {
+                cart = window.petStyleData.cart;
+            }
+        }
+
+        function saveFavorites() {
+            if (!window.petStyleData) window.petStyleData = {};
+            window.petStyleData.favorites = favorites;
+        }
+
+        function saveCart() {
+            if (!window.petStyleData) window.petStyleData = {};
+            window.petStyleData.cart = cart;
+        }
+
+        function renderProducts(searchTerm = '') {
+            const grid = document.getElementById('productGrid');
+            let filteredProducts = products;
+
+            // Filter by category
+            if (currentCategory !== 'all') {
+                filteredProducts = products.filter(product => product.category === currentCategory);
+            }
+
+            // Filter by search term
+            if (searchTerm) {
+                filteredProducts = filteredProducts.filter(product => 
+                    product.name.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            grid.innerHTML = filteredProducts.map(product => `
+                <div class="product-card" onclick="openProductModal(${product.id})">
+                    <button class="favorite-btn ${favorites.includes(product.id) ? 'active' : ''}" 
+                            onclick="event.stopPropagation(); toggleFavorite(${product.id})">
+                        ${favorites.includes(product.id) ? '❤️' : '🤍'}
+                    </button>
+                    <img src="${product.image}" alt="${product.name}" class="product-image">
+                    <h3 class="product-name">${product.name}</h3>
+                    <div class="product-price">${product.price}</div>
+                    <div class="product-rating">
+                        <span class="stars">${'⭐'.repeat(Math.floor(product.rating))}</span>
+                        <span>${product.rating}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleFavorite(productId) {
+            const index = favorites.indexOf(productId);
+            if (index > -1) {
+                favorites.splice(index, 1);
+                showToast('Producto eliminado de favoritos');
+            } else {
+                favorites.push(productId);
+                showToast('¡Producto agregado a favoritos!');
+            }
+            saveFavorites();
+            renderProducts(); // Re-render to update heart icons
+        }
+
+        function openProductModal(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            document.getElementById('modalImage').src = product.image;
+            document.getElementById('modalTitle').textContent = product.name;
+            document.getElementById('modalPrice').textContent = product.price;
+            document.getElementById('modalStars').textContent = '⭐'.repeat(Math.floor(product.rating));
+            document.getElementById('modalRating').textContent = `${product.rating} (${Math.floor(Math.random() * 100 + 50)} reseñas)`;
+            document.getElementById('modalDescription').textContent = product.description;
+            
+            // Update favorite button in modal
+            const modalFavoriteBtn = document.getElementById('modalFavoriteBtn');
+            const isFavorite = favorites.includes(productId);
+            modalFavoriteBtn.textContent = isFavorite ? '❤️' : '🤍';
+            modalFavoriteBtn.className = `modal-favorite-btn ${isFavorite ? 'active' : ''}`;
+            
+            document.getElementById('productModal').classList.add('active');
+            document.getElementById('productModal').dataset.productId = productId;
+        }
+
+        function toggleModalFavorite() {
+            const productId = parseInt(document.getElementById('productModal').dataset.productId);
+            toggleFavorite(productId);
+            
+            // Update modal favorite button
+            const modalFavoriteBtn = document.getElementById('modalFavoriteBtn');
+            const isFavorite = favorites.includes(productId);
+            modalFavoriteBtn.textContent = isFavorite ? '❤️' : '🤍';
+            modalFavoriteBtn.className = `modal-favorite-btn ${isFavorite ? 'active' : ''}`;
+        }
+
+        function closeModal() {
+            document.getElementById('productModal').classList.remove('active');
+        }
+
+        function addToCart() {
+            const productId = parseInt(document.getElementById('productModal').dataset.productId);
+            const product = products.find(p => p.id === productId);
+            
+            if (product) {
+                cart.push(product);
+                saveCart();
+                updateCartBadge();
+                closeModal();
+                
+                // Show success feedback
+                showToast('¡Producto agregado al carrito!');
+            }
+        }
+
+        function updateCartBadge() {
+            document.getElementById('cartBadge').textContent = cart.length;
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #059669;
+                color: white;
+                padding: 15px 25px;
+                border-radius: 25px;
+                font-weight: 500;
+                z-index: 1001;
+                animation: slideInUp 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'fadeIn 0.3s ease reverse';
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 2000);
+        }
+
+        // Navigation functions
+        function navigateTo(page) {
+            // Remover la clase active de todos los nav-items
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            
+            // Agregar la clase active al item clickeado
+            event.currentTarget.classList.add('active');
+            
+            // Redirigir a la página correspondiente
+            window.location.href = page;
+        }
+
+        function setActiveNavItem() {
+            const currentPage = window.location.pathname.split('/').pop();
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            // Remover todas las clases active
+            navItems.forEach(item => item.classList.remove('active'));
+            
+            // Establecer el item activo basado en la página actual
+            switch(currentPage) {
+                case 'home.html':
+                case 'main.html':
+                case '':
+                    navItems[0].classList.add('active'); // Inicio
+                    break;
+                case 'favorites.html':
+                    navItems[1].classList.add('active'); // Favoritos
+                    break;
+                case 'carrito.html':
+                    navItems[2].classList.add('active'); // Carrito
+                    break;
+                case 'profile.html':
+                    navItems[3].classList.add('active'); // Perfil
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
