@@ -603,10 +603,11 @@
 
             init() {
                 this.bindEvents();
-                // Simular verificación de autenticación
-                this.checkAuthentication();
+                // COMENTADO: No verificar autenticación automáticamente
+                // this.checkAuthentication();
             }
 
+            // OPCIONAL: Mantener la función pero no llamarla automáticamente
             checkAuthentication() {
                 // Simulación de verificación de token
                 const token = localStorage.getItem('authToken');
@@ -614,7 +615,7 @@
                     // Ya está autenticado, redirigir
                     this.showToast('Ya has iniciado sesión', 'info');
                     setTimeout(() => {
-                        window.location.href = 'home.html';
+                        window.location.href = 'main.html'; // CORREGIDO: ahora va a main.html
                     }, 1500);
                 }
             }
@@ -716,7 +717,7 @@
                     
                     // Redireccionar después de 1.5 segundos
                     setTimeout(() => {
-                        window.location.href = 'home.html';
+                        window.location.href = 'main.html'; // CORRECTO: ya estaba bien
                     }, 1500);
                     
                 } catch (error) {
@@ -839,7 +840,7 @@
                 loginPage.showToast('¡Conectado con Google exitosamente!', 'success');
                 
                 setTimeout(() => {
-                    window.location.href = 'home.html';
+                    window.location.href = 'main.html'; // CORREGIDO: cambié de index.html a main.html
                 }, 1500);
                 
             } catch (error) {
@@ -880,7 +881,7 @@
                 loginPage.showToast('¡Conectado con Facebook exitosamente!', 'success');
                 
                 setTimeout(() => {
-                    window.location.href = 'home.html';
+                    window.location.href = 'main.html'; // CORRECTO: ya estaba bien
                 }, 1500);
                 
             } catch (error) {

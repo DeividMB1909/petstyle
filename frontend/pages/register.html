@@ -4,122 +4,654 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PetStyle - Registro</title>
-    <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Seguro UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 414px;
+            min-height: 100vh;
+            background: white;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%);
+            padding: 60px 20px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 50px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-2px);
+        }
+
+        .back-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: white;
+            stroke-width: 2;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .auth-header {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
+            backdrop-filter: blur(10px);
+        }
+
+        .auth-header h1 {
+            color: white;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .auth-header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .form-container {
+            flex: 1;
+            padding: 30px 20px 40px;
+            background: white;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #F9FAFB;
+            -webkit-appearance: none;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #8B5CF6;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .form-error {
+            color: #EF4444;
+            font-size: 14px;
+            margin-top: 6px;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+        }
+
+        .form-error.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            transform: none !important;
+            box-shadow: none !important;
+            cursor: not-allowed;
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 32px 0;
+            color: #9CA3AF;
+            font-size: 14px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #E5E7EB;
+        }
+
+        .divider span {
+            margin: 0 16px;
+        }
+
+        .social-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .social-btn {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .social-btn:hover {
+            border-color: #D1D5DB;
+            background: #F9FAFB;
+            transform: translateY(-1px);
+        }
+
+        .social-btn:active {
+            transform: translateY(0);
+        }
+
+        .social-btn.google {
+            color: #1F2937;
+        }
+
+        .social-btn.facebook {
+            color: #1877F2;
+            border-color: #1877F2;
+        }
+
+        .social-btn.facebook:hover {
+            background: rgba(24, 119, 242, 0.05);
+        }
+
+        .social-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .auth-links {
+            text-align: center;
+            color: #6B7280;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .auth-links a {
+            color: #8B5CF6;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .auth-links a:hover {
+            color: #7C3AED;
+        }
+
+        .auth-links p {
+            margin-bottom: 8px;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 350px;
+            width: 90%;
+            text-align: center;
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .modal-icon.success {
+            background: #D1FAE5;
+            color: #059669;
+        }
+
+        .modal-icon.error {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .modal-icon.info {
+            background: #DBEAFE;
+            color: #2563EB;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1F2937;
+        }
+
+        .modal-text {
+            color: #6B7280;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn.primary {
+            background: #8B5CF6;
+            color: white;
+        }
+
+        .modal-btn.secondary {
+            background: #F3F4F6;
+            color: #6B7280;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            z-index: 1001;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            max-width: calc(100% - 40px);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: #059669;
+        }
+
+        .toast.error {
+            background: #DC2626;
+        }
+
+        .toast.info {
+            background: #2563EB;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(180deg); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* iOS Safari specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            .container {
+                min-height: -webkit-fill-available;
+            }
+        }
+
+        /* Android Chrome specific fixes */
+        @media screen and (max-height: 600px) {
+            .header {
+                padding: 40px 20px 30px;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+        }
+
+        /* Responsive adjustments for register form */
+        @media screen and (max-height: 700px) {
+            .form-group {
+                margin-bottom: 18px;
+            }
+            
+            .form-container {
+                padding: 25px 20px 30px;
+            }
+        }
+    </style>
 </head>
-<body class="register-page">
-    <div class="auth-container">
-        <form class="auth-form" id="registerForm">
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <button class="back-btn" onclick="goBack()">
+                <svg fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            
             <div class="auth-header">
-                <img src="../assets/images/logo.png" alt="PetStyle" class="logo" onerror="this.style.display='none'">
+                <div class="logo">🐾</div>
                 <h1>Registro</h1>
                 <p>Crea tu cuenta en PetStyle</p>
             </div>
+        </div>
 
-            <div class="form-group">
-                <label for="name" class="form-label">Nombre Completo</label>
-                <input 
-                    type="text" 
-                    id="name" 
-                    class="form-input" 
-                    placeholder="Tu nombre completo"
-                    required
-                >
-                <div class="form-error" id="nameError"></div>
-            </div>
+        <!-- Form Container -->
+        <div class="form-container">
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="name" class="form-label">Nombre Completo</label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        class="form-input" 
+                        placeholder="Tu nombre completo"
+                        required
+                        autocomplete="name"
+                    >
+                    <div class="form-error" id="nameError"></div>
+                </div>
 
-            <div class="form-group">
-                <label for="email" class="form-label">Correo Electrónico</label>
-                <input 
-                    type="email" 
-                    id="email" 
-                    class="form-input" 
-                    placeholder="tu@email.com"
-                    required
-                >
-                <div class="form-error" id="emailError"></div>
-            </div>
+                <div class="form-group">
+                    <label for="email" class="form-label">Correo Electrónico</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        class="form-input" 
+                        placeholder="ejemplo@correo.com"
+                        required
+                        autocomplete="email"
+                    >
+                    <div class="form-error" id="emailError"></div>
+                </div>
 
-            <div class="form-group">
-                <label for="password" class="form-label">Contraseña</label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    class="form-input" 
-                    placeholder="Mínimo 6 caracteres"
-                    required
-                >
-                <div class="form-error" id="passwordError"></div>
-            </div>
+                <div class="form-group">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        class="form-input" 
+                        placeholder="Mínimo 6 caracteres"
+                        required
+                        autocomplete="new-password"
+                    >
+                    <div class="form-error" id="passwordError"></div>
+                </div>
 
-            <div class="form-group">
-                <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
-                <input 
-                    type="password" 
-                    id="confirmPassword" 
-                    class="form-input" 
-                    placeholder="Repite tu contraseña"
-                    required
-                >
-                <div class="form-error" id="confirmPasswordError"></div>
-            </div>
+                <div class="form-group">
+                    <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        class="form-input" 
+                        placeholder="Repite tu contraseña"
+                        required
+                        autocomplete="new-password"
+                    >
+                    <div class="form-error" id="confirmPasswordError"></div>
+                </div>
 
-            <div class="form-group">
-                <label for="phone" class="form-label">Teléfono (Opcional)</label>
-                <input 
-                    type="tel" 
-                    id="phone" 
-                    class="form-input" 
-                    placeholder="Tu número de teléfono"
-                >
-                <div class="form-error" id="phoneError"></div>
-            </div>
+                <div class="form-group">
+                    <label for="phone" class="form-label">Teléfono (Opcional)</label>
+                    <input 
+                        type="tel" 
+                        id="phone" 
+                        class="form-input" 
+                        placeholder="Tu número de teléfono"
+                        autocomplete="tel"
+                    >
+                    <div class="form-error" id="phoneError"></div>
+                </div>
 
-            <button type="submit" class="btn-primary" id="registerBtn">
-                Registrarse
-            </button>
+                <button type="submit" class="btn-primary" id="registerBtn">
+                    Registrarse
+                </button>
+            </form>
 
-            <div class="social-divider">
+            <div class="divider">
                 <span>o conecta con</span>
             </div>
 
-            <div class="social-auth">
-                <button type="button" class="btn-outline mb-2" onclick="loginWithGoogle()">
-                    <span>🔍</span> Continuar con Google
+            <div class="social-buttons">
+                <button class="social-btn google" onclick="loginWithGoogle()">
+                    <svg class="social-icon" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Continuar con Google
                 </button>
-                <button type="button" class="btn-outline" onclick="loginWithFacebook()">
-                    <span>📘</span> Continuar con Facebook
+
+                <button class="social-btn facebook" onclick="loginWithFacebook()">
+                    <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    Continuar con Facebook
                 </button>
             </div>
 
             <div class="auth-links">
                 <p>¿Ya tienes una cuenta? <a href="login.html">Iniciar sesión</a></p>
             </div>
-        </form>
+        </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="../config/config.js"></script>
-    <script src="../js/utils.js"></script>
-    <script src="../js/api.js"></script>
-    <script src="../js/auth.js"></script>
+    <!-- Modals -->
+    <div class="modal-overlay" id="googleModal">
+        <div class="modal">
+            <div class="modal-icon info">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                </svg>
+            </div>
+            <h3 class="modal-title">Continuar con Google</h3>
+            <p class="modal-text">Serás redirigido a Google para completar el proceso de registro de forma segura.</p>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeModal()">Cancelar</button>
+                <button class="modal-btn primary" onclick="processGoogleRegister()">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="facebookModal">
+        <div class="modal">
+            <div class="modal-icon info">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+            </div>
+            <h3 class="modal-title">Continuar con Facebook</h3>
+            <p class="modal-text">Serás redirigido a Facebook para completar el proceso de registro de forma segura.</p>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeModal()">Cancelar</button>
+                <button class="modal-btn primary" onclick="processFacebookRegister()">Continuar</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         class RegisterPage {
             constructor() {
-                this.api = new API();
-                this.auth = new AuthManager(this.api);
                 this.init();
             }
 
             init() {
-                // Verificar si ya está autenticado
-                if (this.auth.isAuthenticated()) {
-                    window.location.href = 'home.html';
-                    return;
-                }
-
                 this.bindEvents();
+                // COMENTADO: No verificar autenticación automáticamente
+                // this.checkAuthentication();
+            }
+
+            // OPCIONAL: Mantener la función pero no llamarla automáticamente
+            checkAuthentication() {
+                // Simulación de verificación de token
+                const token = localStorage.getItem('authToken');
+                if (token && token !== 'null') {
+                    // Ya está autenticado, redirigir
+                    this.showToast('Ya tienes una sesión activa', 'info');
+                    setTimeout(() => {
+                        window.location.href = 'main.html';
+                    }, 1500);
+                }
             }
 
             bindEvents() {
@@ -146,10 +678,36 @@
                 document.getElementById('phone').addEventListener('blur', (e) => {
                     this.validatePhone(e.target.value);
                 });
+
+                // Limpiar errores al escribir
+                document.getElementById('name').addEventListener('input', () => {
+                    this.hideFieldError('nameError');
+                });
+
+                document.getElementById('email').addEventListener('input', () => {
+                    this.hideFieldError('emailError');
+                });
+
+                document.getElementById('password').addEventListener('input', () => {
+                    this.hideFieldError('passwordError');
+                    // También validar confirmPassword si ya tiene contenido
+                    const confirmPassword = document.getElementById('confirmPassword').value;
+                    if (confirmPassword) {
+                        this.validateConfirmPassword(confirmPassword);
+                    }
+                });
+
+                document.getElementById('confirmPassword').addEventListener('input', () => {
+                    this.hideFieldError('confirmPasswordError');
+                });
+
+                document.getElementById('phone').addEventListener('input', () => {
+                    this.hideFieldError('phoneError');
+                });
             }
 
             validateName(name) {
-                if (!name || name.length < 2) {
+                if (!name || name.trim().length < 2) {
                     this.showFieldError('nameError', 'El nombre debe tener al menos 2 caracteres');
                     return false;
                 } else {
@@ -162,8 +720,8 @@
                 if (!email) {
                     this.showFieldError('emailError', 'El correo es requerido');
                     return false;
-                } else if (!Utils.isValidEmail(email)) {
-                    this.showFieldError('emailError', 'El correo no es válido');
+                } else if (!this.isValidEmail(email)) {
+                    this.showFieldError('emailError', 'Ingresa un correo válido');
                     return false;
                 } else {
                     this.hideFieldError('emailError');
@@ -175,8 +733,8 @@
                 if (!password) {
                     this.showFieldError('passwordError', 'La contraseña es requerida');
                     return false;
-                } else if (!Utils.isValidPassword(password)) {
-                    this.showFieldError('passwordError', 'La contraseña debe tener al menos 6 caracteres');
+                } else if (password.length < 6) {
+                    this.showFieldError('passwordError', 'Mínimo 6 caracteres');
                     return false;
                 } else {
                     this.hideFieldError('passwordError');
@@ -208,6 +766,11 @@
                     this.hideFieldError('phoneError');
                     return true;
                 }
+            }
+
+            isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
             }
 
             showFieldError(fieldId, message) {
@@ -243,52 +806,225 @@
                 }
 
                 // Mostrar estado de cargando
-                const originalText = registerBtn.textContent;
-                registerBtn.textContent = 'Creando cuenta...';
+                const originalText = registerBtn.innerHTML;
+                registerBtn.innerHTML = '<span class="loading-spinner"></span>Creando cuenta...';
                 registerBtn.disabled = true;
 
                 try {
-                    const userData = {
-                        name,
-                        email,
-                        password,
-                        phone: phone || undefined
-                    };
-
-                    await this.auth.register(userData);
+                    // Simular llamada a API
+                    await this.simulateRegister(name, email, password, phone);
                     
-                    // Redireccionar a home
-                    window.location.href = 'home.html';
+                    // Guardar token (simulado)
+                    localStorage.setItem('authToken', 'register_token_' + Date.now());
+                    localStorage.setItem('userEmail', email);
+                    localStorage.setItem('userName', name);
+                    if (phone) {
+                        localStorage.setItem('userPhone', phone);
+                    }
+                    
+                    this.showToast('¡Cuenta creada exitosamente!', 'success');
+                    
+                    // Redireccionar después de 1.5 segundos
+                    setTimeout(() => {
+                        window.location.href = 'main.html';
+                    }, 1500);
+                    
                 } catch (error) {
                     console.error('Register error:', error);
                     
-                    // Mostrar error específico
                     if (error.message.includes('email') || error.message.includes('existe')) {
                         this.showFieldError('emailError', 'Este correo ya está registrado');
                     } else {
-                        Utils.showToast(error.message || 'Error al crear la cuenta', 'error');
+                        this.showToast('Error al crear la cuenta', 'error');
                     }
                 } finally {
-                    // Restaurar botón
-                    registerBtn.textContent = originalText;
-                    registerBtn.disabled = false;
+                    // Restaurar botón después de 2 segundos
+                    setTimeout(() => {
+                        registerBtn.innerHTML = originalText;
+                        registerBtn.disabled = false;
+                    }, 2000);
                 }
+            }
+
+            async simulateRegister(name, email, password, phone) {
+                // Simular delay de red
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Simular verificación de email existente
+                const existingEmails = [
+                    'admin@petstyle.com',
+                    'test@existing.com'
+                ];
+                
+                if (existingEmails.includes(email)) {
+                    throw new Error('Este email ya existe');
+                }
+                
+                return { success: true, token: 'register_token' };
+            }
+
+            showToast(message, type = 'info', duration = 3000) {
+                // Remover toast existente
+                const existingToast = document.querySelector('.toast');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                
+                document.body.appendChild(toast);
+                
+                // Mostrar toast
+                setTimeout(() => toast.classList.add('show'), 100);
+                
+                // Ocultar toast
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
             }
         }
 
-        // Funciones para login social (placeholder)
+        // Funciones globales
+        function goBack() {
+            // Verificar si hay historial
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'login.html';
+            }
+        }
+
         function loginWithGoogle() {
-            Utils.showToast('Login con Google próximamente', 'info');
+            document.getElementById('googleModal').classList.add('active');
         }
 
         function loginWithFacebook() {
-            Utils.showToast('Login con Facebook próximamente', 'info');
+            document.getElementById('facebookModal').classList.add('active');
         }
 
-        // Inicializar página
+        function closeModal() {
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+
+        async function processGoogleRegister() {
+            const modal = document.getElementById('googleModal');
+            const btn = modal.querySelector('.modal-btn.primary');
+            const originalText = btn.textContent;
+            
+            btn.innerHTML = '<span class="loading-spinner"></span>Conectando...';
+            btn.disabled = true;
+            
+            try {
+                // Simular autenticación con Google
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Simular datos de usuario de Google
+                const userData = {
+                    email: 'usuario@gmail.com',
+                    name: 'Usuario Google',
+                    provider: 'google'
+                };
+                
+                localStorage.setItem('authToken', 'google_register_token_' + Date.now());
+                localStorage.setItem('userEmail', userData.email);
+                localStorage.setItem('userName', userData.name);
+                
+                closeModal();
+                
+                const registerPage = new RegisterPage();
+                registerPage.showToast('¡Registro con Google exitoso!', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'main.html';
+                }, 1500);
+                
+            } catch (error) {
+                const registerPage = new RegisterPage();
+                registerPage.showToast('Error al registrarse con Google', 'error');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function processFacebookRegister() {
+            const modal = document.getElementById('facebookModal');
+            const btn = modal.querySelector('.modal-btn.primary');
+            const originalText = btn.textContent;
+            
+            btn.innerHTML = '<span class="loading-spinner"></span>Conectando...';
+            btn.disabled = true;
+            
+            try {
+                // Simular autenticación con Facebook
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Simular datos de usuario de Facebook
+                const userData = {
+                    email: 'usuario@facebook.com',
+                    name: 'Usuario Facebook',
+                    provider: 'facebook'
+                };
+                
+                localStorage.setItem('authToken', 'facebook_register_token_' + Date.now());
+                localStorage.setItem('userEmail', userData.email);
+                localStorage.setItem('userName', userData.name);
+                
+                closeModal();
+                
+                const registerPage = new RegisterPage();
+                registerPage.showToast('¡Registro con Facebook exitoso!', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'main.html';
+                }, 1500);
+                
+            } catch (error) {
+                const registerPage = new RegisterPage();
+                registerPage.showToast('Error al registrarse con Facebook', 'error');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Cerrar modales al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                closeModal();
+            }
+        });
+
+        // Cerrar modales con tecla Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Inicializar página cuando el DOM esté listo
         document.addEventListener('DOMContentLoaded', () => {
             new RegisterPage();
         });
+
+        // Prevenir zoom en iOS Safari al hacer focus en inputs
+        document.addEventListener('touchstart', {});
+        
+        // Ajustar viewport en dispositivos móviles
+        function adjustViewport() {
+            const viewportMeta = document.querySelector('meta[name="viewport"]');
+            if (window.innerWidth <= 414) {
+                viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+            }
+        }
+        
+        window.addEventListener('resize', adjustViewport);
+        adjustViewport();
     </script>
 </body>
 </html>

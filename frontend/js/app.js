@@ -174,5 +174,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Función global para navegación
 function navigateToHome() {
-    window.location.href = 'pages/home.html';
+    window.location.href = 'pages/main.html';
 }

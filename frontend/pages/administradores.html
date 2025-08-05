@@ -1,0 +1,2022 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetStyle - Panel de Administradores</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #873eee;
+            --secondary-color: #7b1fdd;
+            --accent-color: #873eee;
+            --dark-color: #2C3E50;
+            --light-color: #F8F9FA;
+            --success-color:#873eee;
+            --warning-color: #873eee;
+            --danger-color: #873eee;
+            --text-dark: #2C3E50;
+            --text-light: #6C757D;
+            --border-color: #E9ECEF;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0;
+            background: white;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header .logo {
+            font-size: 2rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        /* Botón de Login */
+        .login-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            background: var(--light-color);
+            border-bottom: 2px solid var(--border-color);
+            position: sticky;
+            top: 80px;
+            z-index: 99;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px 10px;
+            text-align: center;
+            background: none;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+            color: var(--text-dark);
+        }
+
+        .nav-tab.active {
+            color: var(--primary-color);
+            background: white;
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .nav-tab .icon {
+            font-size: 1.5rem;
+        }
+
+        .nav-tab span:last-child {
+            font-size: 0.8rem;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        .tab-section {
+            display: none;
+        }
+
+        .tab-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            border-left: 4px solid var(--primary-color);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-card .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .stat-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card p {
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Section Header */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-header h2 {
+            color: var(--text-dark);
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #e55a2b);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #229954);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning-color), #e67e22);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color), #c0392b);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Search Bar */
+        .search-container {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        /* Table for Desktop */
+        .table-container {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, var(--dark-color), #34495e);
+            color: white;
+        }
+
+        th, td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.85rem;
+        }
+
+        th {
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Cards for Mobile */
+        .cards-container {
+            display: grid;
+            gap: 15px;
+        }
+
+        .item-card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .item-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .item-card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .item-card-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .item-card-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .item-card-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .item-card-field label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .item-card-field span {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .item-card-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        /* Status badges */
+        .status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status.active { background: #d4edda; color: #155724; }
+        .status.inactive { background: #f8d7da; color: #721c24; }
+        .status.in-stock { background: #d1ecf1; color: #0c5460; }
+        .status.out-stock { background: #f5c6cb; color: #721c24; }
+        .status.low-stock { background: #fff3cd; color: #856404; }
+        .status.admin { background: #e7f3ff; color: #0066cc; }
+        .status.customer { background: #f0f8ff; color: #2c5aa0; }
+
+        /* Pet category badges */
+        .pet-category {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin: 2px;
+        }
+
+        .pet-category.perros { background: #ffeaa7; color: #d63031; }
+        .pet-category.gatos { background: #fd79a8; color: #2d3436; }
+        .pet-category.aves { background: #a29bfe; color: #2d3436; }
+        .pet-category.peces { background: #74b9ff; color: #2d3436; }
+
+        /* Price formatting */
+        .price {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: modalFadeIn 0.3s ease;
+            padding: 20px;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow: hidden;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-50px) scale(0.9); }
+            to { transform: translateY(0) scale(1); }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        /* Image Upload Styles */
+        .image-upload-container {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            background: #fafafa;
+        }
+
+        .image-upload-container:hover {
+            border-color: var(--primary-color);
+            background: #f0f8ff;
+        }
+
+        .image-upload-container.dragover {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .image-upload-input {
+            display: none;
+        }
+
+        .image-upload-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .image-upload-icon {
+            font-size: 3rem;
+            color: var(--text-light);
+            transition: color 0.3s ease;
+        }
+
+        .image-upload-container:hover .image-upload-icon,
+        .image-upload-container.dragover .image-upload-icon {
+            color: var(--primary-color);
+        }
+
+        .image-upload-container.dragover .image-upload-icon {
+            color: white;
+        }
+
+        .image-upload-text {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .image-upload-subtext {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .image-preview-container {
+            margin-top: 15px;
+            position: relative;
+            display: none;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-remove-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .image-remove-btn:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+
+        .image-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        /* Loading and Toast */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 2000;
+            animation: slideInRight 0.3s ease;
+        }
+
+        .toast.success { background: var(--success-color); }
+        .toast.error { background: var(--danger-color); }
+        .toast.warning { background: var(--warning-color); }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        /* Responsive Design */
+        @media (min-width: 768px) {
+            .container {
+                margin: 20px auto;
+                max-width: 1400px;
+                border-radius: var(--border-radius);
+                box-shadow: var(--shadow);
+            }
+
+            .header {
+                position: static;
+                padding: 30px;
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+                margin-bottom: 10px;
+            }
+
+            .header p {
+                font-size: 1.1rem;
+            }
+
+            .login-btn {
+                top: 25px;
+                right: 30px;
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+
+            .nav-tabs {
+                position: static;
+            }
+
+            .nav-tab {
+                padding: 20px;
+                font-size: 1.1rem;
+                flex-direction: row;
+                gap: 10px;
+            }
+
+            .nav-tab .icon {
+                font-size: 1.3rem;
+            }
+
+            .nav-tab span:last-child {
+                font-size: 1.1rem;
+            }
+
+            .content {
+                padding: 30px;
+                padding-bottom: 30px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+            }
+
+            .stat-card {
+                padding: 25px;
+            }
+
+            .stat-card .icon {
+                font-size: 3rem;
+                margin-bottom: 15px;
+            }
+
+            .stat-card h3 {
+                font-size: 2.5rem;
+                margin-bottom: 10px;
+            }
+
+            .stat-card p {
+                font-size: 0.9rem;
+            }
+
+            .section-header {
+                flex-wrap: nowrap;
+            }
+
+            .section-header h2 {
+                font-size: 1.8rem;
+            }
+
+            .cards-container {
+                display: none;
+            }
+
+            .table-container {
+                display: block;
+            }
+
+            th, td {
+                padding: 15px;
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-btn {
+                position: static;
+                margin: 10px auto 0;
+                display: flex;
+                width: fit-content;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 15px 10px;
+            }
+
+            .stat-card .icon {
+                font-size: 1.5rem;
+                margin-bottom: 5px;
+            }
+
+            .stat-card h3 {
+                font-size: 1.5rem;
+                margin-bottom: 3px;
+            }
+
+            .stat-card p {
+                font-size: 0.7rem;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .section-header h2 {
+                font-size: 1.2rem;
+                text-align: center;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+
+            .item-card {
+                padding: 15px;
+            }
+
+            .item-card-info {
+                grid-template-columns: 1fr;
+            }
+
+            .item-card-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <a href="/frontend/pages/login.html" class="login-btn">
+                🚪 Cerrar Sesión
+            </a>
+            <h1>
+                <span class="logo">🐾</span>
+                PetStyle Admin
+            </h1>
+            <p>Panel de administración - Gestión de usuarios y productos</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('users')">
+                <span class="icon">👥</span>
+                <span>Usuarios</span>
+            </button>
+            <button class="nav-tab" onclick="switchTab('products')">
+                <span class="icon">🛍️</span>
+                <span>Productos</span>
+            </button>
+        </nav>
+
+        <!-- Content -->
+        <main class="content">
+            <!-- Users Section -->
+            <section id="users" class="tab-section active">
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="icon">👥</div>
+                        <h3 id="totalUsers">-</h3>
+                        <p>Total Usuarios</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon">✅</div>
+                        <h3 id="activeUsers">-</h3>
+                        <p>Activos</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon">🆕</div>
+                        <h3 id="newUsers">-</h3>
+                        <p>Nuevos</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon">🛡️</div>
+                        <h3 id="adminUsers">-</h3>
+                        <p>Admins</p>
+                    </div>
+                </div>
+
+                <!-- Section Header -->
+                <div class="section-header">
+                    <h2>
+                        <span class="icon">👥</span>
+                        Gestión de Usuarios
+                    </h2>
+                    <button class="btn btn-primary" onclick="openModal('userModal')">
+                        ➕ Nuevo Usuario
+                    </button>
+                </div>
+
+                <!-- Search -->
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Buscar usuarios..." id="userSearch" oninput="filterUsers()">
+                    <span class="search-icon">🔍</span>
+                </div>
+
+                <!-- Users Table (Desktop) -->
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Usuario</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th>Registro</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Users Cards (Mobile) -->
+                <div class="cards-container" id="usersCardsContainer"></div>
+            </section>
+
+            <!-- Products Section -->
+            <section id="products" class="tab-section">
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="icon">📦</div>
+                        <h3 id="totalProducts">-</h3>
+                        <p>Total</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon">✅</div>
+                        <h3 id="inStockProducts">-</h3>
+                        <p>En Stock</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon">⚠️</div>
+                        <h3 id="lowStockProducts">-</h3>
+                        <p>Stock Bajo</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon">❌</div>
+                        <h3 id="outStockProducts">-</h3>
+                        <p>Agotados</p>
+                    </div>
+                </div>
+
+                <!-- Section Header -->
+                <div class="section-header">
+                    <h2>
+                        <span class="icon">🛍️</span>
+                        Gestión de Productos
+                    </h2>
+                    <button class="btn btn-primary" onclick="openModal('productModal')">
+                        ➕ Nuevo Producto
+                    </button>
+                </div>
+
+                <!-- Search -->
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Buscar productos..." id="productSearch" oninput="filterProducts()">
+                    <span class="search-icon">🔍</span>
+                </div>
+
+                <!-- Products Table (Desktop) -->
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Producto</th>
+                                <th>Categoría</th>
+                                <th>Marca</th>
+                                <th>Precio</th>
+                                <th>Stock</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Products Cards (Mobile) -->
+                <div class="cards-container" id="productsCardsContainer"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- User Modal -->
+    <div id="userModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="userModalTitle">Nuevo Usuario</h3>
+                <button class="modal-close" onclick="closeModal('userModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="userId">
+                    <div class="form-group">
+                        <label for="userName">Nombre completo</label>
+                        <input type="text" id="userName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userEmail">Email</label>
+                        <input type="email" id="userEmail" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userPhone">Teléfono</label>
+                        <input type="tel" id="userPhone" class="form-control" pattern="[0-9]{10}" title="Debe tener 10 dígitos" required>
+                    </div>
+                    <div class="form-group" id="passwordGroup">
+                        <label for="userPassword">Contraseña</label>
+                        <input type="password" id="userPassword" class="form-control" minlength="6" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userRole">Rol</label>
+                        <select id="userRole" class="form-control" required>
+                            <option value="">Seleccionar rol</option>
+                            <option value="admin">Administrador</option>
+                            <option value="customer">Cliente</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="userIsActive">Estado</label>
+                        <select id="userIsActive" class="form-control" required>
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('userModal')">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="saveUser()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="productModalTitle">Nuevo Producto</h3>
+                <button class="modal-close" onclick="closeModal('productModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <input type="hidden" id="productId">
+                    <div class="form-group">
+                        <label for="productName">Nombre del producto</label>
+                        <input type="text" id="productName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productDescription">Descripción</label>
+                        <textarea id="productDescription" class="form-control" rows="3" required></textarea>
+                    </div>
+                    
+                    <!-- Campo de Imagen -->
+                    <div class="form-group">
+                        <label for="productImage">Imagen del producto</label>
+                        <div class="image-upload-container" onclick="document.getElementById('productImageInput').click()">
+                            <input type="file" id="productImageInput" class="image-upload-input" accept="image/*" onchange="handleImageUpload(this)">
+                            <div class="image-upload-content">
+                                <div class="image-upload-icon">📷</div>
+                                <div class="image-upload-text">Seleccionar imagen</div>
+                                <div class="image-upload-subtext">Arrastra y suelta o haz clic para seleccionar<br>Formatos: JPG, PNG, WebP (Máx. 5MB)</div>
+                            </div>
+                        </div>
+                        <div class="image-preview-container" id="imagePreviewContainer">
+                            <img id="imagePreview" class="image-preview" alt="Vista previa">
+                            <button type="button" class="image-remove-btn" onclick="removeImage()">&times;</button>
+                            <div class="image-info" id="imageInfo"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productCategory">Categoría</label>
+                        <select id="productCategory" class="form-control" required>
+                            <option value="">Seleccionar categoría</option>
+                            <option value="perros">Perros 🐕</option>
+                            <option value="gatos">Gatos 🐱</option>
+                            <option value="aves">Aves 🐦</option>
+                            <option value="peces">Peces 🐠</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productBrand">Marca</label>
+                        <input type="text" id="productBrand" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productSku">SKU</label>
+                        <input type="text" id="productSku" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productPrice">Precio</label>
+                        <input type="number" id="productPrice" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productStock">Stock</label>
+                        <input type="number" id="productStock" class="form-control" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productMinStock">Stock Mínimo</label>
+                        <input type="number" id="productMinStock" class="form-control" min="0" value="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="productFeatured">Producto Destacado</label>
+                        <select id="productFeatured" class="form-control">
+                            <option value="false">No</option>
+                            <option value="true">Sí</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productIsActive">Estado</label>
+                        <select id="productIsActive" class="form-control" required>
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('productModal')">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="saveProduct()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== CONFIGURACIÓN Y VARIABLES GLOBALES =====
+        const API_BASE_URL = 'http://localhost:3000/api'; // Ajusta según tu configuración
+        let currentTab = 'users';
+        let users = [];
+        let products = [];
+        let allUsers = [];
+        let allProducts = [];
+        let selectedImageFile = null;
+        let currentImageData = null;
+
+        // ===== UTILIDADES =====
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('es-MX', {
+                style: 'currency',
+                currency: 'MXN'
+            }).format(price);
+        }
+
+        function showLoading(containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '<div class="loading">Cargando datos...</div>';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // ===== FUNCIONES DE MANEJO DE IMÁGENES =====
+        function handleImageUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            // Validar tipo de archivo
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                showToast('Formato de imagen no válido. Usa JPG, PNG o WebP', 'error');
+                input.value = '';
+                return;
+            }
+
+            // Validar tamaño (5MB máximo)
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (file.size > maxSize) {
+                showToast('La imagen es demasiado grande. Máximo 5MB', 'error');
+                input.value = '';
+                return;
+            }
+
+            selectedImageFile = file;
+            displayImagePreview(file);
+        }
+
+        function displayImagePreview(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('imagePreview');
+                const container = document.getElementById('imagePreviewContainer');
+                const info = document.getElementById('imageInfo');
+                
+                preview.src = e.target.result;
+                currentImageData = e.target.result;
+                
+                container.style.display = 'block';
+                info.innerHTML = `
+                    <strong>Archivo:</strong> ${file.name}<br>
+                    <strong>Tamaño:</strong> ${formatFileSize(file.size)}<br>
+                    <strong>Tipo:</strong> ${file.type}
+                `;
+                
+                // Ocultar el área de upload
+                document.querySelector('.image-upload-container').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage() {
+            selectedImageFile = null;
+            currentImageData = null;
+            
+            const container = document.getElementById('imagePreviewContainer');
+            const uploadContainer = document.querySelector('.image-upload-container');
+            const fileInput = document.getElementById('productImageInput');
+            
+            container.style.display = 'none';
+            uploadContainer.style.display = 'block';
+            fileInput.value = '';
+            
+            document.getElementById('imagePreview').src = '';
+            document.getElementById('imageInfo').innerHTML = '';
+        }
+
+        // Drag and drop functionality
+        function setupDragAndDrop() {
+            const uploadContainer = document.querySelector('.image-upload-container');
+            
+            uploadContainer.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            
+            uploadContainer.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+            
+            uploadContainer.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const fileInput = document.getElementById('productImageInput');
+                    fileInput.files = files;
+                    handleImageUpload(fileInput);
+                }
+            });
+        }
+
+        // ===== FUNCIONES DE API =====
+        async function apiRequest(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Error en la petición');
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('API Error:', error);
+                showToast(error.message || 'Error de conexión', 'error');
+                throw error;
+            }
+        }
+
+        // ===== NAVEGACIÓN DE PESTAÑAS =====
+        function switchTab(tabName) {
+            // Actualizar pestañas activas
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Activar pestaña seleccionada
+            event.target.closest('.nav-tab').classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            currentTab = tabName;
+
+            // Cargar datos según la pestaña
+            if (tabName === 'users') {
+                loadUsers();
+            } else if (tabName === 'products') {
+                loadProducts();
+            }
+        }
+
+        // ===== GESTIÓN DE USUARIOS =====
+        async function loadUsers() {
+            try {
+                showLoading('usersTableBody');
+                showLoading('usersCardsContainer');
+                
+                // Simular datos por ahora - reemplazar con API real
+                const userData = await simulateUsersAPI();
+                
+                allUsers = userData.data || [];
+                users = [...allUsers];
+                
+                renderUsersTable();
+                renderUsersCards();
+                updateUsersStats();
+            } catch (error) {
+                console.error('Error loading users:', error);
+                document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="8">Error al cargar usuarios</td></tr>';
+                document.getElementById('usersCardsContainer').innerHTML = '<p>Error al cargar usuarios</p>';
+            }
+        }
+
+        function renderUsersTable() {
+            const tbody = document.getElementById('usersTableBody');
+            
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No hay usuarios para mostrar</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user._id.substr(-6)}</td>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.phone || 'N/A'}</td>
+                    <td><span class="status ${user.role}">${user.role === 'admin' ? 'Admin' : 'Cliente'}</span></td>
+                    <td><span class="status ${user.isActive ? 'active' : 'inactive'}">${user.isActive ? 'Activo' : 'Inactivo'}</span></td>
+                    <td>${formatDate(user.createdAt)}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editUser('${user._id}')">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteUser('${user._id}')">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderUsersCards() {
+            const container = document.getElementById('usersCardsContainer');
+            
+            if (users.length === 0) {
+                container.innerHTML = '<p style="text-align: center;">No hay usuarios para mostrar</p>';
+                return;
+            }
+
+            container.innerHTML = users.map(user => `
+                <div class="item-card">
+                    <div class="item-card-header">
+                        <div>
+                            <div class="item-card-title">${user.name}</div>
+                            <div class="item-card-subtitle">${user.email}</div>
+                        </div>
+                        <span class="status ${user.isActive ? 'active' : 'inactive'}">${user.isActive ? 'Activo' : 'Inactivo'}</span>
+                    </div>
+                    <div class="item-card-info">
+                        <div class="item-card-field">
+                            <label>Teléfono</label>
+                            <span>${user.phone || 'N/A'}</span>
+                        </div>
+                        <div class="item-card-field">
+                            <label>Rol</label>
+                            <span class="status ${user.role}">${user.role === 'admin' ? 'Admin' : 'Cliente'}</span>
+                        </div>
+                        <div class="item-card-field">
+                            <label>Registro</label>
+                            <span>${formatDate(user.createdAt)}</span>
+                        </div>
+                        <div class="item-card-field">
+                            <label>ID</label>
+                            <span>${user._id.substr(-6)}</span>
+                        </div>
+                    </div>
+                    <div class="item-card-actions">
+                        <button class="btn btn-warning btn-sm" onclick="editUser('${user._id}')">✏️ Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteUser('${user._id}')">🗑️ Eliminar</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateUsersStats() {
+            const total = allUsers.length;
+            const active = allUsers.filter(u => u.isActive).length;
+            const admins = allUsers.filter(u => u.role === 'admin').length;
+            const newUsers = allUsers.filter(u => {
+                const userDate = new Date(u.createdAt);
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                return userDate > weekAgo;
+            }).length;
+
+            document.getElementById('totalUsers').textContent = total;
+            document.getElementById('activeUsers').textContent = active;
+            document.getElementById('adminUsers').textContent = admins;
+            document.getElementById('newUsers').textContent = newUsers;
+        }
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+            
+            if (searchTerm === '') {
+                users = [...allUsers];
+            } else {
+                users = allUsers.filter(user => 
+                    user.name.toLowerCase().includes(searchTerm) ||
+                    user.email.toLowerCase().includes(searchTerm) ||
+                    user.phone?.includes(searchTerm)
+                );
+            }
+            
+            renderUsersTable();
+            renderUsersCards();
+        }
+
+        async function saveUser() {
+            try {
+                const userId = document.getElementById('userId').value;
+                const userData = {
+                    name: document.getElementById('userName').value,
+                    email: document.getElementById('userEmail').value,
+                    phone: document.getElementById('userPhone').value,
+                    role: document.getElementById('userRole').value,
+                    isActive: document.getElementById('userIsActive').value === 'true'
+                };
+
+                if (!userId) {
+                    userData.password = document.getElementById('userPassword').value;
+                }
+
+                if (userId) {
+                    // Actualizar usuario existente
+                    await apiRequest(`/admin/users/${userId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(userData)
+                    });
+                    showToast('Usuario actualizado exitosamente');
+                } else {
+                    // Crear nuevo usuario
+                    await apiRequest('/admin/users', {
+                        method: 'POST',
+                        body: JSON.stringify(userData)
+                    });
+                    showToast('Usuario creado exitosamente');
+                }
+
+                closeModal('userModal');
+                loadUsers();
+            } catch (error) {
+                showToast('Error al guardar usuario', 'error');
+            }
+        }
+
+        function editUser(userId) {
+            const user = allUsers.find(u => u._id === userId);
+            if (!user) return;
+
+            document.getElementById('userId').value = user._id;
+            document.getElementById('userName').value = user.name;
+            document.getElementById('userEmail').value = user.email;
+            document.getElementById('userPhone').value = user.phone || '';
+            document.getElementById('userRole').value = user.role;
+            document.getElementById('userIsActive').value = user.isActive.toString();
+            
+            // Ocultar campo de contraseña en edición
+            document.getElementById('passwordGroup').style.display = 'none';
+            document.getElementById('userPassword').required = false;
+            
+            document.getElementById('userModalTitle').textContent = 'Editar Usuario';
+            openModal('userModal');
+        }
+
+        async function deleteUser(userId) {
+            if (!confirm('¿Estás seguro de que quieres eliminar este usuario?')) return;
+
+            try {
+                await apiRequest(`/admin/users/${userId}`, {
+                    method: 'DELETE'
+                });
+                showToast('Usuario eliminado exitosamente');
+                loadUsers();
+            } catch (error) {
+                showToast('Error al eliminar usuario', 'error');
+            }
+        }
+
+        // ===== GESTIÓN DE PRODUCTOS =====
+        async function loadProducts() {
+            try {
+                showLoading('productsTableBody');
+                showLoading('productsCardsContainer');
+                
+                // Simular datos por ahora - reemplazar con API real
+                const productData = await simulateProductsAPI();
+                
+                allProducts = productData.data || [];
+                products = [...allProducts];
+                
+                renderProductsTable();
+                renderProductsCards();
+                updateProductsStats();
+            } catch (error) {
+                console.error('Error loading products:', error);
+                document.getElementById('productsTableBody').innerHTML = '<tr><td colspan="8">Error al cargar productos</td></tr>';
+                document.getElementById('productsCardsContainer').innerHTML = '<p>Error al cargar productos</p>';
+            }
+        }
+
+        function renderProductsTable() {
+            const tbody = document.getElementById('productsTableBody');
+            
+            if (products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No hay productos para mostrar</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = products.map(product => `
+                <tr>
+                    <td>${product.sku}</td>
+                    <td>${product.name}</td>
+                    <td><span class="pet-category ${product.category}">${getCategoryName(product.category)}</span></td>
+                    <td>${product.brand}</td>
+                    <td class="price">${formatPrice(product.price)}</td>
+                    <td>${product.stock}</td>
+                    <td><span class="status ${getStockStatus(product)}">${getStockStatusText(product)}</span></td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editProduct('${product._id}')">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteProduct('${product._id}')">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderProductsCards() {
+            const container = document.getElementById('productsCardsContainer');
+            
+            if (products.length === 0) {
+                container.innerHTML = '<p style="text-align: center;">No hay productos para mostrar</p>';
+                return;
+            }
+
+            container.innerHTML = products.map(product => `
+                <div class="item-card">
+                    <div class="item-card-header">
+                        <div>
+                            <div class="item-card-title">${product.name}</div>
+                            <div class="item-card-subtitle">${product.brand}</div>
+                        </div>
+                        <span class="status ${getStockStatus(product)}">${getStockStatusText(product)}</span>
+                    </div>
+                    <div class="item-card-info">
+                        <div class="item-card-field">
+                            <label>SKU</label>
+                            <span>${product.sku}</span>
+                        </div>
+                        <div class="item-card-field">
+                            <label>Categoría</label>
+                            <span class="pet-category ${product.category}">${getCategoryName(product.category)}</span>
+                        </div>
+                        <div class="item-card-field">
+                            <label>Precio</label>
+                            <span class="price">${formatPrice(product.price)}</span>
+                        </div>
+                        <div class="item-card-field">
+                            <label>Stock</label>
+                            <span>${product.stock} unidades</span>
+                        </div>
+                    </div>
+                    <div class="item-card-actions">
+                        <button class="btn btn-warning btn-sm" onclick="editProduct('${product._id}')">✏️ Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteProduct('${product._id}')">🗑️ Eliminar</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateProductsStats() {
+            const total = allProducts.length;
+            const inStock = allProducts.filter(p => p.stock > p.minStock).length;
+            const lowStock = allProducts.filter(p => p.stock <= p.minStock && p.stock > 0).length;
+            const outStock = allProducts.filter(p => p.stock === 0).length;
+
+            document.getElementById('totalProducts').textContent = total;
+            document.getElementById('inStockProducts').textContent = inStock;
+            document.getElementById('lowStockProducts').textContent = lowStock;
+            document.getElementById('outStockProducts').textContent = outStock;
+        }
+
+        function filterProducts() {
+            const searchTerm = document.getElementById('productSearch').value.toLowerCase();
+            
+            if (searchTerm === '') {
+                products = [...allProducts];
+            } else {
+                products = allProducts.filter(product => 
+                    product.name.toLowerCase().includes(searchTerm) ||
+                    product.brand.toLowerCase().includes(searchTerm) ||
+                    product.sku.toLowerCase().includes(searchTerm) ||
+                    product.category.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            renderProductsTable();
+            renderProductsCards();
+        }
+
+        async function saveProduct() {
+            try {
+                const productId = document.getElementById('productId').value;
+                const productData = {
+                    name: document.getElementById('productName').value,
+                    description: document.getElementById('productDescription').value,
+                    category: document.getElementById('productCategory').value,
+                    brand: document.getElementById('productBrand').value,
+                    sku: document.getElementById('productSku').value,
+                    price: parseFloat(document.getElementById('productPrice').value),
+                    stock: parseInt(document.getElementById('productStock').value),
+                    minStock: parseInt(document.getElementById('productMinStock').value),
+                    featured: document.getElementById('productFeatured').value === 'true',
+                    isActive: document.getElementById('productIsActive').value === 'true'
+                };
+
+                // Agregar imagen si hay una seleccionada
+                if (selectedImageFile || currentImageData) {
+                    productData.image = currentImageData;
+                    productData.imageName = selectedImageFile ? selectedImageFile.name : 'imagen_producto.jpg';
+                }
+
+                if (productId) {
+                    // Actualizar producto existente
+                    await apiRequest(`/products/${productId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(productData)
+                    });
+                    showToast('Producto actualizado exitosamente');
+                } else {
+                    // Crear nuevo producto
+                    await apiRequest('/products', {
+                        method: 'POST',
+                        body: JSON.stringify(productData)
+                    });
+                    showToast('Producto creado exitosamente');
+                }
+
+                closeModal('productModal');
+                loadProducts();
+            } catch (error) {
+                showToast('Error al guardar producto', 'error');
+            }
+        }
+
+        function editProduct(productId) {
+            const product = allProducts.find(p => p._id === productId);
+            if (!product) return;
+
+            document.getElementById('productId').value = product._id;
+            document.getElementById('productName').value = product.name;
+            document.getElementById('productDescription').value = product.description;
+            document.getElementById('productCategory').value = product.category;
+            document.getElementById('productBrand').value = product.brand;
+            document.getElementById('productSku').value = product.sku;
+            document.getElementById('productPrice').value = product.price;
+            document.getElementById('productStock').value = product.stock;
+            document.getElementById('productMinStock').value = product.minStock;
+            document.getElementById('productFeatured').value = product.featured.toString();
+            document.getElementById('productIsActive').value = product.isActive.toString();
+            
+            // Si el producto tiene imagen, mostrarla
+            if (product.image) {
+                currentImageData = product.image;
+                const preview = document.getElementById('imagePreview');
+                const container = document.getElementById('imagePreviewContainer');
+                const info = document.getElementById('imageInfo');
+                
+                preview.src = product.image;
+                container.style.display = 'block';
+                info.innerHTML = `<strong>Imagen actual del producto</strong>`;
+                
+                document.querySelector('.image-upload-container').style.display = 'none';
+            } else {
+                removeImage();
+            }
+            
+            document.getElementById('productModalTitle').textContent = 'Editar Producto';
+            openModal('productModal');
+        }
+
+        async function deleteProduct(productId) {
+            if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) return;
+
+            try {
+                await apiRequest(`/products/${productId}`, {
+                    method: 'DELETE'
+                });
+                showToast('Producto eliminado exitosamente');
+                loadProducts();
+            } catch (error) {
+                showToast('Error al eliminar producto', 'error');
+            }
+        }
+
+        // ===== UTILIDADES PARA PRODUCTOS =====
+        function getCategoryName(category) {
+            const categories = {
+                'perros': 'Perros 🐕',
+                'gatos': 'Gatos 🐱',
+                'aves': 'Aves 🐦',
+                'peces': 'Peces 🐠'
+            };
+            return categories[category] || category;
+        }
+
+        function getStockStatus(product) {
+            if (product.stock === 0) return 'out-stock';
+            if (product.stock <= product.minStock) return 'low-stock';
+            return 'in-stock';
+        }
+
+        function getStockStatusText(product) {
+            if (product.stock === 0) return 'Agotado';
+            if (product.stock <= product.minStock) return 'Stock Bajo';
+            return 'En Stock';
+        }
+
+        // ===== GESTIÓN DE MODALES =====
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('show');
+            
+            // Reset form if it's a new item
+            if (modalId === 'userModal' && !document.getElementById('userId').value) {
+                document.getElementById('userForm').reset();
+                document.getElementById('passwordGroup').style.display = 'block';
+                document.getElementById('userPassword').required = true;
+                document.getElementById('userModalTitle').textContent = 'Nuevo Usuario';
+            } else if (modalId === 'productModal' && !document.getElementById('productId').value) {
+                document.getElementById('productForm').reset();
+                removeImage(); // Reset image upload
+                document.getElementById('productModalTitle').textContent = 'Nuevo Producto';
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('show');
+            
+            // Reset image upload when closing product modal
+            if (modalId === 'productModal') {
+                removeImage();
+            }
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                closeModal(e.target.id);
+            }
+        });
+
+        // ===== DATOS SIMULADOS (REEMPLAZAR CON API REAL) =====
+        async function simulateUsersAPI() {
+            // Simular delay de API
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            return {
+                success: true,
+                data: [
+                    {
+                        _id: '675b1a2c3d4e5f6789012345',
+                        name: 'Juan Pérez',
+                        email: 'juan@example.com',
+                        phone: '5551234567',
+                        role: 'admin',
+                        isActive: true,
+                        createdAt: '2024-01-15T10:30:00Z'
+                    },
+                    {
+                        _id: '675b1a2c3d4e5f6789012346',
+                        name: 'María García',
+                        email: 'maria@example.com',
+                        phone: '5559876543',
+                        role: 'customer',
+                        isActive: true,
+                        createdAt: '2024-02-20T14:15:00Z'
+                    },
+                    {
+                        _id: '675b1a2c3d4e5f6789012347',
+                        name: 'Carlos López',
+                        email: 'carlos@example.com',
+                        phone: '5555555555',
+                        role: 'customer',
+                        isActive: false,
+                        createdAt: '2024-03-10T09:45:00Z'
+                    },
+                    {
+                        _id: '675b1a2c3d4e5f6789012348',
+                        name: 'Ana Rodríguez',
+                        email: 'ana@example.com',
+                        phone: '5551111111',
+                        role: 'customer',
+                        isActive: true,
+                        createdAt: '2024-07-28T16:20:00Z'
+                    },
+                    {
+                        _id: '675b1a2c3d4e5f6789012349',
+                        name: 'Luis Martínez',
+                        email: 'luis@example.com',
+                        phone: '5552222222',
+                        role: 'admin',
+                        isActive: true,
+                        createdAt: '2024-07-30T08:45:00Z'
+                    }
+                ]
+            };
+        }
+
+        async function simulateProductsAPI() {
+            // Simular delay de API
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            return {
+                success: true,
+                data: [
+                    {
+                        _id: '675b1a2c3d4e5f6789012350',
+                        name: 'Alimento Premium para Perros',
+                        description: 'Alimento balanceado de alta calidad para perros adultos',
+                        category: 'perros',
+                        brand: 'Royal Canin',
+                        sku: 'RC-DOG-001',
+                        price: 850.00,
+                        stock: 25,
+                        minStock: 5,
+                        featured: true,
+                        isActive: true,
+                        image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjZjBmOGZmIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2NzVlYTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIwLjNlbSI+SW1hZ2VuIGRlIFByb2R1Y3RvPC90ZXh0Pgo8L3N2Zz4K',
+                        createdAt: '2024-01-10T08:00:00Z'
+                    },
+                    {
+                        _id: '675b1a2c3d4e5f6789012351',
+                        name: 'Arena para Gatos Aglutinante',
+                        description: 'Arena aglutinante sin polvo, con control de olores',
+                        category: 'gatos',
+                        brand: 'Cat Litter Pro',
+                        sku: 'CL-CAT-002',
+                        price: 120.00,
+                        stock: 3,
+                        minStock: 10,
+                        featured: false,
+                        isActive: true,
+                        image: null,
+                        createdAt: '2024-02-05T11:30:00Z'
+                    },
+                    {
+                        _id: '675b1a2c3d4e5f6789012352',
+                        name: 'Semillas Nutritivas para Aves',
+                        description: 'Mezcla completa de semillas para canarios y periquitos',
+                        category: 'aves',
+                        brand: 'Bird Food Plus',
+                        sku: 'BF-BIRD-003',
+                        price: 75.00,
+                        stock: 0,
+                        minStock: 5,
+                        featured: false,
+                        isActive: true,
+                        image: null,
+                        createdAt: '2024-01-25T16:20:00Z'
+                    },
+                    {
+                        _id: '675b1a2c3d4e5f6789012353',
+                        name: 'Comida para Peces Tropicales',
+                        description: 'Alimento completo en hojuelas para peces tropicales',
+                        category: 'peces',
+                        brand: 'AquaLife',
+                        sku: 'AL-FISH-004',
+                        price: 45.00,
+                        stock: 15,
+                        minStock: 8,
+                        featured: true,
+                        isActive: true,
+                        image: null,
+                        createdAt: '2024-03-12T14:10:00Z'
+                    },
+                    {
+                        _id: '675b1a2c3d4e5f6789012354',
+                        name: 'Collar Antipulgas para Perros',
+                        description: 'Collar de protección contra pulgas y garrapatas',
+                        category: 'perros',
+                        brand: 'FleaGuard',
+                        sku: 'FG-DOG-005',
+                        price: 180.00,
+                        stock: 8,
+                        minStock: 5,
+                        featured: false,
+                        isActive: true,
+                        image: null,
+                        createdAt: '2024-04-08T09:25:00Z'
+                    }
+                ]
+            };
+        }
+
+        // ===== INICIALIZACIÓN =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar datos iniciales
+            loadUsers();
+            
+            // Configurar eventos de formularios
+            document.getElementById('userForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveUser();
+            });
+            
+            document.getElementById('productForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveProduct();
+            });
+
+            // Configurar drag and drop para imágenes
+            setupDragAndDrop();
+        });
+    </script>
+</body>
+</html>
