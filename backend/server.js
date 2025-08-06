@@ -25,7 +25,7 @@ const corsOptions = {
             'http://localhost:8080',
             'http://127.0.0.1:8000',
             'http://127.0.0.1:8080',
-            'http://192.168.1.100:8000', // Cambia por tu IP local
+            '192.168.137.1', // Cambia por tu IP local
             'file://', // Para Cordova
             'https://tu-dominio-produccion.com' // Tu dominio en producción
         ];

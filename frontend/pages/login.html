@@ -3,16 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+    
     <title>PetStyle - Iniciar Sesión</title>
+    
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/frontend/css/login.css">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/login.css">
+    
+    <!-- Cordova Script (se carga solo si está disponible) -->
+    <script type="text/javascript" src="cordova.js"></script>
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <div class="header">
             <button class="back-btn" onclick="goBack()">
-                <svg fill="none" viewBox="0 0 24 24">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                 </svg>
             </button>
@@ -36,6 +45,8 @@
                         placeholder="ejemplo@correo.com"
                         required
                         autocomplete="email"
+                        autocapitalize="none"
+                        autocorrect="off"
                     >
                     <div class="form-error" id="emailError"></div>
                 </div>
@@ -89,24 +100,23 @@
     </div>
 
     <!-- Modals -->
-    <div class="modal-overlay" id="googleModal">
+    <div class="modal-overlay" id="googleModal" style="display: none;">
         <div class="modal">
             <div class="modal-icon info">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 </svg>
             </div>
             <h3 class="modal-title">Continuar con Google</h3>
-            <p class="modal-text">Serás redirigido a Google para completar el proceso de autenticación de forma segura.</p>
+            <p class="modal-text">Esta funcionalidad estará disponible próximamente.</p>
             <div class="modal-buttons">
                 <button class="modal-btn secondary" onclick="closeModal()">Cancelar</button>
-                <button class="modal-btn primary" onclick="processGoogleLogin()">Continuar</button>
+                <button class="modal-btn primary" onclick="processGoogleLogin()">Entendido</button>
             </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="facebookModal">
+    <div class="modal-overlay" id="facebookModal" style="display: none;">
         <div class="modal">
             <div class="modal-icon info">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -114,29 +124,37 @@
                 </svg>
             </div>
             <h3 class="modal-title">Continuar con Facebook</h3>
-            <p class="modal-text">Serás redirigido a Facebook para completar el proceso de autenticación de forma segura.</p>
+            <p class="modal-text">Esta funcionalidad estará disponible próximamente.</p>
             <div class="modal-buttons">
                 <button class="modal-btn secondary" onclick="closeModal()">Cancelar</button>
-                <button class="modal-btn primary" onclick="processFacebookLogin()">Continuar</button>
+                <button class="modal-btn primary" onclick="processFacebookLogin()">Entendido</button>
             </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="forgotModal">
+    <div class="modal-overlay" id="forgotModal" style="display: none;">
         <div class="modal">
             <div class="modal-icon info">💌</div>
             <h3 class="modal-title">Recuperar Contraseña</h3>
-            <p class="modal-text">Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.</p>
+            <p class="modal-text">Esta funcionalidad estará disponible próximamente.</p>
             <div style="margin-bottom: 20px;">
                 <input type="email" id="forgotEmail" class="form-input" placeholder="tu@correo.com" style="margin: 0;">
             </div>
             <div class="modal-buttons">
                 <button class="modal-btn secondary" onclick="closeModal()">Cancelar</button>
-                <button class="modal-btn primary" onclick="sendPasswordReset()">Enviar</button>
+                <button class="modal-btn primary" onclick="sendPasswordReset()">Entendido</button>
             </div>
         </div>
     </div>
 
-    <script src="/frontend/js/login.js"></script>
+    <!-- Scripts -->
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        // Crear instancia global de API
+        window.api = new API();
+        console.log('🔧 API instanciada globalmente');
+    </script>
+    <script src="../js/login.js"></script>
 </body>
 </html>

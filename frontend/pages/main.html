@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/frontend/css/main.css">
 </head>
+
 <body>
     <div class="container">
         <!-- Header -->
@@ -89,5 +90,50 @@
     </div>
 
     <script src="/frontend/js/main.js"></script>
+    <!-- Agregar antes del cierre del </body> -->
+<script src="js/config.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/api-client.js"></script>
+<script src="js/login.js"></script>
+<script src="js/products.js"></script>
+
+<script>
+// Inicializar la aplicación cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', async function() {
+    // Actualizar contador del carrito si está autenticado
+    if (authManager.isAuthenticated()) {
+        await productManager.updateCartCounter();
+        
+        // Cargar productos en la página principal
+        if (document.getElementById('products-container')) {
+            await productManager.loadProducts(1);
+        }
+    }
+    
+    // Event listeners para el menú móvil, búsqueda, etc.
+    initializeEventListeners();
+});
+
+function initializeEventListeners() {
+    // Botón de logout si existe
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await authManager.logout();
+        });
+    }
+    
+    // Botón del carrito
+    const cartBtn = document.getElementById('cart-btn');
+    if (cartBtn) {
+        cartBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = '/pages/cart.html';
+        });
+    }
+}
+</script>
+
 </body>
 </html>
