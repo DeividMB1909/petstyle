@@ -58,7 +58,7 @@ const cartSchema = new mongoose.Schema({
 });
 
 // Índices
-cartSchema.index({ user: 1 });
+// cartSchema.index({ user: 1 }); // ← ELIMINADA: duplicada con unique: true
 cartSchema.index({ 'items.product': 1 });
 
 // Virtual para obtener el número total de items
