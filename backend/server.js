@@ -3,18 +3,15 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-require('dotenv').config();
-const { SeedController } = require('./controllers');
 const cookieParser = require('cookie-parser');
+require('dotenv').config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
-const uploadRoutes = require('./routes/uploadRoutes');
 
-
-
-app.use('/api/upload', uploadRoutes);
-
-// Conexión a MongoDB
+// ========================================
+// CONEXIÓN A BASE DE DATOS
+// ========================================
 const connectDB = async () => {
     try {
         const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/petstyle');
@@ -22,29 +19,58 @@ const connectDB = async () => {
         console.log(`📊 Base de datos: ${conn.connection.name}`);
     } catch (error) {
         console.error('❌ Error conectando a MongoDB:', error.message);
-        // No salir del proceso por ahora, para debugging
         console.log('⚠️  Continuando sin base de datos...');
     }
 };
 
-// Conectar a la base de datos
 connectDB();
 
+// ========================================
+// MIDDLEWARES
+// ========================================
+// Configuración de CORS más permisiva
+app.use(cors({
+    origin: function (origin, callback) {
+        // Permitir requests sin origin (mobile apps, postman, etc.)
+        if (!origin) return callback(null, true);
+        
+        const allowedOrigins = [
+            'http://localhost:3000',
+            'http://localhost:8080',
+            'http://127.0.0.1:5500',
+            'http://127.0.0.1:3000',
+            'http://192.168.1.100:8080'
+        ];
+        
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.log('Origen no permitido por CORS:', origin);
+            callback(null, true); // Temporal: permitir todos los orígenes
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 // Middlewares básicos
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan('dev'));
 app.use(cookieParser());
 
 // Configurar EJS
 app.set('view engine', 'ejs');
 app.set('views', './views');
-
-// Archivos estáticos
 app.use(express.static('public'));
 
-// Ruta principal simple
+// ========================================
+// RUTAS DE PRUEBA
+// ========================================
 app.get('/', (req, res) => {
     try {
         res.render('index', { 
@@ -56,91 +82,60 @@ app.get('/', (req, res) => {
         res.json({
             message: 'PetStyle Server funcionando',
             status: 'OK',
-            timestamp: new Date()
+            timestamp: new Date(),
+            database: mongoose.connection.readyState === 1 ? 'Conectado' : 'Desconectado'
         });
     }
 });
 
-// Ruta de documentación
-app.get('/docs', (req, res) => {
-    try {
-        res.render('docs', { 
-            title: 'PetStyle API - Documentación' 
-        });
-    } catch (error) {
-        res.json({
-            message: 'Documentación de PetStyle API',
-            endpoints: [
-                'GET / - Página principal',
-                'GET /docs - Esta documentación',
-                'GET /test - Test del servidor'
-            ]
-        });
-    }
-});
-
-// Ruta de prueba simple
-app.get('/test', (req, res) => {
-    res.json({
-        message: 'Servidor PetStyle funcionando correctamente',
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'OK',
         database: mongoose.connection.readyState === 1 ? 'Conectado' : 'Desconectado',
-        timestamp: new Date(),
-        version: '1.0.0',
-        status: 'OK'
+        timestamp: new Date()
     });
 });
 
-// Ruta para probar modelos
-app.get('/test-models', async (req, res) => {
-    try {
-        const { User, Category, Product, Cart } = require('./models');
-        
-        res.json({
-            message: 'Modelos cargados correctamente',
-            models: {
-                User: User.modelName,
-                Category: Category.modelName,
-                Product: Product.modelName,
-                Cart: Cart.modelName
-            },
-            database: mongoose.connection.readyState === 1 ? 'Conectado' : 'Desconectado',
-            timestamp: new Date()
-        });
-    } catch (error) {
-        res.status(500).json({
-            error: 'Error cargando modelos',
-            details: error.message
-        });
-    }
-});
-
-// API Routes
+// ========================================
+// RUTAS DE API
+// ========================================
 const apiRoutes = require('./routes');
-app.use('/api', apiRoutes);
-
 const authRoutes = require('./routes/authRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
+
+app.use('/api', apiRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/upload', uploadRoutes);
 
-// Ruta para poblar la base de datos con datos de prueba
+// Ruta para poblar datos de prueba
+const { SeedController } = require('./controllers');
 app.get('/seed', SeedController.seedDatabase);
-
-// Ruta para obtener estadísticas de la base de datos
 app.get('/stats', SeedController.getStats);
 
-// Manejo de errores 404
+// ========================================
+// MANEJO DE ERRORES
+// ========================================
 app.use((req, res) => {
     res.status(404).json({
         error: 'Ruta no encontrada',
         path: req.originalUrl,
-        availableRoutes: ['/', '/docs', '/test']
+        availableRoutes: [
+            'GET /',
+            'GET /health',
+            'GET /api',
+            'POST /api/auth/login',
+            'POST /api/auth/register'
+        ]
     });
 });
 
-// Iniciar servidor
+// ========================================
+// INICIAR SERVIDOR
+// ========================================
 app.listen(PORT, () => {
     console.log(`🚀 Servidor PetStyle corriendo en http://localhost:${PORT}`);
-    console.log(`📚 Documentación: http://localhost:${PORT}/docs`);
-    console.log(`🧪 Test: http://localhost:${PORT}/test`);
+    console.log(`📚 API Base: http://localhost:${PORT}/api`);
+    console.log(`🔑 Auth: http://localhost:${PORT}/api/auth`);
     console.log(`⚙️  Entorno: ${process.env.NODE_ENV || 'development'}`);
 });
 

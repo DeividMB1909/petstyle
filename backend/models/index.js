@@ -1,13 +1,12 @@
+// backend/models/index.js
 const User = require('./User');
-const Category = require('./Category');
 const Product = require('./Product');
-const Order = require('./Order');
+const Category = require('./Category');
 const Cart = require('./Cart');
 
 module.exports = {
     User,
-    Category,
     Product,
-    Order,
+    Category,
     Cart
 };

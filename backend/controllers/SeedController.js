@@ -1,228 +1,260 @@
+// backend/controllers/SeedController.js
 const { User, Category, Product, Cart } = require('../models');
+const bcrypt = require('bcryptjs');
 
 class SeedController {
-    // Poblar base de datos con datos de prueba
     static async seedDatabase(req, res) {
         try {
-            // Limpiar datos existentes
-            await User.deleteMany({});
-            await Category.deleteMany({});
-            await Product.deleteMany({});
-            await Cart.deleteMany({});
+            console.log('🌱 Iniciando seed de la base de datos...');
 
-            // Crear usuarios de prueba
-            const users = await User.insertMany([
+            // Limpiar datos existentes (opcional - descomenta si quieres reset completo)
+            // await User.deleteMany({});
+            // await Category.deleteMany({});
+            // await Product.deleteMany({});
+            // await Cart.deleteMany({});
+
+            let usersCreated = 0;
+            let categoriesCreated = 0;
+            let productsCreated = 0;
+
+            // ========================================
+            // CREAR USUARIOS
+            // ========================================
+            const usersData = [
                 {
-                    name: 'David Badillo',
-                    email: 'deivid@example.com',
-                    password: '123456',
+                    name: 'Administrador PetStyle',
+                    email: 'admin@petstyle.com',
+                    password: await bcrypt.hash('admin123', 12),
+                    phone: '5551234567',
                     role: 'admin',
                     address: {
-                        street: 'Calle Principal 123',
-                        city: 'Asientos',
+                        street: 'Av. Principal 123',
+                        city: 'Aguascalientes',
                         state: 'Aguascalientes',
-                        zipCode: '12345',
+                        zipCode: '20000',
                         country: 'México'
-                    },
-                    phone: '4492830878'
+                    }
                 },
                 {
-                    name: 'María García',
-                    email: 'maria@example.com',
-                    password: '123456',
-                    role: 'customer',
-                    address: {
-                        street: 'Avenida Juárez 456',
-                        city: 'Guadalajara',
-                        state: 'Jalisco',
-                        zipCode: '44100',
-                        country: 'México'
-                    },
-                    phone: '8155674934'
+                    name: 'Juan Pérez',
+                    email: 'juan@test.com',
+                    password: await bcrypt.hash('123456', 12),
+                    phone: '5559876543',
+                    role: 'customer'
                 },
                 {
-                    name: 'Carlos López',
-                    email: 'carlos@example.com',
-                    password: '123456',
-                    role: 'customer',
-                    address: {
-                        street: 'Boulevard Norte 789',
-                        city: 'Monterrey',
-                        state: 'Nuevo León',
-                        zipCode: '64000',
-                        country: 'México'
-                    },
-                    phone: '8155551234'
-                }
-            ]);
-
-            // Crear categorías de prueba
-            const categories = await Category.insertMany([
-                { name: 'Collares y Correas', description: 'Collares, correas y arneses para perros y gatos', isActive: true },
-                { name: 'Juguetes', description: 'Juguetes divertidos para mascotas de todas las edades', isActive: true },
-                { name: 'Camas y Descanso', description: 'Camas, cojines y accesorios para el descanso de mascotas', isActive: true },
-                { name: 'Alimentación', description: 'Comederos, bebederos y accesorios para alimentación', isActive: true },
-                { name: 'Cuidado e Higiene', description: 'Productos para el cuidado y limpieza de mascotas', isActive: true },
-                { name: 'Transporte', description: 'Transportadoras, bolsos y accesorios para viajes', isActive: false }
-            ]);
-
-            // Lista de productos
-            const productsData = [
-                {
-                    name: 'Collar Ajustable Premium',
-                    description: 'Collar ajustable de nylon resistente con hebilla de seguridad',
-                    price: 299.99,
-                    category: categories[0]._id,
-                    images: [
-                        { url: 'https://example.com/collar1.jpg', alt: 'Collar Ajustable 1' },
-                        { url: 'https://example.com/collar1-2.jpg', alt: 'Collar Ajustable 2' }
-                    ],
-                    stock: 25,
-                    isActive: true
-                },
-                {
-                    name: 'Correa Extensible 5m',
-                    description: 'Correa extensible de 5 metros con sistema de frenado automático',
-                    price: 459.99,
-                    category: categories[0]._id,
-                    images: [{ url: 'https://example.com/correa1.jpg', alt: 'Correa Extensible' }],
-                    stock: 15,
-                    isActive: true
-                },
-                {
-                    name: 'Arnés Acolchado',
-                    description: 'Arnés acolchado transpirable para perros medianos y grandes',
-                    price: 389.99,
-                    category: categories[0]._id,
-                    images: [{ url: 'https://example.com/arnes1.jpg', alt: 'Arnés Acolchado' }],
-                    stock: 20,
-                    isActive: true
-                },
-                {
-                    name: 'Pelota de Goma Rebotante',
-                    description: 'Pelota de goma natural, perfecta para juegos de buscar',
-                    price: 129.99,
-                    category: categories[1]._id,
-                    images: [{ url: 'https://example.com/pelota1.jpg', alt: 'Pelota de goma' }],
-                    stock: 50,
-                    isActive: true
-                },
-                {
-                    name: 'Cuerda de Algodón Trenzada',
-                    description: 'Cuerda de algodón 100% natural para juegos de tirar',
-                    price: 89.99,
-                    category: categories[1]._id,
-                    images: [{ url: 'https://example.com/cuerda1.jpg', alt: 'Cuerda trenzada' }],
-                    stock: 30,
-                    isActive: true
-                },
-                {
-                    name: 'Juguete Interactivo Kong',
-                    description: 'Juguete dispensador de premios para estimulación mental',
-                    price: 249.99,
-                    category: categories[1]._id,
-                    images: [{ url: 'https://example.com/kong1.jpg', alt: 'Juguete Kong' }],
-                    stock: 12,
-                    isActive: true
-                },
-                {
-                    name: 'Cama Ortopédica Grande',
-                    description: 'Cama ortopédica con espuma de memoria para perros grandes',
-                    price: 899.99,
-                    category: categories[2]._id,
-                    images: [{ url: 'https://example.com/cama1.jpg', alt: 'Cama ortopédica' }],
-                    stock: 8,
-                    isActive: true
-                },
-                {
-                    name: 'Cojín Reversible',
-                    description: 'Cojín reversible lavable para perros y gatos',
-                    price: 349.99,
-                    category: categories[2]._id,
-                    images: [{ url: 'https://example.com/cojin1.jpg', alt: 'Cojín reversible' }],
-                    stock: 22,
-                    isActive: true
-                },
-                {
-                    name: 'Comedero Elevado Doble',
-                    description: 'Set de comedero y bebedero elevado en acero inoxidable',
-                    price: 549.99,
-                    category: categories[3]._id,
-                    images: [{ url: 'https://example.com/comedero1.jpg', alt: 'Comedero elevado' }],
-                    stock: 18,
-                    isActive: true
-                },
-                {
-                    name: 'Fuente de Agua Automática',
-                    description: 'Fuente de agua con filtro y circulación continua',
-                    price: 789.99,
-                    category: categories[3]._id,
-                    images: [{ url: 'https://example.com/fuente1.jpg', alt: 'Fuente automática' }],
-                    stock: 10,
-                    isActive: true
-                },
-                {
-                    name: 'Cepillo Desenredante',
-                    description: 'Cepillo profesional para desenredar pelo largo y corto',
-                    price: 199.99,
-                    category: categories[4]._id,
-                    images: [{ url: 'https://example.com/cepillo1.jpg', alt: 'Cepillo desenredante' }],
-                    stock: 35,
-                    isActive: true
-                },
-                {
-                    name: 'Champú Hipoalergénico',
-                    description: 'Champú suave para pieles sensibles, sin químicos agresivos',
-                    price: 159.99,
-                    category: categories[4]._id,
-                    images: [{ url: 'https://example.com/champu1.jpg', alt: 'Champú hipoalergénico' }],
-                    stock: 40,
-                    isActive: true
-                },
-                {
-                    name: 'Collar LED Nocturno',
-                    description: 'Collar LED recargable para paseos nocturnos',
-                    price: 329.99,
-                    category: categories[0]._id,
-                    images: [{ url: 'https://example.com/collar-led.jpg', alt: 'Collar LED' }],
-                    stock: 0,
-                    isActive: true
-                },
-                {
-                    name: 'Producto Descontinuado',
-                    description: 'Este producto ya no está disponible',
-                    price: 199.99,
-                    category: categories[1]._id,
-                    images: [{ url: 'https://example.com/descontinuado.jpg', alt: 'Producto descontinuado' }],
-                    stock: 5,
-                    isActive: false
+                    name: 'María González',
+                    email: 'maria@test.com',
+                    password: await bcrypt.hash('123456', 12),
+                    phone: '5555678901',
+                    role: 'customer'
                 }
             ];
 
-            // Agregar campo SKU automáticamente
-            const products = await Product.insertMany(
-                productsData.map((product, index) => ({
-                    ...product,
-                    sku: `SKU${String(index + 1).padStart(3, '0')}`
-                }))
-            );
+            for (const userData of usersData) {
+                const existingUser = await User.findOne({ email: userData.email });
+                if (!existingUser) {
+                    await User.create(userData);
+                    usersCreated++;
+                    console.log(`✅ Usuario creado: ${userData.email}`);
+                }
+            }
+
+            // ========================================
+            // CREAR CATEGORÍAS
+            // ========================================
+            const categoriesData = [
+                {
+                    name: 'Collares y Correas',
+                    description: 'Collares, correas y arneses para perros y gatos',
+                    order: 1
+                },
+                {
+                    name: 'Juguetes',
+                    description: 'Juguetes divertidos para mascotas de todas las edades',
+                    order: 2
+                },
+                {
+                    name: 'Camas y Descanso',
+                    description: 'Camas, cojines y accesorios para el descanso de mascotas',
+                    order: 3
+                },
+                {
+                    name: 'Alimentación',
+                    description: 'Comederos, bebederos y accesorios para alimentación',
+                    order: 4
+                },
+                {
+                    name: 'Cuidado e Higiene',
+                    description: 'Productos para el cuidado y limpieza de mascotas',
+                    order: 5
+                },
+                {
+                    name: 'Ropa y Accesorios',
+                    description: 'Ropa, sombreros y accesorios fashion para mascotas',
+                    order: 6
+                }
+            ];
+
+            let categories = {};
+            for (const categoryData of categoriesData) {
+                const existingCategory = await Category.findOne({ name: categoryData.name });
+                if (!existingCategory) {
+                    const category = await Category.create(categoryData);
+                    categories[categoryData.name] = category._id;
+                    categoriesCreated++;
+                    console.log(`✅ Categoría creada: ${categoryData.name}`);
+                } else {
+                    categories[categoryData.name] = existingCategory._id;
+                }
+            }
+
+            // ========================================
+            // CREAR PRODUCTOS CON IMÁGENES VÁLIDAS
+            // ========================================
+            const productsData = [
+                {
+                    name: 'Collar Ajustable para Perros',
+                    description: 'Collar resistente y ajustable, perfecto para perros de tamaño mediano. Fabricado con materiales duraderos y cómodos.',
+                    price: 299.99,
+                    originalPrice: 399.99,
+                    discount: 25,
+                    category: categories['Collares y Correas'],
+                    brand: 'PetStyle',
+                    sku: 'COL001',
+                    stock: 25,
+                    minStock: 5,
+                    tags: ['collar', 'perro', 'ajustable', 'resistente'],
+                    featured: true,
+                    images: [
+                        {
+                            url: 'https://res.cloudinary.com/demo/image/upload/v1234567890/sample.jpg',
+                            publicId: 'petstyle/products/collar_001_primary',
+                            alt: 'Collar Ajustable para Perros - Vista Principal',
+                            isPrimary: true,
+                            optimizedUrl: 'https://res.cloudinary.com/demo/image/upload/w_400,h_300,c_limit/v1234567890/sample.jpg'
+                        },
+                        {
+                            url: 'https://res.cloudinary.com/demo/image/upload/v1234567890/sample2.jpg',
+                            publicId: 'petstyle/products/collar_001_detail',
+                            alt: 'Collar Ajustable para Perros - Detalle',
+                            isPrimary: false,
+                            optimizedUrl: 'https://res.cloudinary.com/demo/image/upload/w_400,h_300,c_limit/v1234567890/sample2.jpg'
+                        }
+                    ],
+                    specifications: [
+                        { name: 'Material', value: 'Nylon resistente' },
+                        { name: 'Tamaño', value: 'Mediano (30-45cm)' },
+                        { name: 'Peso máximo', value: '25kg' }
+                    ]
+                },
+                {
+                    name: 'Pelota de Goma Resistente',
+                    description: 'Pelota de goma natural, perfecta para juegos de buscar y traer. Resistente a mordidas y lavable.',
+                    price: 159.99,
+                    category: categories['Juguetes'],
+                    brand: 'PlayPet',
+                    sku: 'JUG001',
+                    stock: 50,
+                    minStock: 10,
+                    tags: ['pelota', 'juguete', 'goma', 'resistente'],
+                    featured: true,
+                    images: [
+                        {
+                            url: 'https://res.cloudinary.com/demo/image/upload/v1234567890/sample3.jpg',
+                            publicId: 'petstyle/products/pelota_001_primary',
+                            alt: 'Pelota de Goma Resistente - Vista Principal',
+                            isPrimary: true,
+                            optimizedUrl: 'https://res.cloudinary.com/demo/image/upload/w_400,h_300,c_limit/v1234567890/sample3.jpg'
+                        }
+                    ]
+                },
+                {
+                    name: 'Cama Suave para Gatos',
+                    description: 'Cama ultra suave y cómoda, diseñada especialmente para el descanso de gatos. Material hipoalergénico.',
+                    price: 899.99,
+                    category: categories['Camas y Descanso'],
+                    brand: 'ComfortPet',
+                    sku: 'CAM001',
+                    stock: 15,
+                    minStock: 3,
+                    tags: ['cama', 'gato', 'suave', 'hipoalergénico'],
+                    images: [
+                        {
+                            url: 'https://res.cloudinary.com/demo/image/upload/v1234567890/sample4.jpg',
+                            publicId: 'petstyle/products/cama_001_primary',
+                            alt: 'Cama Suave para Gatos - Vista Principal',
+                            isPrimary: true,
+                            optimizedUrl: 'https://res.cloudinary.com/demo/image/upload/w_400,h_300,c_limit/v1234567890/sample4.jpg'
+                        }
+                    ]
+                },
+                {
+                    name: 'Comedero Doble Acero Inoxidable',
+                    description: 'Set de comedero y bebedero en acero inoxidable. Antideslizante y fácil de limpiar.',
+                    price: 449.99,
+                    category: categories['Alimentación'],
+                    brand: 'FeedSafe',
+                    sku: 'COM001',
+                    stock: 30,
+                    minStock: 5,
+                    tags: ['comedero', 'acero', 'doble', 'antideslizante'],
+                    images: [
+                        {
+                            url: 'https://res.cloudinary.com/demo/image/upload/v1234567890/sample5.jpg',
+                            publicId: 'petstyle/products/comedero_001_primary',
+                            alt: 'Comedero Doble Acero Inoxidable - Vista Principal',
+                            isPrimary: true,
+                            optimizedUrl: 'https://res.cloudinary.com/demo/image/upload/w_400,h_300,c_limit/v1234567890/sample5.jpg'
+                        }
+                    ]
+                },
+                {
+                    name: 'Shampoo Antipulgas Natural',
+                    description: 'Shampoo natural con ingredientes orgánicos, efectivo contra pulgas y garrapatas. Suave con la piel.',
+                    price: 249.99,
+                    category: categories['Cuidado e Higiene'],
+                    brand: 'NaturalCare',
+                    sku: 'SHA001',
+                    stock: 40,
+                    minStock: 8,
+                    tags: ['shampoo', 'antipulgas', 'natural', 'orgánico'],
+                    images: [
+                        {
+                            url: 'https://res.cloudinary.com/demo/image/upload/v1234567890/sample6.jpg',
+                            publicId: 'petstyle/products/shampoo_001_primary',
+                            alt: 'Shampoo Antipulgas Natural - Vista Principal',
+                            isPrimary: true,
+                            optimizedUrl: 'https://res.cloudinary.com/demo/image/upload/w_400,h_300,c_limit/v1234567890/sample6.jpg'
+                        }
+                    ]
+                }
+            ];
+
+            for (const productData of productsData) {
+                const existingProduct = await Product.findOne({ sku: productData.sku });
+                if (!existingProduct) {
+                    const product = await Product.create(productData);
+                    productsCreated++;
+                    console.log(`✅ Producto creado: ${productData.name} (${productData.sku})`);
+                }
+            }
+
+            console.log('🌱 Seed completado exitosamente!');
 
             res.status(200).json({
                 success: true,
                 message: 'Base de datos poblada exitosamente',
                 data: {
-                    users: users.length,
-                    categories: categories.length,
-                    products: products.length
-                },
-                summary: {
-                    usersCreated: users.map(u => ({ id: u._id, name: u.name, email: u.email, role: u.role })),
-                    categoriesCreated: categories.map(c => ({ id: c._id, name: c.name, isActive: c.isActive })),
-                    productsCreated: products.length
+                    usersCreated,
+                    categoriesCreated,
+                    productsCreated,
+                    totalRecords: usersCreated + categoriesCreated + productsCreated
                 }
             });
 
         } catch (error) {
+            console.error('❌ Error en seed:', error);
             res.status(500).json({
                 success: false,
                 message: 'Error al poblar la base de datos',
@@ -231,44 +263,74 @@ class SeedController {
         }
     }
 
-    // Obtener estadísticas de la base de datos
     static async getStats(req, res) {
         try {
-            const userCount = await User.countDocuments();
-            const categoryCount = await Category.countDocuments();
-            const productCount = await Product.countDocuments();
-            const cartCount = await Cart.countDocuments();
+            const users = await User.countDocuments();
+            const categories = await Category.countDocuments();
+            const products = await Product.countDocuments();
+            const carts = await Cart.countDocuments();
 
             const activeProducts = await Product.countDocuments({ isActive: true });
             const inactiveProducts = await Product.countDocuments({ isActive: false });
-            const outOfStock = await Product.countDocuments({ stock: 0 });
+            const outOfStockProducts = await Product.countDocuments({ stock: 0 });
 
             res.status(200).json({
                 success: true,
                 message: 'Estadísticas obtenidas exitosamente',
                 data: {
                     collections: {
-                        users: userCount,
-                        categories: categoryCount,
-                        products: productCount,
-                        carts: cartCount
+                        users,
+                        categories,
+                        products,
+                        carts
                     },
                     products: {
                         active: activeProducts,
                         inactive: inactiveProducts,
-                        outOfStock: outOfStock,
-                        total: productCount
+                        outOfStock: outOfStockProducts,
+                        total: products
                     },
                     database: {
                         status: 'connected',
-                        name: 'petstyle'
+                        name: process.env.MONGODB_URI ? 'cloud' : 'local'
                     }
                 }
             });
+
         } catch (error) {
+            console.error('Error al obtener estadísticas:', error);
             res.status(500).json({
                 success: false,
                 message: 'Error al obtener estadísticas',
+                error: error.message
+            });
+        }
+    }
+
+    // Método para limpiar la base de datos (uso en desarrollo)
+    static async clearDatabase(req, res) {
+        try {
+            if (process.env.NODE_ENV === 'production') {
+                return res.status(403).json({
+                    success: false,
+                    message: 'No se puede limpiar la base de datos en producción'
+                });
+            }
+
+            await User.deleteMany({});
+            await Category.deleteMany({});
+            await Product.deleteMany({});
+            await Cart.deleteMany({});
+
+            res.status(200).json({
+                success: true,
+                message: 'Base de datos limpiada exitosamente'
+            });
+
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error al limpiar la base de datos',
                 error: error.message
             });
         }

@@ -1,11 +1,11 @@
-// middleware/index.js
-const auth = require('./auth');
-const validation = require('./validation');
+// backend/middleware/index.js
+const { authenticateToken, authorizeRoles } = require('./auth');
+const { handleValidationErrors, validateObjectId, sanitizeInput } = require('./validation');
 
 module.exports = {
-    // Middlewares de autenticación
-    ...auth,
-    
-    // Middlewares de validación
-    ...validation
+    authenticateToken,
+    authorizeRoles,
+    handleValidationErrors,
+    validateObjectId,
+    sanitizeInput
 };

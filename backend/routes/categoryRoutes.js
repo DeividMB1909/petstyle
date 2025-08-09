@@ -79,7 +79,7 @@ router.post('/', [
 router.post('/with-image', [
     authenticateToken,
     authorizeRoles('admin'),
-    uploadCategory.single('image'),
+  uploadCategory.single('image'),
     handleCategoryUploadErrors,
     ...categoryValidation,
     handleValidationErrors
