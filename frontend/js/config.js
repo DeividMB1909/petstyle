@@ -1,102 +1,118 @@
 // frontend/js/config.js
 const CONFIG = {
-    // URLs de API según el entorno
-    API_BASE_URL: (() => {
-        // Detectar si estamos en Cordova
-        if (window.cordova || window.PhoneGap || window.phonegap) {
-            // En Cordova, usar la IP de tu computadora en la red local
-            return 'http://192.168.1.100:3000/api'; // Cambia esta IP por la tuya
-        }
-        
-        // Si es desarrollo local con archivo
-        if (window.location.protocol === 'file:') {
-            return 'http://localhost:3000/api';
-        }
-        
-        // Si es servidor web local
-        if (window.location.hostname === 'localhost' || 
-            window.location.hostname === '127.0.0.1') {
-            return 'http://localhost:3000/api';
-        }
-        
-        // Producción
-        return '/api';
-    })(),
+    // Configuración del API
+    API_BASE_URL: 'http://localhost:3000/api',
+    BACKEND_URL: 'http://localhost:3000',
     
-    // Claves para localStorage
-    STORAGE_KEYS: {
-        TOKEN: 'petstyle_auth_token',
-        USER: 'petstyle_user_data',
-        CART: 'petstyle_cart',
-        FAVORITES: 'petstyle_favorites'
-    },
+    // Información de la aplicación
+    APP_NAME: 'PetStyle',
+    VERSION: '1.0.0',
+    DEBUG: true,
     
-    // Configuración de la app
+    // Configuración de timeouts y reintentos
     APP: {
-        NAME: 'PetStyle',
-        VERSION: '1.0.0',
         TIMEOUT: 10000, // 10 segundos
-        RETRY_ATTEMPTS: 3
+        RETRY_ATTEMPTS: 3,
+        DEFAULT_PAGE_SIZE: 12
     },
     
-    // Configuración para Cordova
-    CORDOVA: {
-        READY: false,
-        DEVICE_INFO: null
+    // Claves de almacenamiento local
+    STORAGE_KEYS: {
+        TOKEN: 'petstyle_token',
+        USER: 'petstyle_user',
+        CART: 'petstyle_cart',
+        FAVORITES: 'petstyle_favorites',
+        THEME: 'petstyle_theme'
+    },
+    
+    // Configuración de validaciones
+    VALIDATION: {
+        MIN_PASSWORD_LENGTH: 6,
+        MAX_PASSWORD_LENGTH: 100,
+        EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        PHONE_REGEX: /^[\+]?[1-9][\d]{0,15}$/
+    },
+    
+    // Mensajes de la aplicación
+    MESSAGES: {
+        LOGIN_SUCCESS: '¡Bienvenido de vuelta!',
+        REGISTER_SUCCESS: '¡Cuenta creada exitosamente!',
+        LOGOUT_SUCCESS: 'Sesión cerrada correctamente',
+        ERROR_NETWORK: 'Error de conexión. Verifica tu internet.',
+        ERROR_SERVER: 'Error del servidor. Intenta más tarde.',
+        ERROR_INVALID_CREDENTIALS: 'Email o contraseña incorrectos',
+        ERROR_EMAIL_EXISTS: 'Este email ya está registrado'
+    },
+    
+    // Rutas de la aplicación
+    ROUTES: {
+        HOME: '/',
+        LOGIN: '/pages/login.html',
+        REGISTER: '/pages/register.html',
+        PROFILE: '/pages/profile.html',
+        PRODUCTS: '/pages/main.html',
+        CART: '/pages/carrito.html',
+        FAVORITES: '/pages/favorites.html',
+        ADMIN: '/pages/administradores.html'
+    },
+    
+    // Configuración de roles
+    ROLES: {
+        CUSTOMER: 'customer',
+        ADMIN: 'admin'
+    },
+    
+    // Utilidades
+    getEnvironment() {
+        return this.DEBUG ? 'development' : 'production';
+    },
+    
+    isProduction() {
+        return !this.DEBUG;
+    },
+    
+    isDevelopment() {
+        return this.DEBUG;
+    },
+    
+    // Logging personalizado
+    log(level, message, data = null) {
+        if (!this.DEBUG && level === 'debug') return;
+        
+        const timestamp = new Date().toISOString();
+        const prefix = `[${timestamp}] [${level.toUpperCase()}] [${this.APP_NAME}]`;
+        
+        switch (level) {
+            case 'error':
+                console.error(prefix, message, data || '');
+                break;
+            case 'warn':
+                console.warn(prefix, message, data || '');
+                break;
+            case 'info':
+                console.info(prefix, message, data || '');
+                break;
+            case 'debug':
+                console.log(prefix, message, data || '');
+                break;
+            default:
+                console.log(prefix, message, data || '');
+        }
     }
 };
 
-// Función para obtener la IP local de la red
-CONFIG.getLocalIP = function() {
-    // Esta es la IP que debes cambiar por la de tu computadora
-    // Para obtenerla, ejecuta: ipconfig (Windows) o ifconfig (Mac/Linux)
-    return '192.168.1.100'; // CAMBIAR ESTA IP
-};
+// Hacer CONFIG disponible globalmente
+window.CONFIG = CONFIG;
 
-// Función para detectar el entorno
-CONFIG.getEnvironment = function() {
-    if (window.cordova) return 'cordova';
-    if (window.location.protocol === 'file:') return 'file';
-    if (window.location.hostname === 'localhost') return 'development';
-    return 'production';
-};
+// Log de inicialización
+CONFIG.log('info', 'Configuración cargada', {
+    environment: CONFIG.getEnvironment(),
+    apiUrl: CONFIG.API_BASE_URL,
+    version: CONFIG.VERSION
+});
 
-// Función para verificar conectividad
-CONFIG.checkConnectivity = async function() {
-    try {
-        const response = await fetch(`${this.API_BASE_URL.replace('/api', '')}/health`, {
-            method: 'GET',
-            timeout: 5000
-        });
-        return response.ok;
-    } catch (error) {
-        console.error('Connectivity check failed:', error);
-        return false;
-    }
-};
-
-// Event listener para cuando Cordova esté listo
-document.addEventListener('deviceready', function() {
-    CONFIG.CORDOVA.READY = true;
-    CONFIG.CORDOVA.DEVICE_INFO = window.device || null;
-    
-    console.log('🚀 Cordova Ready!');
-    console.log('📱 Device:', CONFIG.CORDOVA.DEVICE_INFO);
-    console.log('🌐 API URL:', CONFIG.API_BASE_URL);
-    
-    // Disparar evento personalizado
-    document.dispatchEvent(new CustomEvent('cordovaReady', {
-        detail: { config: CONFIG }
-    }));
-}, false);
-
-// Para debugging
-if (window.location.hostname === 'localhost') {
-    window.CONFIG = CONFIG;
-    console.log('🐾 PetStyle Config loaded:', CONFIG);
-}
-
-// Export para uso con modules (si es necesario)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = CONFIG;
+// Verificar si estamos en desarrollo y mostrar información útil
+if (CONFIG.isDevelopment()) {
+    CONFIG.log('debug', 'Modo desarrollo activado');
+    CONFIG.log('debug', 'Configuración completa:', CONFIG);
 }

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API PetStyle</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🐾 PetStyle API Test</h1>
+    
+    <div id="config-info"></div>
+    
+    <h2>Pruebas de Conectividad</h2>
+    <button onclick="testHealth()">🏥 Health Check</button>
+    <button onclick="testProducts()">🛍️ Get Products</button>
+    <button onclick="testCategories()">📂 Get Categories</button>
+    <button onclick="testLogin()">🔐 Test Login (demo)</button>
+    
+    <div id="results"></div>
+
+    <!-- Cargar scripts en orden -->
+    <script src="js/config.js"></script>
+    <script src="js/api-client.js"></script>
+    
+    <script>
+        // Mostrar información de configuración
+        setTimeout(() => {
+            document.getElementById('config-info').innerHTML = `
+                <h3>📋 Configuración Actual</h3>
+                <p><strong>Entorno:</strong> ${CONFIG.getEnvironment()}</p>
+                <p><strong>API URL:</strong> ${CONFIG.API_BASE_URL}</p>
+                <p><strong>Cliente Base URL:</strong> ${apiClient.baseURL}</p>
+                <p><strong>Protocolo:</strong> ${window.location.protocol}</p>
+                <p><strong>Host:</strong> ${window.location.hostname}</p>
+                <p><strong>Autenticado:</strong> ${apiClient.isAuthenticated() ? 'Sí' : 'No'}</p>
+            `;
+        }, 100);
+
+        function showResult(title, success, data, error = null) {
+            const resultsDiv = document.getElementById('results');
+            const resultClass = success ? 'success' : 'error';
+            const resultHTML = `
+                <div class="result ${resultClass}">
+                    <h3>${success ? '✅' : '❌'} ${title}</h3>
+                    <p><small>${new Date().toLocaleTimeString()}</small></p>
+                    ${success ? 
+                        `<pre>${JSON.stringify(data, null, 2)}</pre>` : 
+                        `<p><strong>Error:</strong> ${error}</p>`
+                    }
+                </div>
+            `;
+            resultsDiv.innerHTML = resultHTML + resultsDiv.innerHTML;
+        }
+
+        async function testHealth() {
+            try {
+                const isHealthy = await apiClient.checkHealth();
+                if (isHealthy) {
+                    showResult('Health Check', true, { status: 'Backend is healthy' });
+                } else {
+                    showResult('Health Check', false, null, 'Backend no responde');
+                }
+            } catch (error) {
+                showResult('Health Check', false, null, error.message);
+            }
+        }
+
+        async function testProducts() {
+            try {
+                const products = await apiClient.getProducts();
+                showResult('Get Products', true, products);
+            } catch (error) {
+                showResult('Get Products', false, null, error.message);
+            }
+        }
+
+        async function testCategories() {
+            try {
+                const categories = await apiClient.getCategories();
+                showResult('Get Categories', true, categories);
+            } catch (error) {
+                showResult('Get Categories', false, null, error.message);
+            }
+        }
+
+        async function testLogin() {
+            try {
+                // Intentar login con credenciales de demo
+                const response = await apiClient.login('test@example.com', 'password123');
+                showResult('Test Login', true, response);
+            } catch (error) {
+                showResult('Test Login', false, null, error.message);
+            }
+        }
+
+        // Test automático al cargar
+        window.onload = function() {
+            console.log('🚀 Página cargada, esperando inicialización...');
+            setTimeout(() => {
+                testHealth();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
