@@ -74,6 +74,24 @@
                     <div class="menu-arrow">›</div>
                 </div>
 
+                <div class="menu-item" onclick="navigateTo('favorites.html')">
+                    <div class="menu-icon">❤️</div>
+                    <div class="menu-content">
+                        <div class="menu-title">Mis Favoritos</div>
+                        <div class="menu-subtitle" id="favoritesSubtitle">Ver productos guardados</div>
+                    </div>
+                    <div class="menu-arrow">›</div>
+                </div>
+
+                <div class="menu-item" onclick="navigateTo('carrito.html')">
+                    <div class="menu-icon">🛒</div>
+                    <div class="menu-content">
+                        <div class="menu-title">Mi Carrito</div>
+                        <div class="menu-subtitle" id="cartSubtitle">Ver productos en carrito</div>
+                    </div>
+                    <div class="menu-arrow">›</div>
+                </div>
+
                 <div class="menu-item" onclick="openAddressModal()">
                     <div class="menu-icon">📍</div>
                     <div class="menu-content">
@@ -183,7 +201,7 @@
 
             <!-- Logout Button (Only for logged in users) -->
             <div class="menu-section hidden" id="logoutSection">
-                <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+                <button class="logout-btn" onclick="confirmLogout()">Cerrar Sesión</button>
             </div>
         </div>
 
@@ -210,10 +228,11 @@
     </div>
 
     <!-- Edit Profile Modal -->
-    <div class="modal" id="editProfileModal">
+    <div class="modal" id="editProfileModal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">Editar Perfil</div>
+                <button class="close-btn" onclick="closeModal('editProfileModal')">×</button>
             </div>
             <form id="editProfileForm">
                 <div class="form-group">
@@ -241,10 +260,11 @@
     </div>
 
     <!-- Add Pet Modal -->
-    <div class="modal" id="addPetModal">
+    <div class="modal" id="addPetModal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">Agregar Mascota</div>
+                <button class="close-btn" onclick="closeModal('addPetModal')">×</button>
             </div>
             <form id="addPetForm">
                 <div class="form-group">
@@ -289,10 +309,11 @@
     </div>
 
     <!-- Address Modal -->
-    <div class="modal" id="addressModal">
+    <div class="modal" id="addressModal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">Gestionar Direcciones</div>
+                <button class="close-btn" onclick="closeModal('addressModal')">×</button>
             </div>
             <div id="addressList">
                 <div class="menu-item" onclick="openAddAddressModal()">
@@ -310,55 +331,12 @@
         </div>
     </div>
 
-    <!-- Add Address Modal -->
-    <div class="modal" id="addAddressModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Nueva Dirección</div>
-            </div>
-            <form id="addAddressForm">
-                <div class="form-group">
-                    <label class="form-label">Etiqueta</label>
-                    <select class="form-input" id="addressLabel" required>
-                        <option value="">Seleccionar etiqueta</option>
-                        <option value="home">🏠 Casa</option>
-                        <option value="work">🏢 Trabajo</option>
-                        <option value="other">📍 Otro</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Nombre del Destinatario</label>
-                    <input type="text" class="form-input" id="recipientName" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Dirección</label>
-                    <input type="text" class="form-input" id="addressStreet" placeholder="Calle y número" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Ciudad</label>
-                    <input type="text" class="form-input" id="addressCity" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Código Postal</label>
-                    <input type="text" class="form-input" id="addressZip" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Teléfono de Contacto</label>
-                    <input type="tel" class="form-input" id="addressPhone">
-                </div>
-                <div class="modal-buttons">
-                    <button type="button" class="btn-secondary" onclick="closeModal('addAddressModal')">Cancelar</button>
-                    <button type="submit" class="btn-primary">Guardar Dirección</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- Payment Modal -->
-    <div class="modal" id="paymentModal">
+    <div class="modal" id="paymentModal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">Métodos de Pago</div>
+                <button class="close-btn" onclick="closeModal('paymentModal')">×</button>
             </div>
             <div id="paymentList">
                 <div class="menu-item" onclick="openAddPaymentModal()">
@@ -376,44 +354,12 @@
         </div>
     </div>
 
-    <!-- Add Payment Modal -->
-    <div class="modal" id="addPaymentModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Nueva Tarjeta</div>
-            </div>
-            <form id="addPaymentForm">
-                <div class="form-group">
-                    <label class="form-label">Número de Tarjeta</label>
-                    <input type="text" class="form-input" id="cardNumber" placeholder="1234 5678 9012 3456" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Nombre en la Tarjeta</label>
-                    <input type="text" class="form-input" id="cardName" required>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div class="form-group">
-                        <label class="form-label">Fecha de Expiración</label>
-                        <input type="text" class="form-input" id="cardExpiry" placeholder="MM/AA" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">CVV</label>
-                        <input type="text" class="form-input" id="cardCVV" placeholder="123" maxlength="4" required>
-                    </div>
-                </div>
-                <div class="modal-buttons">
-                    <button type="button" class="btn-secondary" onclick="closeModal('addPaymentModal')">Cancelar</button>
-                    <button type="submit" class="btn-primary">Agregar Tarjeta</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- Language Modal -->
-    <div class="modal" id="languageModal">
+    <div class="modal" id="languageModal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">Seleccionar Idioma</div>
+                <button class="close-btn" onclick="closeModal('languageModal')">×</button>
             </div>
             <div>
                 <div class="menu-item" onclick="changeLanguage('es')">
@@ -445,10 +391,11 @@
     </div>
 
     <!-- Currency Modal -->
-    <div class="modal" id="currencyModal">
+    <div class="modal" id="currencyModal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">Seleccionar Moneda</div>
+                <button class="close-btn" onclick="closeModal('currencyModal')">×</button>
             </div>
             <div>
                 <div class="menu-item" onclick="changeCurrency('USD')">
@@ -479,6 +426,573 @@
         </div>
     </div>
 
+    <!-- Logout Confirmation Modal -->
+    <div class="modal-overlay" id="logoutModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-icon">⚠️</div>
+            <h3 class="modal-title">Cerrar Sesión</h3>
+            <p class="modal-text">¿Estás seguro de que quieres cerrar sesión?</p>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeLogoutModal()">Cancelar</button>
+                <button class="modal-btn primary" onclick="performLogout()">Cerrar Sesión</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <!-- 1. API Connection -->
+    <script src="/frontend/js/api.js"></script>
+    
+    <!-- 2. Profile functionality -->
+    <script>
+        // ================================================
+        // VARIABLES GLOBALES
+        // ================================================
+        let currentUser = null;
+        let userPets = [];
+        let userStats = {
+            orders: 0,
+            favorites: 0,
+            reviews: 0
+        };
+
+        // ================================================
+        // INICIALIZACIÓN
+        // ================================================
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('👤 Iniciando página de perfil...');
+            
+            // Verificar si el usuario está logueado
+            if (isUserLoggedIn()) {
+                await loadUserProfile();
+                showLoggedInUI();
+            } else {
+                showGuestUI();
+            }
+
+            // Configurar event listeners
+            setupEventListeners();
+            
+            console.log('✅ Página de perfil inicializada');
+        });
+
+        // ================================================
+        // FUNCIONES DE CARGA DE DATOS
+        // ================================================
+        async function loadUserProfile() {
+            try {
+                // Obtener datos del usuario del localStorage
+                currentUser = {
+                    id: localStorage.getItem('userId'),
+                    name: localStorage.getItem('userName'),
+                    email: localStorage.getItem('userEmail'),
+                    role: localStorage.getItem('userRole')
+                };
+
+                // Cargar estadísticas del usuario
+                await loadUserStats();
+                
+                // Cargar mascotas del usuario
+                await loadUserPets();
+                
+                // Actualizar contador del carrito
+                await updateCartCounter();
+                
+                // Actualizar UI con datos del usuario
+                updateProfileUI();
+                
+            } catch (error) {
+                console.error('Error cargando perfil:', error);
+                showToast('Error al cargar el perfil', 'error');
+            }
+        }
+
+        async function loadUserStats() {
+            try {
+                // Cargar favoritos del localStorage
+                const favorites = JSON.parse(localStorage.getItem('userFavorites') || '[]');
+                userStats.favorites = favorites.length;
+
+                // Cargar carrito para estadísticas
+                if (isUserLoggedIn()) {
+                    try {
+                        const cart = await getCart();
+                        // No mostrar items del carrito como estadística, solo favoritos reales
+                    } catch (error) {
+                        console.log('No se pudo cargar carrito para stats');
+                    }
+                }
+
+                // Por ahora, orders y reviews son simulados
+                userStats.orders = parseInt(localStorage.getItem('userOrders') || '0');
+                userStats.reviews = parseInt(localStorage.getItem('userReviews') || '0');
+
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+            }
+        }
+
+        async function loadUserPets() {
+            try {
+                // Cargar mascotas del localStorage (en el futuro desde API)
+                userPets = JSON.parse(localStorage.getItem('userPets') || '[]');
+                displayUserPets();
+            } catch (error) {
+                console.error('Error cargando mascotas:', error);
+            }
+        }
+
+        async function updateCartCounter() {
+            try {
+                if (!isUserLoggedIn()) {
+                    document.getElementById('cartBadge').style.display = 'none';
+                    return;
+                }
+
+                const cart = await getCart();
+                const badge = document.getElementById('cartBadge');
+                
+                if (cart.data && cart.data.items) {
+                    const totalItems = cart.data.items.reduce((sum, item) => sum + item.quantity, 0);
+                    badge.textContent = totalItems;
+                    badge.style.display = totalItems > 0 ? 'block' : 'none';
+                    
+                    // Actualizar subtitle del carrito
+                    const cartSubtitle = document.getElementById('cartSubtitle');
+                    if (cartSubtitle) {
+                        cartSubtitle.textContent = totalItems > 0 ? `${totalItems} productos en el carrito` : 'Carrito vacío';
+                    }
+                } else {
+                    badge.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error actualizando contador:', error);
+                document.getElementById('cartBadge').style.display = 'none';
+            }
+        }
+
+        // ================================================
+        // FUNCIONES DE UI
+        // ================================================
+        function showLoggedInUI() {
+            // Mostrar secciones para usuarios logueados
+            document.getElementById('userStats').classList.remove('hidden');
+            document.getElementById('petProfile').classList.remove('hidden');
+            document.getElementById('accountSection').classList.remove('hidden');
+            document.getElementById('logoutSection').classList.remove('hidden');
+            
+            // Ocultar CTA de login
+            document.getElementById('loginCTA').style.display = 'none';
+            
+            // Mostrar cámara de avatar
+            document.getElementById('cameraBtn').style.display = 'block';
+        }
+
+        function showGuestUI() {
+            // Ocultar secciones para usuarios logueados
+            document.getElementById('userStats').classList.add('hidden');
+            document.getElementById('petProfile').classList.add('hidden');
+            document.getElementById('accountSection').classList.add('hidden');
+            document.getElementById('logoutSection').classList.add('hidden');
+            
+            // Mostrar CTA de login
+            document.getElementById('loginCTA').style.display = 'block';
+            
+            // Ocultar cámara de avatar
+            document.getElementById('cameraBtn').style.display = 'none';
+            
+            // Ocultar contador del carrito
+            document.getElementById('cartBadge').style.display = 'none';
+        }
+
+        function updateProfileUI() {
+            if (!currentUser) return;
+
+            // Actualizar nombre y email
+            document.getElementById('profileName').textContent = currentUser.name || 'Usuario';
+            document.getElementById('profileEmail').textContent = currentUser.email || '';
+
+            // Actualizar estadísticas
+            document.getElementById('ordersCount').textContent = userStats.orders;
+            document.getElementById('favoritesCount').textContent = userStats.favorites;
+            document.getElementById('reviewsCount').textContent = userStats.reviews;
+
+            // Actualizar subtitle de favoritos
+            const favoritesSubtitle = document.getElementById('favoritesSubtitle');
+            if (favoritesSubtitle) {
+                favoritesSubtitle.textContent = userStats.favorites > 0 ? 
+                    `${userStats.favorites} productos guardados` : 'No tienes favoritos aún';
+            }
+
+            // Actualizar avatar si tiene imagen
+            const avatar = document.getElementById('profileAvatar');
+            const userAvatar = localStorage.getItem('userAvatar');
+            if (userAvatar && userAvatar !== 'null') {
+                avatar.textContent = userAvatar;
+            }
+        }
+
+        function displayUserPets() {
+            const petGrid = document.getElementById('petGrid');
+            
+            // Limpiar grid excepto el botón de agregar
+            const addPetCard = petGrid.querySelector('.add-pet');
+            petGrid.innerHTML = '';
+            petGrid.appendChild(addPetCard);
+
+            // Agregar mascotas del usuario
+            userPets.forEach(pet => {
+                const petCard = document.createElement('div');
+                petCard.className = 'pet-card';
+                petCard.innerHTML = `
+                    <div class="pet-avatar">${getPetEmoji(pet.type)}</div>
+                    <div class="pet-name">${pet.name}</div>
+                    <div class="pet-info">${pet.breed || pet.type}</div>
+                    <button class="pet-edit-btn" onclick="editPet('${pet.id}')">✏️</button>
+                `;
+                petGrid.insertBefore(petCard, addPetCard);
+            });
+        }
+
+        function getPetEmoji(type) {
+            const emojis = {
+                dog: '🐕',
+                cat: '🐱',
+                bird: '🐦',
+                rabbit: '🐰',
+                hamster: '🐹',
+                fish: '🐠',
+                other: '🐾'
+            };
+            return emojis[type] || '🐾';
+        }
+
+        // ================================================
+        // FUNCIONES DE MODAL
+        // ================================================
+        function openEditProfileModal() {
+            if (!currentUser) return;
+
+            // Prellenar formulario con datos actuales
+            document.getElementById('editName').value = currentUser.name || '';
+            document.getElementById('editEmail').value = currentUser.email || '';
+            document.getElementById('editPhone').value = localStorage.getItem('userPhone') || '';
+            document.getElementById('editBirthdate').value = localStorage.getItem('userBirthdate') || '';
+
+            document.getElementById('editProfileModal').style.display = 'flex';
+        }
+
+        function openAddPetModal() {
+            // Limpiar formulario
+            document.getElementById('addPetForm').reset();
+            document.getElementById('addPetModal').style.display = 'flex';
+        }
+
+        function openAddressModal() {
+            document.getElementById('addressModal').style.display = 'flex';
+        }
+
+        function openPaymentModal() {
+            document.getElementById('paymentModal').style.display = 'flex';
+        }
+
+        function openLanguageModal() {
+            document.getElementById('languageModal').style.display = 'flex';
+        }
+
+        function openCurrencyModal() {
+            document.getElementById('currencyModal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function confirmLogout() {
+            document.getElementById('logoutModal').style.display = 'flex';
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'none';
+        }
+
+        // ================================================
+        // FUNCIONES DE FORMULARIOS
+        // ================================================
+        function setupEventListeners() {
+            // Formulario de editar perfil
+            const editProfileForm = document.getElementById('editProfileForm');
+            if (editProfileForm) {
+                editProfileForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    await saveProfileChanges();
+                });
+            }
+
+            // Formulario de agregar mascota
+            const addPetForm = document.getElementById('addPetForm');
+            if (addPetForm) {
+                addPetForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    await addPet();
+                });
+            }
+
+            // Toggle de notificaciones
+            const notificationsToggle = document.getElementById('notificationsToggle');
+            if (notificationsToggle) {
+                notificationsToggle.addEventListener('change', function() {
+                    localStorage.setItem('notificationsEnabled', this.checked);
+                    showToast(this.checked ? 'Notificaciones activadas' : 'Notificaciones desactivadas', 'info');
+                });
+                
+                // Cargar estado guardado
+                const notificationsEnabled = localStorage.getItem('notificationsEnabled');
+                if (notificationsEnabled !== null) {
+                    notificationsToggle.checked = notificationsEnabled === 'true';
+                }
+            }
+
+            // Toggle de modo oscuro
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            if (darkModeToggle) {
+                darkModeToggle.addEventListener('change', function() {
+                    localStorage.setItem('darkModeEnabled', this.checked);
+                    document.body.classList.toggle('dark-mode', this.checked);
+                    showToast(this.checked ? 'Modo oscuro activado' : 'Modo oscuro desactivado', 'info');
+                });
+                
+                // Cargar estado guardado
+                const darkModeEnabled = localStorage.getItem('darkModeEnabled');
+                if (darkModeEnabled === 'true') {
+                    darkModeToggle.checked = true;
+                    document.body.classList.add('dark-mode');
+                }
+            }
+        }
+
+        async function saveProfileChanges() {
+            try {
+                const name = document.getElementById('editName').value.trim();
+                const email = document.getElementById('editEmail').value.trim();
+                const phone = document.getElementById('editPhone').value.trim();
+                const birthdate = document.getElementById('editBirthdate').value;
+
+                if (!name || !email) {
+                    showToast('Nombre y email son requeridos', 'error');
+                    return;
+                }
+
+                // Guardar en localStorage (en el futuro enviar a API)
+                localStorage.setItem('userName', name);
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('userPhone', phone);
+                localStorage.setItem('userBirthdate', birthdate);
+
+                // Actualizar objeto currentUser
+                currentUser.name = name;
+                currentUser.email = email;
+
+                // Actualizar UI
+                updateProfileUI();
+
+                showToast('Perfil actualizado correctamente', 'success');
+                closeModal('editProfileModal');
+
+            } catch (error) {
+                console.error('Error guardando perfil:', error);
+                showToast('Error al guardar cambios', 'error');
+            }
+        }
+
+        async function addPet() {
+            try {
+                const name = document.getElementById('petName').value.trim();
+                const type = document.getElementById('petType').value;
+                const breed = document.getElementById('petBreed').value.trim();
+                const age = document.getElementById('petAge').value;
+                const weight = document.getElementById('petWeight').value;
+                const notes = document.getElementById('petNotes').value.trim();
+
+                if (!name || !type) {
+                    showToast('Nombre y tipo de mascota son requeridos', 'error');
+                    return;
+                }
+
+                const newPet = {
+                    id: Date.now().toString(),
+                    name,
+                    type,
+                    breed,
+                    age: age ? parseInt(age) : null,
+                    weight: weight ? parseFloat(weight) : null,
+                    notes,
+                    createdAt: new Date().toISOString()
+                };
+
+                userPets.push(newPet);
+                localStorage.setItem('userPets', JSON.stringify(userPets));
+
+                displayUserPets();
+                showToast(`${name} agregado/a como mascota`, 'success');
+                closeModal('addPetModal');
+
+            } catch (error) {
+                console.error('Error agregando mascota:', error);
+                showToast('Error al agregar mascota', 'error');
+            }
+        }
+
+        function editPet(petId) {
+            const pet = userPets.find(p => p.id === petId);
+            if (pet) {
+                // Prellenar formulario con datos de la mascota
+                document.getElementById('petName').value = pet.name;
+                document.getElementById('petType').value = pet.type;
+                document.getElementById('petBreed').value = pet.breed || '';
+                document.getElementById('petAge').value = pet.age || '';
+                document.getElementById('petWeight').value = pet.weight || '';
+                document.getElementById('petNotes').value = pet.notes || '';
+
+                // Cambiar el comportamiento del formulario para editar
+                const form = document.getElementById('addPetForm');
+                form.dataset.editingPetId = petId;
+
+                openAddPetModal();
+            }
+        }
+
+        // ================================================
+        // FUNCIONES DE NAVEGACIÓN Y UTILIDADES
+        // ================================================
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+
+        function isUserLoggedIn() {
+            return localStorage.getItem('authToken') && localStorage.getItem('userId');
+        }
+
+        async function performLogout() {
+            try {
+                // Limpiar datos del usuario
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('userId');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userName');
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('userPhone');
+                localStorage.removeItem('userBirthdate');
+                localStorage.removeItem('userAvatar');
+                localStorage.removeItem('userFavorites');
+                localStorage.removeItem('userPets');
+
+                showToast('Sesión cerrada correctamente', 'success');
+                
+                // Redirigir al login después de 1 segundo
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+
+            } catch (error) {
+                console.error('Error cerrando sesión:', error);
+                showToast('Error al cerrar sesión', 'error');
+            }
+        }
+
+        function changeAvatar() {
+            const emojis = ['👤', '🧑', '👩', '🧔', '👱', '🦳', '🦲', '🧑‍🦰', '👩‍🦰', '🧑‍🦱', '👩‍🦱'];
+            const currentAvatar = document.getElementById('profileAvatar').textContent;
+            const currentIndex = emojis.indexOf(currentAvatar);
+            const nextIndex = (currentIndex + 1) % emojis.length;
+            const newAvatar = emojis[nextIndex];
+            
+            document.getElementById('profileAvatar').textContent = newAvatar;
+            localStorage.setItem('userAvatar', newAvatar);
+            showToast('Avatar actualizado', 'success');
+        }
+
+        function changeLanguage(lang) {
+            // Limpiar checkmarks anteriores
+            document.querySelectorAll('[id^="lang-"]').forEach(el => el.textContent = '');
+            
+            // Marcar idioma seleccionado
+            document.getElementById(`lang-${lang}`).textContent = '✓';
+            
+            localStorage.setItem('selectedLanguage', lang);
+            showToast('Idioma actualizado', 'success');
+            
+            // Aquí puedes implementar la lógica de cambio de idioma
+            closeModal('languageModal');
+        }
+
+        function changeCurrency(currency) {
+            // Limpiar checkmarks anteriores
+            document.querySelectorAll('[id^="curr-"]').forEach(el => el.textContent = '');
+            
+            // Marcar moneda seleccionada
+            document.getElementById(`curr-${currency}`).textContent = '✓';
+            
+            localStorage.setItem('selectedCurrency', currency);
+            showToast('Moneda actualizada', 'success');
+            
+            // Aquí puedes implementar la lógica de cambio de moneda
+            closeModal('currencyModal');
+        }
+
+        function showOrderHistory() {
+            // Simular historial de pedidos
+            showToast('Función de historial próximamente', 'info');
+        }
+
+        function openHelpCenter() {
+            showToast('Centro de ayuda próximamente', 'info');
+        }
+
+        function contactSupport() {
+            showToast('Soporte en línea próximamente', 'info');
+        }
+
+        function showAbout() {
+            showToast('PetStyle v2.1.0 - Hecho con ❤️ para mascotas', 'info');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 5000);
+        }
+
+        // ================================================
+        // FUNCIONES GLOBALES PARA INTEGRACIÓN
+        // ================================================
+        window.ProfileAPI = {
+            getCurrentUser: () => currentUser,
+            isLoggedIn: isUserLoggedIn,
+            updateStats: loadUserStats,
+            refreshProfile: loadUserProfile
+        };
+
+        console.log('✅ Sistema de perfil PetStyle cargado');
+    </script>
+
+    <!-- 3. Script original del perfil (para compatibilidad) -->
+      <script src="../js/api.js"></script>
     <script src="/frontend/js/profile.js"></script>
 </body>
 </html>

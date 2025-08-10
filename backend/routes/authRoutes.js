@@ -23,6 +23,7 @@ const registerValidation = [
         .isLength({ min: 6 })
         .withMessage('La contraseña debe tener al menos 6 caracteres'),
     body('phone')
+        .optional()
         .matches(/^[0-9]{10}$/)
         .withMessage('El teléfono debe tener 10 dígitos')
 ];
