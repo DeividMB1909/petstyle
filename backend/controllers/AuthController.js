@@ -2,8 +2,27 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 
+// Importación directa del modelo Administrador
+const mongoose = require('mongoose');
+
+// Definir el schema directamente en el controller para evitar problemas de importación
+const administradorSchema = new mongoose.Schema({
+    nombre: String,
+    email: String,
+    password: String,
+    rol: String,
+    permisos: [String],
+    activo: Boolean,
+    fechaCreacion: Date,
+    ultimoAcceso: Date
+}, {
+    collection: 'administradors' // Nombre exacto de tu colección
+});
+
+const Administrador = mongoose.model('AdminTemp', administradorSchema, 'administradors');
+
 class AuthController {
-    // Registro de usuario
+    // Registro de usuario (mantener igual)
     static async register(req, res) {
         try {
             const { name, email, password, phone, role = 'customer', address, dateOfBirth } = req.body;
@@ -31,13 +50,11 @@ class AuthController {
                 dateOfBirth
             };
 
-            // Solo agregar address si se proporciona completo
             if (address && address.street && address.city && address.state && address.zipCode) {
                 userData.address = address;
             }
 
             const newUser = new User(userData);
-
             await newUser.save();
 
             // Generar token JWT
@@ -51,7 +68,6 @@ class AuthController {
                 { expiresIn: '7d' }
             );
 
-            // Respuesta sin password
             const userResponse = {
                 id: newUser._id,
                 name: newUser.name,
@@ -63,12 +79,11 @@ class AuthController {
                 createdAt: newUser.createdAt
             };
 
-            // Configurar cookie httpOnly para el token
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
-                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
+                maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
             res.status(201).json({
@@ -76,7 +91,7 @@ class AuthController {
                 message: 'Usuario registrado exitosamente',
                 data: {
                     user: userResponse,
-                    token: token // También enviamos el token en la respuesta para apps móviles
+                    token: token
                 }
             });
         } catch (error) {
@@ -88,12 +103,11 @@ class AuthController {
         }
     }
 
-    // Login de usuario
+    // Login SIMPLIFICADO Y DIRECTO
     static async login(req, res) {
         try {
             const { email, password } = req.body;
 
-            // Validar que se proporcionen email y password
             if (!email || !password) {
                 return res.status(400).json({
                     success: false,
@@ -101,21 +115,88 @@ class AuthController {
                 });
             }
 
-            // Buscar usuario por email e incluir password explícitamente
-            const user = await User.findOne({ email }).select('+password');
-            if (!user) {
+            console.log('🔍 === INICIO LOGIN ===');
+            console.log('📧 Email:', email);
+            console.log('🔐 Password:', password);
+
+            let user = null;
+            let userType = null;
+            let isPasswordValid = false;
+
+            // PASO 1: Buscar en usuarios normales
+            console.log('🔍 PASO 1: Buscando en users...');
+            try {
+                user = await User.findOne({ email }).select('+password');
+                console.log('👤 Usuario encontrado en users:', !!user);
+                
+                if (user) {
+                    userType = 'user';
+                    isPasswordValid = await user.comparePassword(password);
+                    console.log('✅ Password válido (user):', isPasswordValid);
+                    
+                    if (isPasswordValid) {
+                        user.lastLogin = new Date();
+                        await user.save();
+                        console.log('🎯 LOGIN EXITOSO COMO USER');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error en users:', error.message);
+            }
+
+            // PASO 2: Si no funciona, buscar en administradors
+            if (!user || !isPasswordValid) {
+                console.log('🔍 PASO 2: Buscando en administradors...');
+                try {
+                    // Buscar directamente en la colección
+                    user = await Administrador.findOne({ email: email });
+                    console.log('👨‍💼 Admin encontrado:', !!user);
+                    
+                    if (user) {
+                        console.log('📋 Admin data:', {
+                            nombre: user.nombre,
+                            email: user.email,
+                            rol: user.rol,
+                            activo: user.activo
+                        });
+                        
+                        userType = 'admin';
+                        // Verificar password
+                        isPasswordValid = await bcrypt.compare(password, user.password);
+                        console.log('✅ Password válido (admin):', isPasswordValid);
+                        
+                        if (isPasswordValid) {
+                            // Actualizar último acceso
+                            user.ultimoAcceso = new Date();
+                            await user.save();
+                            console.log('🎯 LOGIN EXITOSO COMO ADMIN');
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Error en administradors:', error.message);
+                }
+            }
+
+            console.log('🔍 RESULTADOS FINALES:');
+            console.log('👤 Usuario encontrado:', !!user);
+            console.log('🔐 Password válido:', isPasswordValid);
+            console.log('👥 Tipo usuario:', userType);
+
+            // Verificar credenciales
+            if (!user || !isPasswordValid) {
+                console.log('❌ LOGIN FALLIDO - Credenciales inválidas');
                 return res.status(401).json({
                     success: false,
                     message: 'Credenciales inválidas'
                 });
             }
 
-            // Verificar password usando el método del modelo
-            const isPasswordValid = await user.comparePassword(password);
-            if (!isPasswordValid) {
+            // Verificar si admin está activo
+            if (userType === 'admin' && user.activo === false) {
+                console.log('❌ LOGIN FALLIDO - Admin desactivado');
                 return res.status(401).json({
                     success: false,
-                    message: 'Credenciales inválidas'
+                    message: 'Cuenta desactivada'
                 });
             }
 
@@ -124,45 +205,67 @@ class AuthController {
                 { 
                     userId: user._id, 
                     email: user.email, 
-                    role: user.role 
+                    role: userType === 'admin' ? 'admin' : user.role,
+                    userType: userType
                 },
                 process.env.JWT_SECRET || 'petstyle_secret_key_2024',
                 { expiresIn: '7d' }
             );
 
-            // Actualizar último login
-            user.lastLogin = new Date();
-            await user.save();
+            // Preparar respuesta
+            let userResponse;
+            
+            if (userType === 'admin') {
+                userResponse = {
+                    id: user._id,
+                    name: user.nombre,
+                    email: user.email,
+                    role: 'admin',
+                    userType: 'admin',
+                    isAdmin: true,
+                    permissions: user.permisos || [],
+                    lastAccess: user.ultimoAcceso
+                };
+            } else {
+                userResponse = {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                    userType: 'user',
+                    isAdmin: false,
+                    phone: user.phone,
+                    address: user.address,
+                    dateOfBirth: user.dateOfBirth,
+                    lastLogin: user.lastLogin
+                };
+            }
 
-            // Respuesta sin password
-            const userResponse = {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                phone: user.phone,
-                address: user.address,
-                dateOfBirth: user.dateOfBirth,
-                lastLogin: user.lastLogin
-            };
-
-            // Configurar cookie httpOnly para el token
+            // Cookie
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
-                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
+                maxAge: 7 * 24 * 60 * 60 * 1000
+            });
+
+            console.log('🎉 LOGIN COMPLETAMENTE EXITOSO');
+            console.log('📤 Enviando respuesta:', {
+                userType: userType,
+                role: userResponse.role,
+                isAdmin: userResponse.isAdmin
             });
 
             res.status(200).json({
                 success: true,
                 message: 'Login exitoso',
-                data: {
-                    user: userResponse,
-                    token: token
-                }
+                user: userResponse,
+                token: token,
+                redirectTo: userType === 'admin' ? '/admin.html' : '/main.html'
             });
+
         } catch (error) {
+            console.error('💥 ERROR CRÍTICO EN LOGIN:', error);
             res.status(500).json({
                 success: false,
                 message: 'Error en el login',
@@ -171,12 +274,10 @@ class AuthController {
         }
     }
 
-    // Logout de usuario
+    // Resto de métodos (mantener igual)
     static async logout(req, res) {
         try {
-            // Limpiar cookie del token
             res.clearCookie('token');
-
             res.status(200).json({
                 success: true,
                 message: 'Logout exitoso'
@@ -190,10 +291,8 @@ class AuthController {
         }
     }
 
-    // Obtener perfil del usuario autenticado
     static async getProfile(req, res) {
         try {
-            // El usuario viene del middleware de autenticación
             const user = await User.findById(req.user.userId).select('-password');
             
             if (!user) {
@@ -217,13 +316,11 @@ class AuthController {
         }
     }
 
-    // Cambiar password
     static async changePassword(req, res) {
         try {
             const { currentPassword, newPassword } = req.body;
             const userId = req.user.userId;
 
-            // Validar que se proporcionen ambos passwords
             if (!currentPassword || !newPassword) {
                 return res.status(400).json({
                     success: false,
@@ -231,7 +328,6 @@ class AuthController {
                 });
             }
 
-            // Validar longitud del nuevo password
             if (newPassword.length < 6) {
                 return res.status(400).json({
                     success: false,
@@ -239,7 +335,6 @@ class AuthController {
                 });
             }
 
-            // Buscar usuario e incluir password explícitamente
             const user = await User.findById(userId).select('+password');
             if (!user) {
                 return res.status(404).json({
@@ -248,7 +343,6 @@ class AuthController {
                 });
             }
 
-            // Verificar password actual usando el método del modelo
             const isCurrentPasswordValid = await user.comparePassword(currentPassword);
             if (!isCurrentPasswordValid) {
                 return res.status(401).json({
@@ -257,11 +351,9 @@ class AuthController {
                 });
             }
 
-            // Encriptar nuevo password y actualizar directamente
             const saltRounds = 12;
             const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
 
-            // Actualizar password directamente en la base de datos
             await User.findByIdAndUpdate(userId, { 
                 password: hashedNewPassword 
             });
@@ -279,16 +371,14 @@ class AuthController {
         }
     }
 
-    // Actualizar perfil del usuario autenticado
     static async updateProfile(req, res) {
         try {
             const userId = req.user.userId;
             const updateData = req.body;
 
-            // No permitir actualizar email y password por esta ruta
             delete updateData.email;
             delete updateData.password;
-            delete updateData.role; // Solo admins pueden cambiar roles
+            delete updateData.role;
 
             const updatedUser = await User.findByIdAndUpdate(
                 userId,
@@ -317,10 +407,8 @@ class AuthController {
         }
     }
 
-    // Verificar si el token es válido
     static async verifyToken(req, res) {
         try {
-            // El middleware de autenticación ya verificó el token
             const user = await User.findById(req.user.userId).select('-password');
             
             res.status(200).json({

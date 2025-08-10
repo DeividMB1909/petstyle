@@ -1,9 +1,9 @@
-// ===== AUTHENTICATION SYSTEM =====
+// ===== AUTHENTICATION SYSTEM - REAL DATABASE ONLY =====
 
 // Get current user from localStorage
 function getCurrentUser() {
     try {
-        const user = localStorage.getItem('currentUser');
+        const user = localStorage.getItem('petstyle_user');
         return user ? JSON.parse(user) : null;
     } catch (error) {
         console.error('Error getting current user:', error);
@@ -15,9 +15,9 @@ function getCurrentUser() {
 function setCurrentUser(user) {
     try {
         if (user) {
-            localStorage.setItem('currentUser', JSON.stringify(user));
+            localStorage.setItem('petstyle_user', JSON.stringify(user));
         } else {
-            localStorage.removeItem('currentUser');
+            localStorage.removeItem('petstyle_user');
         }
         return true;
     } catch (error) {
@@ -26,15 +26,42 @@ function setCurrentUser(user) {
     }
 }
 
-// Login function
+// Get current token from localStorage
+function getCurrentToken() {
+    try {
+        return localStorage.getItem('petstyle_token');
+    } catch (error) {
+        console.error('Error getting token:', error);
+        return null;
+    }
+}
+
+// Set token in localStorage
+function setCurrentToken(token) {
+    try {
+        if (token) {
+            localStorage.setItem('petstyle_token', token);
+        } else {
+            localStorage.removeItem('petstyle_token');
+        }
+        return true;
+    } catch (error) {
+        console.error('Error setting token:', error);
+        return false;
+    }
+}
+
+// Login function - FIXED to save token correctly
 async function login(email, password) {
     try {
-        // First try demo accounts
-        const demoUser = checkDemoAccount(email, password);
-        if (demoUser) {
-            setCurrentUser(demoUser);
-            showToast('Inicio de sesión exitoso', 'success');
-            return { success: true, user: demoUser };
+        console.log('🔐 Attempting login for:', email);
+        
+        if (!email || !password) {
+            throw new Error('Email y contraseña son obligatorios');
+        }
+        
+        if (!isValidEmail(email)) {
+            throw new Error('Email no válido');
         }
         
         // Try API login
@@ -46,29 +73,104 @@ async function login(email, password) {
             body: JSON.stringify({ email, password })
         });
         
-        const data = await response.json();
+        console.log('📡 API response status:', response.status);
         
-        if (response.ok && data.success) {
-            setCurrentUser(data.user);
-            showToast('Inicio de sesión exitoso', 'success');
-            return { success: true, user: data.user };
+        if (response.ok) {
+            const data = await response.json();
+            console.log('✅ API login response:', data);
+            
+            // Handle different response formats from your API
+            if (data.success || data.message === "Login exitoso" || response.status === 200) {
+                // Extract user data
+                let userData = data.user || data.data || data;
+                
+                // If we don't have user data but login was successful, create basic user object
+                if (!userData.email && data.message === "Login exitoso") {
+                    userData = {
+                        email: email,
+                        name: userData.name || "Usuario",
+                        role: userData.role || "user",
+                        _id: userData._id || Date.now().toString()
+                    };
+                }
+                
+                console.log('👤 User data to save:', userData);
+                console.log('🔑 Token to save:', data.token);
+                
+                // Save user data
+                setCurrentUser(userData);
+                
+                // Save token if available
+                if (data.token) {
+                    setCurrentToken(data.token);
+                    console.log('✅ Token saved successfully');
+                } else {
+                    console.log('⚠️ No token received from server');
+                }
+                
+                // Verify data was saved
+                console.log('🔍 Verification - User saved:', !!getCurrentUser());
+                console.log('🔍 Verification - Token saved:', !!getCurrentToken());
+                
+                showToast('Inicio de sesión exitoso', 'success');
+                
+                // Redirect based on user role
+                redirectBasedOnRole(userData);
+                
+                return { success: true, user: userData, token: data.token };
+            } else {
+                throw new Error(data.message || 'Respuesta inválida del servidor');
+            }
         } else {
-            throw new Error(data.message || 'Credenciales incorrectas');
+            const errorData = await response.json();
+            console.log('❌ API login failed:', errorData);
+            throw new Error(errorData.message || 'Credenciales incorrectas');
         }
         
     } catch (error) {
         console.error('Login error:', error);
-        const message = error.message || 'Error al iniciar sesión';
+        
+        // Handle specific error messages
+        let message = error.message;
+        if (error.message.includes('fetch')) {
+            message = 'No se pudo conectar con el servidor. Verifica que esté funcionando.';
+        } else if (error.message.includes('NetworkError')) {
+            message = 'Error de conexión. Verifica tu internet.';
+        }
+        
         showToast(message, 'error');
         return { success: false, message };
     }
 }
 
-// Register function
+// Redirect user based on their role from database
+function redirectBasedOnRole(user) {
+    console.log('🔄 Redirecting user based on role:', user);
+    console.log('👤 User role/type:', user.role, user.userType);
+    
+    // Check if user is admin based on multiple criteria
+    const isUserAdmin = isAdmin(user);
+    
+    console.log('🔍 Admin check result:', isUserAdmin);
+    
+    setTimeout(() => {
+        if (isUserAdmin) {
+            console.log('👑 Admin detected - redirecting to admin panel');
+            showToast('Bienvenido, Administrador', 'success');
+            window.location.href = 'admin.html';
+        } else {
+            console.log('👤 Regular user - redirecting to main');
+            showToast(`Bienvenido, ${user.name || user.nombre}`, 'success');
+            window.location.href = 'main.html';
+        }
+    }, 1000);
+}
+
+// Register function - ONLY with real API
 async function register(userData) {
     try {
         // Validate required fields
-        const requiredFields = ['nombre', 'email', 'password'];
+        const requiredFields = ['name', 'email', 'password'];
         for (const field of requiredFields) {
             if (!userData[field]) {
                 throw new Error(`El campo ${field} es obligatorio`);
@@ -86,20 +188,41 @@ async function register(userData) {
             throw new Error(passwordValidation.errors[0]);
         }
         
+        // Prepare data for API
+        const registerData = {
+            name: userData.name,
+            email: userData.email,
+            password: userData.password,
+            phone: userData.phone || '',
+            address: userData.address || {}
+        };
+        
         // Try API registration
         const response = await fetch('http://localhost:3000/api/auth/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(userData)
+            body: JSON.stringify(registerData)
         });
         
         const data = await response.json();
         
         if (response.ok && data.success) {
             setCurrentUser(data.user);
+            
+            // Save token if provided
+            if (data.token) {
+                setCurrentToken(data.token);
+            }
+            
             showToast('Registro exitoso', 'success');
+            
+            // New users are always regular users, redirect to main
+            setTimeout(() => {
+                window.location.href = 'main.html';
+            }, 1500);
+            
             return { success: true, user: data.user };
         } else {
             throw new Error(data.message || 'Error en el registro');
@@ -110,7 +233,7 @@ async function register(userData) {
         
         // Handle specific error cases
         let message = error.message;
-        if (error.message.includes('duplicate') || error.message.includes('exists')) {
+        if (error.message.includes('duplicate') || error.message.includes('exists') || error.message.includes('E11000')) {
             message = 'Este email ya está registrado';
         } else if (error.message.includes('validation')) {
             message = 'Datos de registro inválidos';
@@ -121,80 +244,40 @@ async function register(userData) {
     }
 }
 
-// Logout function
-function logout() {
-    try {
-        // Clear user data
-        setCurrentUser(null);
+// Check if user is admin - Updated for your backend response
+function isAdmin(user = null) {
+    const currentUser = user || getCurrentUser();
+    if (!currentUser) return false;
+    
+    console.log('🔍 Checking admin status for user:', currentUser);
+    
+    // Check multiple conditions for admin based on your database structure
+    const adminConditions = [
+        // From your backend response structure
+        currentUser.role === 'admin',
+        currentUser.userType === 'admin',
+        currentUser.isAdmin === true,
         
-        // Clear user-specific data
-        const user = getCurrentUser();
-        if (user) {
-            localStorage.removeItem(`favorites_${user.email}`);
-            localStorage.removeItem(`cart_${user.email}`);
-        }
+        // Additional checks
+        currentUser.role === 'administrador',
+        currentUser.role === 'administrator',
+        currentUser.role === 'superadmin',
         
-        showToast('Sesión cerrada correctamente', 'success');
+        // If user has admin email patterns
+        currentUser.email?.includes('admin'),
         
-        // Redirect to main page
-        setTimeout(() => {
-            window.location.href = 'main.html';
-        }, 1000);
-        
-        return true;
-    } catch (error) {
-        console.error('Logout error:', error);
-        showToast('Error al cerrar sesión', 'error');
-        return false;
-    }
-}
-
-// Check demo accounts
-function checkDemoAccount(email, password) {
-    const demoAccounts = [
-        {
-            _id: 'demo-admin',
-            email: 'admin@petstyle.com',
-            password: 'admin123',
-            nombre: 'Administrador',
-            role: 'admin',
-            fechaRegistro: new Date().toISOString()
-        },
-        {
-            _id: 'demo-user',
-            email: 'demo@petstyle.com',
-            password: 'demo123',
-            nombre: 'Usuario Demo',
-            role: 'user',
-            fechaRegistro: new Date().toISOString()
-        },
-        {
-            _id: 'demo-user2',
-            email: 'usuario@petstyle.com',
-            password: 'usuario123',
-            nombre: 'Usuario PetStyle',
-            role: 'user',
-            fechaRegistro: new Date().toISOString()
-        }
+        // Check collection or source
+        currentUser.collection === 'administradors',
+        currentUser.fromAdminCollection === true
     ];
     
-    const account = demoAccounts.find(acc => 
-        acc.email === email && acc.password === password
-    );
+    const isUserAdmin = adminConditions.some(condition => condition === true);
+    console.log('🎯 Admin conditions check:', { 
+        conditions: adminConditions.map((c, i) => `${i}: ${c}`), 
+        result: isUserAdmin 
+    });
     
-    if (account) {
-        // Don't include password in returned user object
-        const { password: _, ...userWithoutPassword } = account;
-        return userWithoutPassword;
-    }
-    
-    return null;
-}
-
-// Check if user is admin
-function isAdmin() {
-    const user = getCurrentUser();
-    return user && (user.role === 'admin' || user.email === 'admin@petstyle.com');
+    return isUserAdmin;
 }
 
 // Check if user is logged in
@@ -202,7 +285,7 @@ function isLoggedIn() {
     return getCurrentUser() !== null;
 }
 
-// Require authentication (redirect to login if not logged in)
+// Require authentication
 function requireAuth(redirectUrl = 'login.html') {
     if (!isLoggedIn()) {
         showToast('Debes iniciar sesión para acceder a esta página', 'warning');
@@ -216,6 +299,8 @@ function requireAuth(redirectUrl = 'login.html') {
 
 // Require admin privileges
 function requireAdmin(redirectUrl = 'main.html') {
+    if (!requireAuth()) return false;
+    
     if (!isAdmin()) {
         showToast('Acceso denegado. Se requieren permisos de administrador.', 'error');
         setTimeout(() => {
@@ -226,121 +311,90 @@ function requireAdmin(redirectUrl = 'main.html') {
     return true;
 }
 
-// Update user profile
-async function updateProfile(userData) {
+// Logout function
+function logout() {
     try {
+        // Clear user data
         const user = getCurrentUser();
-        if (!user) {
-            throw new Error('No hay usuario logueado');
+        setCurrentUser(null);
+        setCurrentToken(null);
+        
+        // Clear user-specific data
+        if (user) {
+            localStorage.removeItem(`favorites_${user.email}`);
+            localStorage.removeItem(`cart_${user.email}`);
         }
         
-        // Validate email if changed
-        if (userData.email && userData.email !== user.email) {
-            if (!isValidEmail(userData.email)) {
-                throw new Error('El email no es válido');
+        // Clear any other PetStyle data
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+            if (key.startsWith('petstyle_') || key.startsWith('cart_') || key.startsWith('favorites_')) {
+                localStorage.removeItem(key);
             }
-        }
+        });
         
-        // Try API update (if backend supports it)
-        try {
-            const response = await fetch(`http://localhost:3000/api/auth/profile/${user._id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(userData)
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                const updatedUser = { ...user, ...data.user };
-                setCurrentUser(updatedUser);
-                showToast('Perfil actualizado correctamente', 'success');
-                return { success: true, user: updatedUser };
-            }
-        } catch (apiError) {
-            console.log('API update failed, using local update');
-        }
+        showToast('Sesión cerrada correctamente', 'success');
         
-        // Fallback to local update
-        const updatedUser = { ...user, ...userData };
-        setCurrentUser(updatedUser);
-        showToast('Perfil actualizado correctamente', 'success');
-        return { success: true, user: updatedUser };
+        // Redirect to login page
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1000);
         
+        return true;
     } catch (error) {
-        console.error('Profile update error:', error);
-        showToast(error.message || 'Error al actualizar perfil', 'error');
-        return { success: false, message: error.message };
+        console.error('Logout error:', error);
+        showToast('Error al cerrar sesión', 'error');
+        return false;
     }
 }
 
-// Change password
-async function changePassword(currentPassword, newPassword) {
-    try {
-        const user = getCurrentUser();
-        if (!user) {
-            throw new Error('No hay usuario logueado');
-        }
-        
-        // Validate new password
-        const passwordValidation = validatePassword(newPassword);
-        if (!passwordValidation.isValid) {
-            throw new Error(passwordValidation.errors[0]);
-        }
-        
-        // Try API password change
-        const response = await fetch(`http://localhost:3000/api/auth/change-password/${user._id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ 
-                currentPassword, 
-                newPassword 
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok && data.success) {
-            showToast('Contraseña cambiada correctamente', 'success');
-            return { success: true };
-        } else {
-            throw new Error(data.message || 'Error al cambiar contraseña');
-        }
-        
-    } catch (error) {
-        console.error('Password change error:', error);
-        showToast(error.message || 'Error al cambiar contraseña', 'error');
-        return { success: false, message: error.message };
+// Validate email
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+// Validate password
+function validatePassword(password) {
+    const errors = [];
+    
+    if (password.length < 6) {
+        errors.push('La contraseña debe tener al menos 6 caracteres');
     }
+    
+    return {
+        isValid: errors.length === 0,
+        errors: errors,
+        strength: getPasswordStrength(password)
+    };
+}
+
+function getPasswordStrength(password) {
+    let strength = 0;
+    
+    if (password.length >= 6) strength += 1;
+    if (password.length >= 8) strength += 1;
+    if (/[A-Z]/.test(password)) strength += 1;
+    if (/[a-z]/.test(password)) strength += 1;
+    if (/\d/.test(password)) strength += 1;
+    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+    
+    if (strength <= 2) return 'weak';
+    if (strength <= 4) return 'medium';
+    return 'strong';
 }
 
 // Session management
 function initializeAuth() {
-    // Check if user session is still valid
     const user = getCurrentUser();
+    const token = getCurrentToken();
+    
     if (user) {
-        // Could validate session with backend here
-        console.log('User session found:', user.nombre);
+        console.log('👤 User session found:', user.name || user.nombre);
+        console.log('🔑 User data:', user);
+        console.log('🎫 Token available:', !!token);
+        console.log('👑 Is admin:', isAdmin(user));
     }
-    
-    // Set up session timeout (optional)
-    setupSessionTimeout();
-}
-
-// Setup session timeout (24 hours)
-function setupSessionTimeout(timeoutHours = 24) {
-    const timeoutMs = timeoutHours * 60 * 60 * 1000;
-    
-    setTimeout(() => {
-        const user = getCurrentUser();
-        if (user) {
-            logout();
-            showToast('Tu sesión ha expirado', 'warning');
-        }
-    }, timeoutMs);
 }
 
 // Initialize auth system
@@ -349,7 +403,9 @@ document.addEventListener('DOMContentLoaded', initializeAuth);
 // Export auth functions for global use
 window.auth = {
     getCurrentUser,
+    getCurrentToken,
     setCurrentUser,
+    setCurrentToken,
     login,
     register,
     logout,
@@ -357,7 +413,5 @@ window.auth = {
     isLoggedIn,
     requireAuth,
     requireAdmin,
-    updateProfile,
-    changePassword,
-    checkDemoAccount
+    redirectBasedOnRole
 };

@@ -1,61 +1,9 @@
-// ===== MAIN PAGE JAVASCRIPT WITH FALLBACK =====
+// ===== MAIN PAGE JAVASCRIPT - CORREGIDO PARA TUS CATEGORÍAS REALES =====
 
 let allProducts = [];
 let filteredProducts = [];
 let currentCategory = '';
 let currentSort = 'newest';
-
-// Mock data for testing
-const mockProducts = [
-    {
-        _id: 'mock1',
-        nombre: 'Alimento Premium para Perros',
-        categoria: 'alimento',
-        precio: 45.99,
-        imagen: 'https://via.placeholder.com/200?text=Alimento+Perros',
-        descripcion: 'Alimento nutritivo para perros adultos'
-    },
-    {
-        _id: 'mock2',
-        nombre: 'Pelota de Juguete',
-        categoria: 'juguetes',
-        precio: 12.50,
-        imagen: 'https://via.placeholder.com/200?text=Pelota+Juguete',
-        descripcion: 'Pelota resistente para perros'
-    },
-    {
-        _id: 'mock3',
-        nombre: 'Collar Elegante',
-        categoria: 'accesorios',
-        precio: 28.00,
-        imagen: 'https://via.placeholder.com/200?text=Collar+Elegante',
-        descripcion: 'Collar ajustable para mascotas'
-    },
-    {
-        _id: 'mock4',
-        nombre: 'Shampoo para Gatos',
-        categoria: 'higiene',
-        precio: 18.75,
-        imagen: 'https://via.placeholder.com/200?text=Shampoo+Gatos',
-        descripcion: 'Shampoo suave para gatos'
-    },
-    {
-        _id: 'mock5',
-        nombre: 'Vitaminas para Mascotas',
-        categoria: 'salud',
-        precio: 35.20,
-        imagen: 'https://via.placeholder.com/200?text=Vitaminas',
-        descripcion: 'Suplemento vitamínico para mascotas'
-    },
-    {
-        _id: 'mock6',
-        nombre: 'Cama para Perros Grande',
-        categoria: 'accesorios',
-        precio: 89.99,
-        imagen: 'https://via.placeholder.com/200?text=Cama+Perros',
-        descripcion: 'Cama cómoda para perros grandes'
-    }
-];
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
@@ -75,7 +23,7 @@ function checkAuthStatus() {
     const userInfo = document.getElementById('user-info');
     
     if (user) {
-        userGreeting.textContent = `Hola, ${user.nombre || 'Usuario'}`;
+        userGreeting.textContent = `Hola, ${user.name || user.nombre || 'Usuario'}`;
         userInfo.onclick = () => window.location.href = 'profile.html';
     } else {
         userGreeting.textContent = 'Hola, Invitado';
@@ -87,7 +35,9 @@ function checkAuthStatus() {
 function setupEventListeners() {
     // Search input
     const searchInput = document.getElementById('search-input');
-    searchInput.addEventListener('input', debounce(handleSearch, 300));
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(handleSearch, 300));
+    }
     
     // Category buttons
     const categoryButtons = document.querySelectorAll('.category-item');
@@ -97,38 +47,32 @@ function setupEventListeners() {
     
     // Sort select
     const sortSelect = document.getElementById('sort-select');
-    sortSelect.addEventListener('change', handleSortChange);
+    if (sortSelect) {
+        sortSelect.addEventListener('change', handleSortChange);
+    }
 }
 
-// Load products from API with fallback
+// Load products from API
 async function loadProducts() {
     const loadingState = document.getElementById('loading-state');
     const emptyState = document.getElementById('empty-state');
     const productsGrid = document.getElementById('products-grid');
     
     try {
-        loadingState.style.display = 'block';
-        emptyState.style.display = 'none';
-        productsGrid.style.display = 'none';
+        console.log('📦 Cargando productos desde el backend...');
         
-        console.log('🔄 Trying to load products from API...');
+        if (loadingState) loadingState.style.display = 'block';
+        if (emptyState) emptyState.style.display = 'none';
+        if (productsGrid) productsGrid.style.display = 'none';
         
-        // Try to fetch from API first
+        // Try to fetch from API using your api.js
         try {
-            const response = await fetch('http://localhost:3000/api/productos');
-            
-            if (response.ok) {
-                allProducts = await response.json();
-                console.log('✅ Products loaded from API:', allProducts.length);
-            } else {
-                throw new Error(`API returned ${response.status}`);
-            }
+            allProducts = await api.getAllProducts();
+            console.log('✅ Productos cargados desde API:', allProducts.length, allProducts);
         } catch (apiError) {
-            console.log('⚠️ API failed, using mock data:', apiError.message);
-            allProducts = mockProducts;
-            
-            // Show info toast
-            showToast('Usando datos de prueba (Backend no disponible)', 'info', 5000);
+            console.log('⚠️ Error del API:', apiError.message);
+            allProducts = [];
+            showToast('Error al cargar productos del servidor', 'error');
         }
         
         filteredProducts = [...allProducts];
@@ -140,36 +84,12 @@ async function loadProducts() {
         }
         
     } catch (error) {
-        console.error('Error loading products:', error);
-        // Use mock data as final fallback
-        allProducts = mockProducts;
-        filteredProducts = [...allProducts];
-        renderProducts();
-        showToast('Usando datos de prueba', 'warning');
+        console.error('❌ Error cargando productos:', error);
+        showEmptyState();
+        showToast('Error al cargar productos', 'error');
     } finally {
-        loadingState.style.display = 'none';
+        if (loadingState) loadingState.style.display = 'none';
     }
-}
-
-// Handle loading error
-function handleLoadError() {
-    const emptyState = document.getElementById('empty-state');
-    emptyState.innerHTML = `
-        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; color: #ef4444;"></i>
-        <h3>Error al cargar productos</h3>
-        <p>No se pudo conectar con el servidor. Usando datos de prueba.</p>
-        <button class="add-to-cart-btn" onclick="loadProducts()" style="max-width: 200px; margin: 1rem auto;">
-            Reintentar
-        </button>
-    `;
-    emptyState.style.display = 'block';
-    
-    // Load mock data
-    allProducts = mockProducts;
-    filteredProducts = [...allProducts];
-    setTimeout(() => {
-        renderProducts();
-    }, 2000);
 }
 
 // Show empty state
@@ -177,8 +97,8 @@ function showEmptyState() {
     const emptyState = document.getElementById('empty-state');
     const productsGrid = document.getElementById('products-grid');
     
-    emptyState.style.display = 'block';
-    productsGrid.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'block';
+    if (productsGrid) productsGrid.style.display = 'none';
 }
 
 // Render products
@@ -186,40 +106,100 @@ function renderProducts() {
     const productsGrid = document.getElementById('products-grid');
     const emptyState = document.getElementById('empty-state');
     
+    if (!productsGrid) {
+        console.error('❌ No se encontró el contenedor de productos');
+        return;
+    }
+    
     if (filteredProducts.length === 0) {
         showEmptyState();
         return;
     }
     
+    console.log('🎨 Renderizando productos:', filteredProducts.length);
+    
     productsGrid.innerHTML = filteredProducts.map(product => createProductCard(product)).join('');
     
-    emptyState.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'none';
     productsGrid.style.display = 'grid';
+    
+    console.log('✅ Productos renderizados');
 }
 
 // Create product card HTML
 function createProductCard(product) {
+    // Manejar imagen del producto con mejores fallbacks
+    let imageUrl = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=400&fit=crop&crop=center';
+    
+    if (product.images && product.images.length > 0) {
+        // Si tiene array de imágenes (formato nuevo del admin)
+        imageUrl = product.images[0].url || imageUrl;
+    } else if (product.imagen && product.imagen !== 'https://via.placeholder.com/300x300?text=Producto') {
+        // Si tiene imagen válida como string (formato legacy)
+        imageUrl = product.imagen;
+    } else if (product.image && product.image !== 'https://via.placeholder.com/300x300?text=Producto') {
+        // Otro formato posible
+        imageUrl = product.image;
+    }
+    
+    // Manejar nombre de categoría
+    let categoryName = 'General';
+    const categoryMap = {
+        '6898049bdd53186ec08fd313': 'Perros',
+        '6898049bdd53186ec08fd316': 'Gatos',
+        '6898049bdd53186ec08fd319': 'Aves',
+        '6898049bdd53186ec08fd31c': 'Peces',
+        '6898049bdd53186ec08fd31f': 'Accesorios'
+    };
+    
+    if (product.category) {
+        if (typeof product.category === 'object' && product.category.name) {
+            categoryName = product.category.name;
+        } else if (categoryMap[product.category]) {
+            categoryName = categoryMap[product.category];
+        } else if (typeof product.category === 'string') {
+            categoryName = product.category;
+        }
+    } else if (product.categoria) {
+        categoryName = product.categoria;
+    }
+    
+    // Datos del producto
+    const productName = product.nombre || product.name || 'Producto sin nombre';
+    const productPrice = product.precio || product.price || 0;
+    const productDescription = product.descripcion || product.description || 'Sin descripción disponible';
+    const productStock = product.stock || 0;
     const isFavorite = isProductFavorite ? isProductFavorite(product._id) : false;
-    const imageUrl = product.imagen || 'https://via.placeholder.com/200?text=Sin+Imagen';
     
     return `
         <div class="product-card" data-id="${product._id}">
             <div class="product-image">
                 <img src="${imageUrl}" 
-                     alt="${product.nombre}" 
+                     alt="${productName}" 
                      loading="lazy"
-                     onerror="this.src='https://via.placeholder.com/200?text=Sin+Imagen'">
+                     onerror="this.src='https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=400&fit=crop'">
                 <button class="favorite-btn ${isFavorite ? 'active' : ''}" 
                         onclick="handleFavoriteClick('${product._id}', this)">
                     <i class="fas fa-heart"></i>
                 </button>
+                ${productStock <= 0 ? '<div class="stock-badge out-of-stock">Agotado</div>' : ''}
+                ${product.featured ? '<div class="stock-badge featured">Destacado</div>' : ''}
             </div>
             <div class="product-info">
-                <h3 class="product-name" title="${product.nombre}">${product.nombre}</h3>
-                <p class="product-category">${product.categoria}</p>
-                <p class="product-price">$${product.precio}</p>
-                <button class="add-to-cart-btn" onclick="handleAddToCart('${product._id}')">
-                    <i class="fas fa-shopping-cart"></i> Agregar al carrito
+                <div class="product-category">${categoryName}</div>
+                <h3 class="product-name" title="${productName}">${productName}</h3>
+                <p class="product-description">${productDescription.substring(0, 50)}${productDescription.length > 50 ? '...' : ''}</p>
+                <div class="product-price">
+                    <span class="current-price">${parseFloat(productPrice).toFixed(2)}</span>
+                    ${product.originalPrice && product.originalPrice > productPrice ? 
+                        `<span class="original-price">${parseFloat(product.originalPrice).toFixed(2)}</span>` : ''
+                    }
+                </div>
+                <button class="add-to-cart-btn" 
+                        onclick="handleAddToCart('${product._id}')"
+                        ${productStock <= 0 ? 'disabled' : ''}>
+                    <i class="fas fa-shopping-cart"></i>
+                    ${productStock <= 0 ? 'Agotado' : 'Agregar'}
                 </button>
             </div>
         </div>
@@ -229,24 +209,78 @@ function createProductCard(product) {
 // Handle search
 function handleSearch(event) {
     const searchTerm = event.target.value.toLowerCase().trim();
+    console.log('🔍 Buscando:', searchTerm);
     
     filteredProducts = allProducts.filter(product => {
-        const matchesSearch = !searchTerm || 
-            product.nombre.toLowerCase().includes(searchTerm) ||
-            product.categoria.toLowerCase().includes(searchTerm) ||
-            (product.descripcion && product.descripcion.toLowerCase().includes(searchTerm));
+        const productName = (product.nombre || product.name || '').toLowerCase();
+        const productDescription = (product.descripcion || product.description || '').toLowerCase();
         
-        const matchesCategory = !currentCategory || product.categoria === currentCategory;
+        // Manejar categoría para búsqueda
+        let categoryName = '';
+        const categoryMap = {
+            '6898049bdd53186ec08fd313': 'perros',
+            '6898049bdd53186ec08fd316': 'gatos',
+            '6898049bdd53186ec08fd319': 'aves',
+            '6898049bdd53186ec08fd31c': 'peces',
+            '6898049bdd53186ec08fd31f': 'accesorios'
+        };
+        
+        if (product.category) {
+            if (typeof product.category === 'object' && product.category.name) {
+                categoryName = product.category.name.toLowerCase();
+            } else if (categoryMap[product.category]) {
+                categoryName = categoryMap[product.category];
+            }
+        } else if (product.categoria) {
+            categoryName = product.categoria.toLowerCase();
+        }
+        
+        const matchesSearch = !searchTerm || 
+            productName.includes(searchTerm) ||
+            productDescription.includes(searchTerm) ||
+            categoryName.includes(searchTerm);
+        
+        const matchesCategory = !currentCategory || matchesCurrentCategory(product);
         
         return matchesSearch && matchesCategory;
     });
     
     applySorting();
     renderProducts();
+    
+    console.log(`📊 ${filteredProducts.length} productos filtrados`);
+}
+
+// Check if product matches current category
+function matchesCurrentCategory(product) {
+    if (!currentCategory) return true;
+    
+    const categoryMap = {
+        'alimento': ['6898049bdd53186ec08fd313'], // Perros - algunos productos de perros pueden ser alimento
+        'juguetes': ['6898049bdd53186ec08fd313', '6898049bdd53186ec08fd316'], // Perros y Gatos
+        'accesorios': ['6898049bdd53186ec08fd31f'], // Accesorios
+        'higiene': ['6898049bdd53186ec08fd316'], // Gatos - algunos productos de gatos pueden ser higiene
+        'salud': ['6898049bdd53186ec08fd319', '6898049bdd53186ec08fd31c'] // Aves y Peces
+    };
+    
+    const allowedCategoryIds = categoryMap[currentCategory] || [];
+    
+    if (product.category) {
+        if (typeof product.category === 'object' && product.category._id) {
+            return allowedCategoryIds.includes(product.category._id);
+        } else if (typeof product.category === 'string') {
+            return allowedCategoryIds.includes(product.category);
+        }
+    }
+    
+    // Fallback: match by category name
+    return (product.categoria || '').toLowerCase() === currentCategory;
 }
 
 // Handle category change
 function handleCategoryChange(clickedButton) {
+    console.log('📂 Cambiando categoría...');
+    
     // Update active category button
     document.querySelectorAll('.category-item').forEach(btn => {
         btn.classList.remove('active');
@@ -255,16 +289,17 @@ function handleCategoryChange(clickedButton) {
     
     // Get selected category
     currentCategory = clickedButton.dataset.category || '';
+    console.log('📂 Categoría seleccionada:', currentCategory);
     
     // Filter products
-    const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+    const searchTerm = document.getElementById('search-input')?.value.toLowerCase().trim() || '';
     
     filteredProducts = allProducts.filter(product => {
         const matchesSearch = !searchTerm || 
-            product.nombre.toLowerCase().includes(searchTerm) ||
-            product.categoria.toLowerCase().includes(searchTerm);
+            (product.nombre || product.name || '').toLowerCase().includes(searchTerm) ||
+            (product.descripcion || product.description || '').toLowerCase().includes(searchTerm);
         
-        const matchesCategory = !currentCategory || product.categoria === currentCategory;
+        const matchesCategory = !currentCategory || matchesCurrentCategory(product);
         
         return matchesSearch && matchesCategory;
     });
@@ -274,14 +309,19 @@ function handleCategoryChange(clickedButton) {
     
     // Update section title
     const sectionTitle = document.querySelector('.section-title');
-    sectionTitle.textContent = currentCategory ? 
-        `Productos - ${currentCategory}` : 
-        'Todos los Productos';
+    if (sectionTitle) {
+        sectionTitle.textContent = currentCategory ? 
+            `Productos - ${currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1)}` : 
+            'Todos los Productos';
+    }
+    
+    console.log(`📊 ${filteredProducts.length} productos en categoría`);
 }
 
 // Handle sort change
 function handleSortChange(event) {
     currentSort = event.target.value;
+    console.log('🔄 Ordenando por:', currentSort);
     applySorting();
     renderProducts();
 }
@@ -290,20 +330,31 @@ function handleSortChange(event) {
 function applySorting() {
     switch (currentSort) {
         case 'price-low':
-            filteredProducts.sort((a, b) => parseFloat(a.precio) - parseFloat(b.precio));
+            filteredProducts.sort((a, b) => {
+                const priceA = parseFloat(a.precio || a.price || 0);
+                const priceB = parseFloat(b.precio || b.price || 0);
+                return priceA - priceB;
+            });
             break;
         case 'price-high':
-            filteredProducts.sort((a, b) => parseFloat(b.precio) - parseFloat(a.precio));
+            filteredProducts.sort((a, b) => {
+                const priceA = parseFloat(a.precio || a.price || 0);
+                const priceB = parseFloat(b.precio || b.price || 0);
+                return priceB - priceA;
+            });
             break;
         case 'name':
-            filteredProducts.sort((a, b) => a.nombre.localeCompare(b.nombre));
+            filteredProducts.sort((a, b) => {
+                const nameA = (a.nombre || a.name || '').toLowerCase();
+                const nameB = (b.nombre || b.name || '').toLowerCase();
+                return nameA.localeCompare(nameB);
+            });
             break;
         case 'newest':
         default:
-            // Keep original order or sort by date if available
             filteredProducts.sort((a, b) => {
-                const dateA = new Date(a.fechaCreacion || a._id);
-                const dateB = new Date(b.fechaCreacion || b._id);
+                const dateA = new Date(a.createdAt || a.fechaCreacion || a._id);
+                const dateB = new Date(b.createdAt || b.fechaCreacion || b._id);
                 return dateB - dateA;
             });
             break;
@@ -312,7 +363,6 @@ function applySorting() {
 
 // Handle favorite button click
 function handleFavoriteClick(productId, button) {
-    // Check if favorites functions exist
     if (typeof getCurrentUser !== 'function') {
         showToast('Sistema de favoritos no disponible', 'warning');
         return;
@@ -347,7 +397,6 @@ function handleFavoriteClick(productId, button) {
 
 // Handle add to cart
 function handleAddToCart(productId) {
-    // Check if cart functions exist
     if (typeof getCurrentUser !== 'function') {
         showToast('Sistema de carrito no disponible', 'warning');
         return;
@@ -397,11 +446,10 @@ function debounce(func, wait) {
     };
 }
 
-// Handle page visibility change (refresh data when user returns)
+// Handle page visibility change
 document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
         checkAuthStatus();
-        // Refresh favorite buttons in case user logged in/out in another tab
         if (typeof updateFavoriteButtons === 'function') {
             updateFavoriteButtons();
         }
@@ -413,9 +461,9 @@ function updateFavoriteButtons() {
     const favoriteButtons = document.querySelectorAll('.favorite-btn');
     favoriteButtons.forEach(button => {
         const productCard = button.closest('.product-card');
-        const productId = productCard.dataset.id;
+        const productId = productCard?.dataset.id;
         
-        if (typeof isProductFavorite === 'function' && isProductFavorite(productId)) {
+        if (productId && typeof isProductFavorite === 'function' && isProductFavorite(productId)) {
             button.classList.add('active');
         } else {
             button.classList.remove('active');
@@ -428,5 +476,6 @@ window.PetStyleApp = {
     loadProducts,
     handleFavoriteClick,
     handleAddToCart,
-    mockProducts
+    allProducts,
+    filteredProducts
 };

@@ -161,15 +161,20 @@ app.get('/debug/db', async (req, res) => {
 });
 
 // ========================================
-// RUTAS DE API
+// RUTAS DE API - CORREGIDAS EN ESPAÑOL
 // ========================================
 const apiRoutes = require('./routes');
 const authRoutes = require('./routes/authRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const productRoutes = require('./routes/productRoutes');
 
+// RUTAS PRINCIPALES
 app.use('/api', apiRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
+
+// ✅ RUTA DE PRODUCTOS CORREGIDA - EN ESPAÑOL
+app.use('/api/productos', productRoutes);
 
 // Ruta para poblar datos de prueba
 const { SeedController } = require('./controllers');
@@ -189,6 +194,9 @@ app.use((req, res) => {
             'GET /debug/db',
             'GET /api',
             'GET /api/productos',
+            'POST /api/productos',
+            'PUT /api/productos/:id',
+            'DELETE /api/productos/:id',
             'POST /api/auth/login',
             'POST /api/auth/register'
         ]
@@ -202,6 +210,7 @@ app.listen(PORT, () => {
     console.log(`🚀 Servidor PetStyle corriendo en http://localhost:${PORT}`);
     console.log(`📚 API Base: http://localhost:${PORT}/api`);
     console.log(`🔑 Auth: http://localhost:${PORT}/api/auth`);
+    console.log(`📦 Productos: http://localhost:${PORT}/api/productos`);
     console.log(`🔍 Debug DB: http://localhost:${PORT}/debug/db`);
     console.log(`⚙️  Entorno: ${process.env.NODE_ENV || 'development'}`);
 });

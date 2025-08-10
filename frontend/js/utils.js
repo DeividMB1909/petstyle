@@ -1,94 +1,158 @@
-// ===== UTILITY FUNCTIONS =====
+// Utility functions for PetStyle
 
 // Toast notification system
-function showToast(message, type = 'info', duration = 3000) {
-    // Create toast container if it doesn't exist
-    let container = document.getElementById('toast-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'toast-container';
-        container.style.cssText = `
-            position: fixed;
-            top: 90px;
-            right: 20px;
-            z-index: 9999;
-        `;
-        document.body.appendChild(container);
-    }
-    
-    // Create toast element
+function showToast(message, type = 'info') {
+    // Remove existing toasts
+    const existingToasts = document.querySelectorAll('.toast');
+    existingToasts.forEach(toast => toast.remove());
+
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
+    
+    const toastStyles = {
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        padding: '12px 24px',
+        borderRadius: '8px',
+        color: 'white',
+        fontWeight: '500',
+        fontSize: '14px',
+        zIndex: '10000',
+        maxWidth: '300px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        animation: 'slideInRight 0.3s ease-out',
+        transition: 'all 0.3s ease'
+    };
+
+    // Apply base styles
+    Object.assign(toast.style, toastStyles);
+
+    // Apply type-specific colors
+    const typeColors = {
+        success: '#10b981',
+        error: '#ef4444', 
+        warning: '#f59e0b',
+        info: '#3b82f6'
+    };
+    
+    toast.style.background = typeColors[type] || typeColors.info;
     toast.textContent = message;
-    
-    // Toast styles
-    toast.style.cssText = `
-        background: ${getToastColor(type)};
-        color: white;
-        padding: 12px 20px;
-        border-radius: 8px;
-        margin-bottom: 10px;
-        opacity: 0;
-        transform: translateX(100%);
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        font-weight: 500;
-        font-size: 14px;
-        max-width: 300px;
-        word-wrap: break-word;
-    `;
-    
-    // Add to container
-    container.appendChild(toast);
-    
-    // Show toast
+
+    // Add CSS animation if not exists
+    if (!document.querySelector('#toast-animations')) {
+        const style = document.createElement('style');
+        style.id = 'toast-animations';
+        style.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    document.body.appendChild(toast);
+
+    // Auto remove after 3 seconds
     setTimeout(() => {
-        toast.style.opacity = '1';
-        toast.style.transform = 'translateX(0)';
-    }, 100);
-    
-    // Remove toast
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateX(100%)';
+        if (toast.parentNode) {
+            toast.style.animation = 'slideOutRight 0.3s ease-out';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 300);
+        }
+    }, 3000);
+
+    // Click to dismiss
+    toast.addEventListener('click', () => {
+        toast.style.animation = 'slideOutRight 0.3s ease-out';
         setTimeout(() => {
             if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
+                toast.remove();
             }
         }, 300);
-    }, duration);
+    });
 }
 
-function getToastColor(type) {
-    const colors = {
-        success: '#10b981',
-        error: '#ef4444',
-        warning: '#f59e0b',
-        info: '#3b82f6',
-        default: '#333'
-    };
-    return colors[type] || colors.default;
+// Local Storage helpers
+function setLocalStorage(key, value) {
+    try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+    } catch (error) {
+        console.error('Error saving to localStorage:', error);
+        return false;
+    }
+}
+
+function getLocalStorage(key, defaultValue = null) {
+    try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : defaultValue;
+    } catch (error) {
+        console.error('Error reading from localStorage:', error);
+        return defaultValue;
+    }
+}
+
+function removeLocalStorage(key) {
+    try {
+        localStorage.removeItem(key);
+        return true;
+    } catch (error) {
+        console.error('Error removing from localStorage:', error);
+        return false;
+    }
 }
 
 // Format currency
-function formatCurrency(amount, currency = 'USD') {
+function formatCurrency(amount) {
     return new Intl.NumberFormat('es-MX', {
         style: 'currency',
-        currency: currency,
-        minimumFractionDigits: 2
+        currency: 'MXN'
     }).format(amount);
 }
 
 // Format date
-function formatDate(date, options = {}) {
-    const defaultOptions = {
+function formatDate(date) {
+    return new Intl.DateTimeFormat('es-MX', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric',
-        ...options
+        day: 'numeric'
+    }).format(new Date(date));
+}
+
+// Debounce function
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
     };
-    
-    return new Intl.DateTimeFormat('es-MX', defaultOptions).format(new Date(date));
 }
 
 // Validate email
@@ -97,221 +161,110 @@ function isValidEmail(email) {
     return emailRegex.test(email);
 }
 
-// Validate password strength
-function validatePassword(password) {
-    const errors = [];
-    
-    if (password.length < 8) {
-        errors.push('La contraseña debe tener al menos 8 caracteres');
-    }
-    
-    if (!/[A-Z]/.test(password)) {
-        errors.push('Debe contener al menos una letra mayúscula');
-    }
-    
-    if (!/[a-z]/.test(password)) {
-        errors.push('Debe contener al menos una letra minúscula');
-    }
-    
-    if (!/\d/.test(password)) {
-        errors.push('Debe contener al menos un número');
-    }
-    
-    return {
-        isValid: errors.length === 0,
-        errors: errors,
-        strength: getPasswordStrength(password)
-    };
-}
-
-function getPasswordStrength(password) {
-    let strength = 0;
-    
-    if (password.length >= 8) strength += 1;
-    if (password.length >= 12) strength += 1;
-    if (/[A-Z]/.test(password)) strength += 1;
-    if (/[a-z]/.test(password)) strength += 1;
-    if (/\d/.test(password)) strength += 1;
-    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
-    
-    if (strength <= 2) return 'weak';
-    if (strength <= 4) return 'medium';
-    return 'strong';
-}
-
-// Sanitize HTML input
-function sanitizeHTML(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-}
-
-// Debounce function
-function debounce(func, wait, immediate = false) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            timeout = null;
-            if (!immediate) func(...args);
-        };
-        const callNow = immediate && !timeout;
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-        if (callNow) func(...args);
-    };
-}
-
-// Throttle function
-function throttle(func, limit) {
-    let inThrottle;
-    return function(...args) {
-        if (!inThrottle) {
-            func.apply(this, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-        }
-    };
-}
-
-// Local storage helpers
-const storage = {
-    set(key, value) {
-        try {
-            localStorage.setItem(key, JSON.stringify(value));
-            return true;
-        } catch (error) {
-            console.error('Error saving to localStorage:', error);
-            return false;
-        }
-    },
-    
-    get(key, defaultValue = null) {
-        try {
-            const item = localStorage.getItem(key);
-            return item ? JSON.parse(item) : defaultValue;
-        } catch (error) {
-            console.error('Error reading from localStorage:', error);
-            return defaultValue;
-        }
-    },
-    
-    remove(key) {
-        try {
-            localStorage.removeItem(key);
-            return true;
-        } catch (error) {
-            console.error('Error removing from localStorage:', error);
-            return false;
-        }
-    },
-    
-    clear() {
-        try {
-            localStorage.clear();
-            return true;
-        } catch (error) {
-            console.error('Error clearing localStorage:', error);
-            return false;
-        }
-    }
-};
-
-// Generate unique ID
+// Generate random ID
 function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
-// Format file size
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
+// Get user initials for avatar
+function getUserInitials(name) {
+    if (!name) return 'U';
     
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    const names = name.trim().split(' ');
+    if (names.length === 1) {
+        return names[0].charAt(0).toUpperCase();
+    }
     
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
 }
 
-// Check if device is mobile
-function isMobile() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-}
-
-// Copy text to clipboard
-async function copyToClipboard(text) {
+// Logout function - NUEVA FUNCIÓN
+function logout() {
     try {
-        await navigator.clipboard.writeText(text);
-        showToast('Copiado al portapapeles', 'success');
+        // Clear user data from localStorage
+        localStorage.removeItem('petstyle_user');
+        localStorage.removeItem('petstyle_token');
+        
+        // Clear any user-specific data
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+            if (key.startsWith('cart_') || key.startsWith('favorites_')) {
+                localStorage.removeItem(key);
+            }
+        });
+        
+        // Show success message
+        showToast('Sesión cerrada exitosamente', 'success');
+        
+        // Redirect to login after a short delay
+        setTimeout(() => {
+            window.location.href = '../pages/login.html';
+        }, 1000);
+        
         return true;
     } catch (error) {
-        console.error('Error copying to clipboard:', error);
-        
-        // Fallback for older browsers
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        
-        try {
-            document.execCommand('copy');
-            showToast('Copiado al portapapeles', 'success');
-            return true;
-        } catch (fallbackError) {
-            showToast('Error al copiar', 'error');
-            return false;
-        } finally {
-            document.body.removeChild(textArea);
-        }
+        console.error('Error during logout:', error);
+        showToast('Error al cerrar sesión', 'error');
+        return false;
     }
 }
 
-// Smooth scroll to element
-function scrollToElement(elementId, offset = 0) {
-    const element = document.getElementById(elementId);
+// Check if user is logged in
+function isLoggedIn() {
+    const user = getLocalStorage('petstyle_user');
+    return user && user.email;
+}
+
+// Get current user data
+function getCurrentUser() {
+    return getLocalStorage('petstyle_user');
+}
+
+// Redirect if not logged in
+function requireAuth() {
+    if (!isLoggedIn()) {
+        showToast('Debes iniciar sesión para acceder a esta página', 'warning');
+        setTimeout(() => {
+            window.location.href = '../pages/login.html';
+        }, 1500);
+        return false;
+    }
+    return true;
+}
+
+// Loading state helpers
+function showLoading(element) {
     if (element) {
-        const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
-        
-        window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-        });
+        element.innerHTML = `
+            <div style="text-align: center; padding: 2rem;">
+                <div style="width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+                <p style="color: #6b7280;">Cargando...</p>
+            </div>
+        `;
     }
 }
 
-// Loading state manager
-const loadingManager = {
-    show(elementId, message = 'Cargando...') {
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.innerHTML = `
-                <div style="text-align: center; padding: 2rem; color: #6b7280;">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem; color: #6366f1;"></i>
-                    <p>${message}</p>
-                </div>
-            `;
-        }
-    },
-    
-    hide(elementId) {
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.innerHTML = '';
-        }
+function hideLoading(element) {
+    if (element) {
+        element.innerHTML = '';
     }
-};
+}
 
-// Error handler
+// Error handling
 function handleError(error, context = '') {
-    console.error(`Error in ${context}:`, error);
+    console.error(`Error${context ? ` in ${context}` : ''}:`, error);
     
-    let message = 'Ha ocurrido un error';
+    let message = 'Ha ocurrido un error inesperado';
     
     if (error.message) {
         if (error.message.includes('fetch')) {
             message = 'Error de conexión. Verifica tu internet.';
-        } else if (error.message.includes('JSON')) {
-            message = 'Error procesando datos del servidor.';
+        } else if (error.message.includes('404')) {
+            message = 'Recurso no encontrado';
+        } else if (error.message.includes('401')) {
+            message = 'No autorizado. Inicia sesión nuevamente.';
+            logout();
+            return;
         } else {
             message = error.message;
         }
@@ -320,42 +273,25 @@ function handleError(error, context = '') {
     showToast(message, 'error');
 }
 
-// Network status checker
-function checkNetworkStatus() {
-    return navigator.onLine;
+// Export functions if using modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        showToast,
+        setLocalStorage,
+        getLocalStorage,
+        removeLocalStorage,
+        formatCurrency,
+        formatDate,
+        debounce,
+        isValidEmail,
+        generateId,
+        getUserInitials,
+        logout,
+        isLoggedIn,
+        getCurrentUser,
+        requireAuth,
+        showLoading,
+        hideLoading,
+        handleError
+    };
 }
-
-// Initialize network status listeners
-function initNetworkListeners() {
-    window.addEventListener('online', () => {
-        showToast('Conexión restaurada', 'success');
-    });
-    
-    window.addEventListener('offline', () => {
-        showToast('Sin conexión a internet', 'warning');
-    });
-}
-
-// Call on page load
-document.addEventListener('DOMContentLoaded', initNetworkListeners);
-
-// Export utilities for global use
-window.utils = {
-    showToast,
-    formatCurrency,
-    formatDate,
-    isValidEmail,
-    validatePassword,
-    sanitizeHTML,
-    debounce,
-    throttle,
-    storage,
-    generateId,
-    formatFileSize,
-    isMobile,
-    copyToClipboard,
-    scrollToElement,
-    loadingManager,
-    handleError,
-    checkNetworkStatus
-};

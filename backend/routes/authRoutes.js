@@ -85,4 +85,61 @@ router.post('/change-password', [
 // GET /api/auth/verify - Verificar si el token es válido
 router.get('/verify', authenticateToken, AuthController.verifyToken);
 
+// En authRoutes.js, reemplaza la ruta test-admin con esta versión:
+router.post('/test-admin', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        
+        console.log('🧪 TEST: Probando conexión directa a administradors');
+        console.log('📧 Email:', email);
+        
+        // GENERAR HASH NUEVO PRIMERO (SIEMPRE)
+        const bcrypt = require('bcryptjs');
+        const freshHash = await bcrypt.hash('admin123', 12);
+        console.log('🔑 HASH COMPLETAMENTE NUEVO:', freshHash);
+        
+        // Conexión directa a MongoDB
+        const mongoose = require('mongoose');
+        const adminCollection = mongoose.connection.collection('administradors');
+        
+        // Buscar admin
+        const admin = await adminCollection.findOne({ email: email });
+        console.log('👨‍💼 Admin encontrado:', !!admin);
+        
+        if (admin) {
+            console.log('📋 Admin data:', {
+                nombre: admin.nombre,
+                email: admin.email,
+                activo: admin.activo
+            });
+            
+            // Verificar password
+            const isValid = await bcrypt.compare(password, admin.password);
+            console.log('🔐 Password válido:', isValid);
+            
+            return res.json({
+                success: true,
+                message: 'Test completado',
+                adminFound: !!admin,
+                passwordValid: isValid,
+                newHashGenerated: freshHash
+            });
+        }
+        
+        res.status(200).json({
+            success: true,
+            message: 'Test completado - admin no encontrado',
+            newHashGenerated: freshHash
+        });
+        
+    } catch (error) {
+        console.error('❌ Error en test:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error en test',
+            error: error.message
+        });
+    }
+});
+
 module.exports = router;

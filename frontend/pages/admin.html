@@ -111,6 +111,7 @@
                     <input type="text" id="product-search" placeholder="Buscar productos..." onkeyup="filterProducts()">
                     <select id="category-filter" onchange="filterProducts()">
                         <option value="">Todas las categorías</option>
+                        <!-- Las categorías se cargarán dinámicamente -->
                     </select>
                 </div>
 
@@ -186,37 +187,38 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="product-name">Nombre *</label>
-                        <input type="text" id="product-name" required>
+                        <input type="text" id="product-name" required placeholder="Ej: Collar de colores para gato">
                     </div>
                     <div class="form-group">
                         <label for="product-category">Categoría *</label>
                         <select id="product-category" required>
-                            <option value="">Seleccionar categoría</option>
-                            <option value="alimento">Alimento</option>
-                            <option value="juguetes">Juguetes</option>
-                            <option value="accesorios">Accesorios</option>
-                            <option value="higiene">Higiene</option>
-                            <option value="salud">Salud</option>
+                            <option value="">Selecciona una categoría</option>
+                            <option value="6898049bdd53186ec08fd313">🐕 Perros</option>
+                            <option value="6898049bdd53186ec08fd316">🐱 Gatos</option>
+                            <option value="6898049bdd53186ec08fd319">🦅 Aves</option>
+                            <option value="6898049bdd53186ec08fd31c">🐠 Peces</option>
+                            <option value="6898049bdd53186ec08fd31f">🎾 Accesorios</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="product-price">Precio *</label>
-                        <input type="number" id="product-price" step="0.01" min="0" required>
+                        <input type="number" id="product-price" step="0.01" min="0" required placeholder="0.00">
                     </div>
                     <div class="form-group">
                         <label for="product-stock">Stock</label>
-                        <input type="number" id="product-stock" min="0" value="0">
+                        <input type="number" id="product-stock" min="0" value="0" placeholder="Cantidad disponible">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="product-description">Descripción</label>
-                    <textarea id="product-description" rows="3"></textarea>
+                    <label for="product-description">Descripción *</label>
+                    <textarea id="product-description" rows="3" required placeholder="Describe las características principales del producto..."></textarea>
                 </div>
                 <div class="form-group">
                     <label for="product-image">URL de Imagen</label>
                     <input type="url" id="product-image" placeholder="https://ejemplo.com/imagen.jpg">
+                    <small class="form-help">Si no proporcionas una imagen, se usará una imagen por defecto</small>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" onclick="closeProductModal()">

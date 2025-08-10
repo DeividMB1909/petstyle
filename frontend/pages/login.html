@@ -6,353 +6,182 @@
     <title>Iniciar Sesión - PetStyle</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/auth.css">
-    <link rel="stylesheet" href="../css/components.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="auth-body">
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="loading-screen hidden">
-        <div class="loading-content">
-            <div class="logo-loading">🐾</div>
-            <h2>PetStyle</h2>
-            <div class="loading-spinner"></div>
-        </div>
-    </div>
-
-    <!-- Main Container -->
+<body>
     <div class="auth-container">
         <!-- Header -->
-        <div class="auth-header">
-            <button class="back-btn" onclick="goBack()">
-                <span class="back-icon">←</span>
+        <header class="auth-header">
+            <button class="back-btn" onclick="window.location.href='main.html'">
+                <i class="fas fa-arrow-left"></i>
             </button>
-            <div class="auth-logo">
-                <span class="logo-icon">🐾</span>
-                <span class="logo-text">PetStyle</span>
+            <div class="logo">
+                <i class="fas fa-paw"></i>
+                <span>PetStyle</span>
             </div>
-        </div>
+        </header>
 
-        <!-- Login Form -->
-        <div class="auth-content">
-            <div class="auth-welcome">
-                <h1>¡Bienvenido de vuelta!</h1>
-                <p>Inicia sesión para acceder a tu cuenta y seguir explorando nuestros productos para mascotas</p>
-            </div>
+        <!-- Main Content -->
+        <main class="auth-content">
+            <div class="auth-card">
+                <div class="auth-header-text">
+                    <h1>¡Bienvenido de vuelta!</h1>
+                    <p>Inicia sesión para acceder a tu cuenta y seguir explorando nuestros productos para mascotas</p>
+                </div>
 
-            <form id="login-form" class="auth-form" novalidate>
-                <div class="form-group">
-                    <label for="email" class="form-label">Correo Electrónico</label>
-                    <div class="input-group">
-                        <span class="input-icon">📧</span>
-                        <input 
-                            type="email" 
-                            id="email" 
-                            name="email" 
-                            class="form-input" 
-                            placeholder="tu-email@ejemplo.com"
-                            required
-                            autocomplete="email"
-                        >
+                <!-- Login Form -->
+                <form id="login-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="email">Correo Electrónico</label>
+                        <div class="input-group">
+                            <input type="email" 
+                                   id="email" 
+                                   placeholder="tu-email@ejemplo.com" 
+                                   required 
+                                   autocomplete="email">
+                            <i class="fas fa-envelope input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Contraseña</label>
+                        <div class="input-group">
+                            <input type="password" 
+                                   id="password" 
+                                   placeholder="Tu contraseña" 
+                                   required 
+                                   autocomplete="current-password">
+                            <button type="button" class="password-toggle" onclick="togglePassword()">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="remember">
+                            <span class="checkmark"></span>
+                            Recordarme
+                        </label>
+                        <a href="#" class="forgot-password" onclick="handleForgotPassword(event)">
+                            ¿Olvidaste tu contraseña?
+                        </a>
+                    </div>
+
+                    <button type="submit" id="login-btn" class="btn-primary">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Iniciar Sesión
+                    </button>
+                </form>
+
+                <!-- Database Info -->
+                <div class="database-info">
+                    <div class="info-item">
+                        <i class="fas fa-database"></i>
+                        <span>Conectado a: petstyle_db</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-users"></i>
+                        <span>Usuarios registrados: Disponible</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Autenticación segura</span>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="password" class="form-label">Contraseña</label>
-                    <div class="input-group">
-                        <span class="input-icon">🔒</span>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            name="password" 
-                            class="form-input" 
-                            placeholder="Tu contraseña"
-                            required
-                            autocomplete="current-password"
-                        >
-                        <button type="button" class="toggle-password" tabindex="-1">👁️</button>
-                    </div>
-                </div>
-
-                <div class="form-options">
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="rememberMe" class="form-checkbox">
-                        <span class="checkbox-text">Recordarme</span>
-                    </label>
-                    <a href="#" class="forgot-password" onclick="showForgotPassword()">
-                        ¿Olvidaste tu contraseña?
-                    </a>
-                </div>
-
-                <button type="submit" class="btn-primary btn-auth">
-                    <span class="btn-icon">🚀</span>
-                    <span class="btn-text">Iniciar Sesión</span>
-                </button>
-
+                <!-- Divider -->
                 <div class="auth-divider">
-                    <span>o</span>
+                    <span>0</span>
                 </div>
 
-                <button type="button" class="btn-secondary btn-auth" onclick="showDemoLogin()">
-                    <span class="btn-icon">👤</span>
-                    <span class="btn-text">Cuenta Demo</span>
-                </button>
-            </form>
-
-            <div class="auth-footer">
-                <p class="auth-switch">
-                    ¿No tienes cuenta? 
-                    <a href="register.html" class="auth-link">Regístrate aquí</a>
-                </p>
-            </div>
-        </div>
-
-        <!-- Demo Login Modal -->
-        <div id="demo-modal" class="modal hidden">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Cuentas Demo</h3>
-                    <button class="close-btn" onclick="closeDemoModal()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p class="demo-info">Prueba la aplicación con estas cuentas de demostración:</p>
-                    
-                    <div class="demo-accounts">
-                        <div class="demo-account" onclick="loginAsDemo('customer')">
-                            <div class="demo-avatar">👤</div>
-                            <div class="demo-details">
-                                <div class="demo-name">Usuario Cliente</div>
-                                <div class="demo-email">juan@test.com</div>
-                                <div class="demo-role">Cliente</div>
-                            </div>
-                            <button class="demo-btn">Usar Cuenta</button>
-                        </div>
-                        
-                        <div class="demo-account" onclick="loginAsDemo('admin')">
-                            <div class="demo-avatar">⚙️</div>
-                            <div class="demo-details">
-                                <div class="demo-name">Administrador</div>
-                                <div class="demo-email">admin@petstyle.com</div>
-                                <div class="demo-role">Administrador</div>
-                            </div>
-                            <button class="demo-btn">Usar Cuenta</button>
-                        </div>
-                    </div>
-                    
-                    <div class="demo-warning">
-                        <span class="warning-icon">⚠️</span>
-                        <span>Los datos en cuentas demo son de prueba y pueden ser modificados por otros usuarios.</span>
-                    </div>
+                <!-- Register Link -->
+                <div class="auth-footer">
+                    <p>¿No tienes cuenta? <a href="register.html">Regístrate aquí</a></p>
                 </div>
             </div>
-        </div>
-
-        <!-- Forgot Password Modal -->
-        <div id="forgot-password-modal" class="modal hidden">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Recuperar Contraseña</h3>
-                    <button class="close-btn" onclick="closeForgotPasswordModal()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p class="forgot-info">
-                        Ingresa tu correo electrónico y te enviaremos las instrucciones para restablecer tu contraseña.
-                    </p>
-                    
-                    <form id="forgot-password-form" class="forgot-form">
-                        <div class="form-group">
-                            <label for="forgot-email" class="form-label">Correo Electrónico</label>
-                            <div class="input-group">
-                                <span class="input-icon">📧</span>
-                                <input 
-                                    type="email" 
-                                    id="forgot-email" 
-                                    name="email" 
-                                    class="form-input" 
-                                    placeholder="tu-email@ejemplo.com"
-                                    required
-                                >
-                            </div>
-                        </div>
-                        
-                        <button type="submit" class="btn-primary">
-                            <span class="btn-icon">📤</span>
-                            <span class="btn-text">Enviar Instrucciones</span>
-                        </button>
-                    </form>
-                    
-                    <div class="forgot-note">
-                        <span class="note-icon">💡</span>
-                        <span>Si no recibes el correo en unos minutos, revisa tu carpeta de spam.</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
 
-    <!-- Toast Notifications -->
-    <div id="toast-container" class="toast-container"></div>
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
 
     <!-- Scripts -->
     <script src="../js/utils.js"></script>
-    <script src="../js/api.js"></script>
     <script src="../js/auth.js"></script>
-    
-    <script>
-        // Page-specific JavaScript
-        
-        // Check if already logged in
-        document.addEventListener('DOMContentLoaded', async () => {
-            const isAuthenticated = await Auth.checkAuthStatus();
-            if (isAuthenticated) {
-                // Redirect to main page if already logged in
-                window.location.href = 'main.html';
-                return;
-            }
-            
-            // Auto-focus email field
-            document.getElementById('email').focus();
-            
-            // Check for redirect parameter
-            const redirectUrl = UrlUtils.getParam('redirect');
-            if (redirectUrl) {
-                Auth.setRedirectAfterLogin(decodeURIComponent(redirectUrl));
-            }
-        });
+    <script src="../js/login-page.js"></script>
 
-        // Navigation functions
-        function goBack() {
-            if (window.history.length > 1) {
-                window.history.back();
-            } else {
-                window.location.href = 'main.html';
-            }
+    <style>
+        /* Additional styles for this page */
+        .database-info {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1.5rem 0;
         }
 
-        // Demo login functions
-        function showDemoLogin() {
-            document.getElementById('demo-modal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: #0369a1;
         }
 
-        function closeDemoModal() {
-            document.getElementById('demo-modal').classList.add('hidden');
-            document.body.style.overflow = '';
+        .info-item:last-child {
+            margin-bottom: 0;
         }
 
-        async function loginAsDemo(type) {
-            const demoCredentials = {
-                customer: {
-                    email: 'juan@test.com',
-                    password: '123456'
-                },
-                admin: {
-                    email: 'admin@petstyle.com',
-                    password: 'admin123'
-                }
-            };
-
-            const credentials = demoCredentials[type];
-            if (!credentials) return;
-
-            closeDemoModal();
-            
-            // Fill form
-            document.getElementById('email').value = credentials.email;
-            document.getElementById('password').value = credentials.password;
-            
-            // Auto-submit form
-            setTimeout(() => {
-                document.getElementById('login-form').dispatchEvent(new Event('submit'));
-            }, 500);
+        .info-item i {
+            width: 16px;
+            color: #0284c7;
         }
 
-        // Forgot password functions
-        function showForgotPassword() {
-            document.getElementById('forgot-password-modal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-            
-            // Pre-fill email if entered
-            const currentEmail = document.getElementById('email').value;
-            if (currentEmail) {
-                document.getElementById('forgot-email').value = currentEmail;
-            }
+        .field-error {
+            color: #ef4444;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
         }
 
-        function closeForgotPasswordModal() {
-            document.getElementById('forgot-password-modal').classList.add('hidden');
-            document.body.style.overflow = '';
+        .field-error::before {
+            content: "⚠️";
         }
 
-        // Handle forgot password form
-        document.getElementById('forgot-password-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const form = e.target;
-            const submitBtn = form.querySelector('button[type="submit"]');
-            const formData = FormUtils.getFormData(form);
-            
-            LoadingUtils.showButton(submitBtn, 'Enviando...');
-            
-            try {
-                // Simulate API call (implement when backend is ready)
-                await TimingUtils.delay(2000);
-                
-                Toast.show('Instrucciones enviadas a tu correo electrónico', 'success');
-                closeForgotPasswordModal();
-                form.reset();
-            } catch (error) {
-                Toast.show('Error al enviar instrucciones', 'error');
-            } finally {
-                LoadingUtils.hideButton(submitBtn);
-            }
-        });
+        .input-group input.error {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
 
-        // Close modals when clicking backdrop
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal')) {
-                if (e.target.id === 'demo-modal') {
-                    closeDemoModal();
-                } else if (e.target.id === 'forgot-password-modal') {
-                    closeForgotPasswordModal();
-                }
-            }
-        });
+        .input-group input.error:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
 
-        // Form enhancements
-        document.addEventListener('input', (e) => {
-            if (e.target.classList.contains('form-input')) {
-                // Remove error styling when user starts typing
-                e.target.classList.remove('error');
-                const errorMsg = e.target.parentNode.nextElementSibling;
-                if (errorMsg && errorMsg.classList.contains('error-message')) {
-                    errorMsg.remove();
-                }
-            }
-        });
+        .auth-header-text h1 {
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
 
-        // Enter key handling for better UX
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && e.target.type === 'email') {
-                // Move to password field when pressing Enter on email
-                const passwordField = document.getElementById('password');
-                if (passwordField) {
-                    passwordField.focus();
-                }
-            }
-        });
+        .auth-header-text p {
+            color: #6b7280;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
 
-        // Handle browser autofill
-        window.addEventListener('load', () => {
-            // Check if browser autofilled the form
-            const emailField = document.getElementById('email');
-            const passwordField = document.getElementById('password');
+        /* Mobile responsive */
+        @media (max-width: 480px) {
+            .database-info {
+                padding: 0.75rem;
+            }
             
-            if (emailField.value && passwordField.value) {
-                // Add visual indicator that form is autofilled
-                [emailField, passwordField].forEach(field => {
-                    field.classList.add('autofilled');
-                });
+            .info-item {
+                font-size: 0.8rem;
             }
-        });
-    </script>
+        }
+    </style>
 </body>
 </html>

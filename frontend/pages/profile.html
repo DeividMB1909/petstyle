@@ -4,243 +4,144 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Perfil - PetStyle</title>
-    <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/profile.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <button class="back-btn" onclick="window.location.href='main.html'">
-                    <i class="fas fa-arrow-left"></i>
-                </button>
-                <h1>Mi Perfil</h1>
-                <button class="header-btn" id="settings-btn" onclick="toggleSettings()">
-                    <i class="fas fa-cog"></i>
-                </button>
-            </div>
-        </header>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Guest Profile (Not Logged In) -->
-            <div id="guest-profile" class="guest-profile" style="display: none;">
-                <div class="guest-avatar">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <h2>¡Hola, Invitado!</h2>
-                <p>Inicia sesión para acceder a todas las funciones</p>
-                
-                <div class="guest-actions">
-                    <button class="btn-primary" onclick="window.location.href='login.html'">
-                        <i class="fas fa-sign-in-alt"></i>
-                        Iniciar Sesión
-                    </button>
-                    <button class="btn-secondary" onclick="window.location.href='register.html'">
-                        <i class="fas fa-user-plus"></i>
-                        Registrarse
-                    </button>
-                </div>
-
-                <div class="guest-features">
-                    <h3>¿Por qué registrarse?</h3>
-                    <div class="feature-list">
-                        <div class="feature-item">
-                            <i class="fas fa-heart"></i>
-                            <span>Guardar favoritos</span>
-                        </div>
-                        <div class="feature-item">
-                            <i class="fas fa-shopping-cart"></i>
-                            <span>Carrito personalizado</span>
-                        </div>
-                        <div class="feature-item">
-                            <i class="fas fa-truck"></i>
-                            <span>Seguimiento de pedidos</span>
-                        </div>
-                        <div class="feature-item">
-                            <i class="fas fa-gift"></i>
-                            <span>Ofertas exclusivas</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Logged In Profile -->
-            <div id="user-profile" class="user-profile" style="display: none;">
-                <!-- User Info -->
-                <div class="profile-header">
-                    <div class="user-avatar">
-                        <img id="user-avatar-img" src="https://via.placeholder.com/100" alt="Avatar">
-                        <button class="avatar-edit-btn" onclick="changeAvatar()">
-                            <i class="fas fa-camera"></i>
-                        </button>
-                    </div>
-                    <div class="user-info">
-                        <h2 id="user-name">Usuario</h2>
-                        <p id="user-email">usuario@email.com</p>
-                        <span id="user-role" class="user-role">Usuario</span>
-                    </div>
-                </div>
-
-                <!-- Stats -->
-                <div class="profile-stats">
-                    <div class="stat-item">
-                        <div class="stat-number" id="favorites-count">0</div>
-                        <div class="stat-label">Favoritos</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="cart-count">0</div>
-                        <div class="stat-label">En Carrito</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="orders-count">0</div>
-                        <div class="stat-label">Pedidos</div>
-                    </div>
-                </div>
-
-                <!-- Profile Menu -->
-                <div class="profile-menu">
-                    <div class="menu-section">
-                        <h3>Mi Cuenta</h3>
-                        <button class="menu-item" onclick="editProfile()">
-                            <i class="fas fa-user-edit"></i>
-                            <span>Editar Perfil</span>
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                        <button class="menu-item" onclick="changePassword()">
-                            <i class="fas fa-lock"></i>
-                            <span>Cambiar Contraseña</span>
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                        <button class="menu-item" onclick="manageAddresses()">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>Direcciones</span>
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-
-                    <div class="menu-section">
-                        <h3>Compras</h3>
-                        <button class="menu-item" onclick="viewOrders()">
-                            <i class="fas fa-shopping-bag"></i>
-                            <span>Mis Pedidos</span>
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                        <button class="menu-item" onclick="window.location.href='favorites.html'">
-                            <i class="fas fa-heart"></i>
-                            <span>Favoritos</span>
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                        <button class="menu-item" onclick="window.location.href='cart.html'">
-                            <i class="fas fa-shopping-cart"></i>
-                            <span>Mi Carrito</span>
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-
-                    <div class="menu-section">
-                        <h3>Configuración</h3>
-                        <div class="menu-item toggle-item">
-                            <i class="fas fa-bell"></i>
-                            <span>Notificaciones</span>
-                            <div class="toggle-switch" onclick="toggleNotifications()">
-                                <input type="checkbox" id="notifications-toggle" checked>
-                                <span class="slider"></span>
-                            </div>
-                        </div>
-                        <div class="menu-item toggle-item">
-                            <i class="fas fa-moon"></i>
-                            <span>Modo Oscuro</span>
-                            <div class="toggle-switch" onclick="toggleDarkMode()">
-                                <input type="checkbox" id="darkmode-toggle">
-                                <span class="slider"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Admin Section (Only for admins) -->
-                    <div class="menu-section" id="admin-section" style="display: none;">
-                        <h3>Administración</h3>
-                        <button class="menu-item admin-item" onclick="window.location.href='admin.html'">
-                            <i class="fas fa-cogs"></i>
-                            <span>Panel de Admin</span>
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-
-                    <div class="menu-section">
-                        <button class="menu-item logout-item" onclick="handleLogout()">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Cerrar Sesión</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <button class="nav-btn" onclick="window.location.href='main.html'">
-                <i class="fas fa-home"></i>
-                <span>Inicio</span>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <button class="back-btn" onclick="goBack()">
+                ← Atrás
             </button>
-            <button class="nav-btn" onclick="window.location.href='favorites.html'">
-                <i class="fas fa-heart"></i>
-                <span>Favoritos</span>
-            </button>
-            <button class="nav-btn" onclick="window.location.href='cart.html'">
-                <i class="fas fa-shopping-cart"></i>
-                <span>Carrito</span>
-            </button>
-            <button class="nav-btn active">
-                <i class="fas fa-user"></i>
-                <span>Perfil</span>
-            </button>
-        </nav>
-    </div>
-
-    <!-- Edit Profile Modal -->
-    <div id="edit-profile-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Editar Perfil</h3>
-                <button class="close-btn" onclick="closeEditModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <form id="edit-profile-form" class="modal-body">
-                <div class="form-group">
-                    <label for="edit-name">Nombre</label>
-                    <input type="text" id="edit-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="edit-email">Email</label>
-                    <input type="email" id="edit-email" required>
-                </div>
-                <div class="form-group">
-                    <label for="edit-phone">Teléfono</label>
-                    <input type="tel" id="edit-phone">
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" onclick="closeEditModal()">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="btn-primary">
-                        Guardar Cambios
-                    </button>
-                </div>
-            </form>
+            <h1>Mi Perfil</h1>
+            <div style="width: 60px;"></div> <!-- Spacer for centering -->
         </div>
+    </header>
+
+    <!-- Container -->
+    <div class="container">
+        <!-- Profile Content -->
+        <div id="profileContent" class="profile-content">
+            <!-- Loading state will be inserted here -->
+        </div>
+
+        <!-- User Profile Template (hidden, will be cloned by JS) -->
+        <template id="userProfileTemplate">
+            <!-- Profile Card -->
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="userAvatar">U</div>
+                    <h2 class="profile-name" id="userName">Usuario</h2>
+                    <p class="profile-email" id="userEmail">usuario@email.com</p>
+                    <span class="profile-badge" id="userRole">Usuario</span>
+                </div>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="stats-section">
+                <h3 class="stats-title">Mis Estadísticas</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number" id="favoritesCount">0</span>
+                        <span class="stat-label">Favoritos</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="cartCount">0</span>
+                        <span class="stat-label">En Carrito</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="ordersCount">0</span>
+                        <span class="stat-label">Pedidos</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Actions -->
+            <div class="actions-section">
+                <button class="action-btn secondary" onclick="editProfile()">
+                    ✏️ Editar Perfil
+                </button>
+                <button class="action-btn secondary" onclick="changePassword()">
+                    🔒 Cambiar Contraseña
+                </button>
+                <button class="action-btn secondary" onclick="viewOrders()">
+                    📦 Mis Pedidos
+                </button>
+            </div>
+
+            <!-- Quick Access -->
+            <div class="actions-section">
+                <h3 style="margin-bottom: 1rem; font-size: 1.1rem; font-weight: 700; color: #1a1a1a;">Accesos Rápidos</h3>
+                <button class="action-btn secondary" onclick="goToFavorites()">
+                    ❤️ Mis Favoritos
+                </button>
+                <button class="action-btn secondary" onclick="goToCart()">
+                    🛒 Mi Carrito
+                </button>
+            </div>
+
+            <!-- Settings -->
+            <div class="settings-section">
+                <h3 class="settings-title">Configuración</h3>
+                <div class="setting-item">
+                    <span class="setting-label">Notificaciones</span>
+                    <div class="setting-toggle" id="notificationsToggle" onclick="toggleNotifications()"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Modo Oscuro</span>
+                    <div class="setting-toggle" id="darkModeToggle" onclick="toggleDarkMode()"></div>
+                </div>
+            </div>
+
+            <!-- Logout -->
+            <div class="actions-section">
+                <button class="action-btn danger" onclick="logout()">
+                    🚪 Cerrar Sesión
+                </button>
+            </div>
+        </template>
+
+        <!-- Guest Profile Template -->
+        <template id="guestProfileTemplate">
+            <div class="profile-card guest-profile">
+                <div class="guest-icon">👤</div>
+                <h2 class="guest-title">Modo Invitado</h2>
+                <p class="guest-description">
+                    Inicia sesión para acceder a tu perfil, favoritos y configuraciones personalizadas.
+                </p>
+                <a href="../pages/login.html" class="login-btn">
+                    Iniciar Sesión
+                </a>
+            </div>
+        </template>
     </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="../pages/main.html" class="nav-item">
+            <div class="nav-icon">🏠</div>
+            <span class="nav-text">Inicio</span>
+        </a>
+        <a href="../pages/favorites.html" class="nav-item">
+            <div class="nav-icon">❤️</div>
+            <span class="nav-text">Favoritos</span>
+        </a>
+        <a href="../pages/cart.html" class="nav-item">
+            <div class="nav-icon">🛒</div>
+            <span class="nav-text">Carrito</span>
+        </a>
+        <a href="../pages/profile.html" class="nav-item active">
+            <div class="nav-icon">👤</div>
+            <span class="nav-text">Perfil</span>
+        </a>
+    </nav>
 
     <!-- Scripts -->
     <script src="../js/utils.js"></script>
-    <script src="../js/api.js"></script>
     <script src="../js/auth.js"></script>
-    <script src="../js/favorites.js"></script>
+    <script src="../js/api.js"></script>
     <script src="../js/cart.js"></script>
+    <script src="../js/favorites.js"></script>
     <script src="../js/profile-page.js"></script>
 </body>
 </html>
