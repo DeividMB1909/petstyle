@@ -14,12 +14,43 @@ const PORT = process.env.PORT || 3000;
 // ========================================
 const connectDB = async () => {
     try {
-        const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/petstyle');
+        // Verificar que tenemos la URI
+        console.log('🔍 Verificando variables de entorno...');
+        console.log('📍 MONGODB_URI existe:', !!process.env.MONGODB_URI);
+        
+        if (!process.env.MONGODB_URI) {
+            throw new Error('MONGODB_URI no está definida en las variables de entorno');
+        }
+        
+        // Mostrar la URI sin credenciales (solo para debug)
+        const uriParts = process.env.MONGODB_URI.split('@');
+        const safePart = uriParts[1]; // Parte después de las credenciales
+        console.log('🔗 Conectando a:', `***@${safePart}`);
+        
+        const conn = await mongoose.connect(process.env.MONGODB_URI);
+        
         console.log(`✅ MongoDB Conectado: ${conn.connection.host}`);
         console.log(`📊 Base de datos: ${conn.connection.name}`);
+        console.log(`📡 Estado de conexión: ${conn.connection.readyState}`);
+        
+        // Verificar qué colecciones tenemos
+        try {
+            const collections = await conn.connection.db.listCollections().toArray();
+            console.log(`📋 Colecciones disponibles: ${collections.map(c => c.name).join(', ')}`);
+            
+            // Contar documentos en cada colección
+            for (const collection of collections) {
+                const count = await conn.connection.db.collection(collection.name).countDocuments();
+                console.log(`📦 ${collection.name}: ${count} documentos`);
+            }
+        } catch (listError) {
+            console.log('⚠️  No se pudieron listar las colecciones:', listError.message);
+        }
+        
     } catch (error) {
         console.error('❌ Error conectando a MongoDB:', error.message);
         console.log('⚠️  Continuando sin base de datos...');
+        // No terminar el proceso, solo loggear el error
     }
 };
 
@@ -83,7 +114,8 @@ app.get('/', (req, res) => {
             message: 'PetStyle Server funcionando',
             status: 'OK',
             timestamp: new Date(),
-            database: mongoose.connection.readyState === 1 ? 'Conectado' : 'Desconectado'
+            database: mongoose.connection.readyState === 1 ? 'Conectado' : 'Desconectado',
+            databaseName: mongoose.connection.name || 'No conectado'
         });
     }
 });
@@ -92,8 +124,40 @@ app.get('/health', (req, res) => {
     res.status(200).json({
         status: 'OK',
         database: mongoose.connection.readyState === 1 ? 'Conectado' : 'Desconectado',
+        databaseName: mongoose.connection.name || 'No conectado',
         timestamp: new Date()
     });
+});
+
+// Ruta de debug para verificar la base de datos
+app.get('/debug/db', async (req, res) => {
+    try {
+        const dbInfo = {
+            connected: mongoose.connection.readyState === 1,
+            databaseName: mongoose.connection.name,
+            host: mongoose.connection.host,
+            collections: []
+        };
+        
+        if (mongoose.connection.readyState === 1) {
+            try {
+                const collections = await mongoose.connection.db.listCollections().toArray();
+                for (const collection of collections) {
+                    const count = await mongoose.connection.db.collection(collection.name).countDocuments();
+                    dbInfo.collections.push({
+                        name: collection.name,
+                        documents: count
+                    });
+                }
+            } catch (error) {
+                dbInfo.error = error.message;
+            }
+        }
+        
+        res.json(dbInfo);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // ========================================
@@ -122,7 +186,9 @@ app.use((req, res) => {
         availableRoutes: [
             'GET /',
             'GET /health',
+            'GET /debug/db',
             'GET /api',
+            'GET /api/productos',
             'POST /api/auth/login',
             'POST /api/auth/register'
         ]
@@ -136,6 +202,7 @@ app.listen(PORT, () => {
     console.log(`🚀 Servidor PetStyle corriendo en http://localhost:${PORT}`);
     console.log(`📚 API Base: http://localhost:${PORT}/api`);
     console.log(`🔑 Auth: http://localhost:${PORT}/api/auth`);
+    console.log(`🔍 Debug DB: http://localhost:${PORT}/debug/db`);
     console.log(`⚙️  Entorno: ${process.env.NODE_ENV || 'development'}`);
 });
 
