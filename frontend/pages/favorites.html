@@ -1,57 +1,537 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Favoritos - PetStyle</title>
-    <link rel="stylesheet" href="/frontend/css/favorites.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Favoritos - PetStyle</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/favorites.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
+    <div class="app-container">
         <!-- Header -->
-        <div class="header">
-            <h1 class="logo">PetStyle</h1>
-            <p class="subtitle">Tus productos favoritos</p>
-        </div>
+        <header class="header">
+            <div class="header-content">
+                <button class="back-btn" onclick="window.location.href='main.html'">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1>Mis Favoritos</h1>
+                <button class="header-btn" onclick="clearFavorites()">
+                    <i class="fas fa-heart-broken"></i>
+                </button>
+            </div>
+        </header>
 
-        <div class="content">
-            <h2 class="section-title">Mis Favoritos</h2>
-            
-            <!-- Empty State -->
-            <div class="empty-state" id="emptyState" style="display: none;">
-                <div class="empty-icon">💔</div>
-                <h3 class="empty-title">No tienes favoritos aún</h3>
-                <p class="empty-text">Explora nuestros productos y guarda los que más te gusten tocando el corazón</p>
-                <a href="main.html" class="browse-btn">Explorar Productos</a>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Loading State -->
+            <div id="loading-favorites" class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Cargando favoritos...</p>
+            </div>
+
+            <!-- Empty Favorites State -->
+            <div id="empty-favorites" class="empty-state" style="display: none;">
+                <i class="fas fa-heart empty-icon"></i>
+                <h3>No tienes favoritos aún</h3>
+                <p>Guarda tus productos favoritos aquí</p>
+                <button class="btn-primary" onclick="window.location.href='main.html'">
+                    Explorar Productos
+                </button>
+            </div>
+
+            <!-- Auth Required State -->
+            <div id="auth-required" class="empty-state" style="display: none;">
+                <i class="fas fa-lock empty-icon"></i>
+                <h3>Inicia sesión para ver favoritos</h3>
+                <p>Guarda tus productos favoritos iniciando sesión</p>
+                <div class="auth-buttons">
+                    <button class="btn-primary" onclick="window.location.href='login.html'">
+                        Iniciar Sesión
+                    </button>
+                    <button class="btn-secondary" onclick="window.location.href='register.html'">
+                        Registrarse
+                    </button>
+                </div>
             </div>
 
             <!-- Favorites Grid -->
-            <div class="favorites-grid" id="favoritesGrid"></div>
-        </div>
+            <div id="favorites-grid" class="favorites-grid" style="display: none;">
+                <!-- Items will be loaded here -->
+            </div>
+        </main>
 
         <!-- Bottom Navigation -->
-        <div class="bottom-nav">
-            <div class="nav-item" onclick="navigateTo('main.html')">
-                <div class="nav-icon">🏠</div>
-                <div class="nav-label">Inicio</div>
-            </div>
-            <div class="nav-item active" onclick="navigateTo('favorites.html')">
-                <div class="nav-icon">❤️</div>
-                <div class="nav-label">Favoritos</div>
-            </div>
-            <div class="nav-item" onclick="navigateTo('carrito.html')" style="position: relative;">
-                <div class="nav-icon">🛒</div>
-                <div class="nav-label">Carrito</div>
-                <div class="cart-badge" id="cartBadge">0</div>
-            </div>
-            <div class="nav-item" onclick="navigateTo('profile.html')">
-                <div class="nav-icon">👤</div>
-                <div class="nav-label">Perfil</div>
-            </div>
-        </div>
+        <nav class="bottom-nav">
+            <button class="nav-btn" onclick="window.location.href='main.html'">
+                <i class="fas fa-home"></i>
+                <span>Inicio</span>
+            </button>
+            <button class="nav-btn active">
+                <i class="fas fa-heart"></i>
+                <span>Favoritos</span>
+            </button>
+            <button class="nav-btn" onclick="window.location.href='cart.html'">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Carrito</span>
+            </button>
+            <button class="nav-btn" onclick="window.location.href='profile.html'">
+                <i class="fas fa-user"></i>
+                <span>Perfil</span>
+            </button>
+        </nav>
     </div>
-     <script src="../js/api.js"></script>
-    <script src="/frontend/js/favorites.js"></script>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Scripts en orden correcto -->
+    <script type="text/javascript">
+        // ===== TOAST SYSTEM =====
+        function showToast(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('toast-container') || document.body;
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            
+            // Add to container
+            container.appendChild(toast);
+            
+            // Show toast
+            setTimeout(() => toast.classList.add('show'), 100);
+            
+            // Remove toast
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // ===== AUTH SYSTEM =====
+        function getCurrentUser() {
+            const user = localStorage.getItem('currentUser');
+            return user ? JSON.parse(user) : null;
+        }
+
+        // ===== FAVORITES SYSTEM =====
+        function getFavoriteProducts() {
+            const user = getCurrentUser();
+            if (!user) return [];
+            
+            const favorites = localStorage.getItem(`favorites_${user.email}`);
+            return favorites ? JSON.parse(favorites) : [];
+        }
+
+        function removeFromFavorites(productId) {
+            const user = getCurrentUser();
+            if (!user) return false;
+            
+            let favorites = getFavoriteProducts();
+            favorites = favorites.filter(id => id !== productId);
+            
+            localStorage.setItem(`favorites_${user.email}`, JSON.stringify(favorites));
+            return true;
+        }
+
+        function clearFavoriteProducts() {
+            const user = getCurrentUser();
+            if (!user) return false;
+            
+            localStorage.removeItem(`favorites_${user.email}`);
+            return true;
+        }
+
+        // ===== API SYSTEM =====
+        const api = {
+            baseURL: 'http://localhost:3000/api',
+            
+            async getProduct(id) {
+                const response = await fetch(`${this.baseURL}/productos/${id}`);
+                if (!response.ok) throw new Error('Product not found');
+                return response.json();
+            }
+        };
+
+        // ===== PAGE LOGIC =====
+        async function loadFavorites() {
+            const loadingEl = document.getElementById('loading-favorites');
+            const emptyEl = document.getElementById('empty-favorites');
+            const authEl = document.getElementById('auth-required');
+            const gridEl = document.getElementById('favorites-grid');
+
+            try {
+                loadingEl.style.display = 'block';
+                emptyEl.style.display = 'none';
+                authEl.style.display = 'none';
+                gridEl.style.display = 'none';
+
+                const user = getCurrentUser();
+                if (!user) {
+                    loadingEl.style.display = 'none';
+                    authEl.style.display = 'block';
+                    return;
+                }
+
+                const favoriteIds = getFavoriteProducts();
+                
+                if (favoriteIds.length === 0) {
+                    loadingEl.style.display = 'none';
+                    emptyEl.style.display = 'block';
+                    return;
+                }
+
+                // For now, show empty state until we have products
+                loadingEl.style.display = 'none';
+                emptyEl.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading favorites:', error);
+                loadingEl.style.display = 'none';
+                emptyEl.style.display = 'block';
+                showToast('Error al cargar favoritos', 'error');
+            }
+        }
+
+        function clearFavorites() {
+            const user = getCurrentUser();
+            if (!user) {
+                showToast('Debes iniciar sesión', 'warning');
+                return;
+            }
+
+            const favorites = getFavoriteProducts();
+            if (favorites.length === 0) {
+                showToast('No tienes favoritos para eliminar', 'info');
+                return;
+            }
+
+            if (confirm('¿Estás seguro de que quieres eliminar todos los favoritos?')) {
+                clearFavoriteProducts();
+                loadFavorites();
+                showToast('Todos los favoritos eliminados', 'success');
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFavorites();
+        });
+    </script>
+
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f9fafb;
+            color: #1f2937;
+        }
+
+        /* App Container */
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            max-width: 100%;
+        }
+
+        .header h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+            margin: 0 1rem;
+        }
+
+        .back-btn, .header-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover, .header-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 1rem;
+            padding-bottom: 100px; /* Space for bottom nav */
+        }
+
+        /* Loading State */
+        .loading-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6b7280;
+        }
+
+        .loading-state i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #6366f1;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            min-height: 44px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: white;
+            color: #1f2937;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            min-height: 44px;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+            transform: translateY(-1px);
+        }
+
+        /* Auth Buttons */
+        .auth-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            padding: 8px 0;
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            height: 70px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 8px 4px;
+            border: none;
+            background: transparent;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            min-width: 0;
+            width: 25%;
+        }
+
+        .nav-btn:hover {
+            color: #6366f1;
+        }
+
+        .nav-btn.active {
+            color: #6366f1;
+        }
+
+        .nav-btn i {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+
+        .nav-btn span {
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        /* Favorites Grid */
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1rem;
+            padding-bottom: 2rem;
+        }
+
+        /* Toast styles */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast-success { background: #10b981; }
+        .toast-error { background: #ef4444; }
+        .toast-warning { background: #f59e0b; }
+        .toast-info { background: #3b82f6; }
+
+        /* Mobile Responsive */
+        @media (max-width: 480px) {
+            .header-content {
+                padding: 0.75rem;
+            }
+
+            .header h1 {
+                font-size: 1.125rem;
+            }
+
+            .main-content {
+                padding: 0.75rem;
+                padding-bottom: 80px;
+            }
+
+            .bottom-nav {
+                height: 65px;
+                padding: 6px 0;
+            }
+
+            .nav-btn {
+                padding: 6px 2px;
+            }
+
+            .nav-btn i {
+                font-size: 18px;
+            }
+
+            .nav-btn span {
+                font-size: 10px;
+            }
+        }
+
+        /* Very small screens */
+        @media (max-width: 360px) {
+            .nav-btn span {
+                font-size: 9px;
+            }
+            
+            .nav-btn i {
+                font-size: 16px;
+            }
+        }
+    </style>
 </body>
 </html>

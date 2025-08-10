@@ -1,228 +1,194 @@
-class API {
-    constructor() {
-        this.baseURL = CONFIG.API_BASE_URL;
-        this.token = this.getToken();
-    }
+// ===== API SERVICE - AUTO DETECTION =====
 
-    getToken() {
-        return localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
-    }
-
-    setToken(token) {
-        this.token = token;
-        localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, token);
-    }
-
-    clearToken() {
-        this.token = null;
-        localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
-        localStorage.removeItem(CONFIG.STORAGE_KEYS.USER);
-    }
-
-    async request(endpoint, options = {}) {
-        const url = `${this.baseURL}${endpoint}`;
-        const headers = {
-            ...options.headers
-        };
-
-        // Solo agregar Content-Type si no es FormData
-        if (!(options.body instanceof FormData)) {
-            headers['Content-Type'] = 'application/json';
-        }
-
-        if (this.token) {
-            headers.Authorization = `Bearer ${this.token}`;
-        }
-
-        console.log(`🌐 API Request: ${options.method || 'GET'} ${url}`);
-
-        try {
-            const response = await fetch(url, {
-                ...options,
-                headers,
-                credentials: 'include' // Para cookies
-            });
-
-            console.log(`📡 Response Status: ${response.status}`);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('❌ API Error Response:', errorText);
+const api = {
+    baseURL: 'http://localhost:3000',
+    detectedEndpoints: {},
+    
+    // Auto-detect your backend endpoints
+    async detectEndpoints() {
+        console.log('🔍 Auto-detecting your backend endpoints...');
+        
+        const possibleRoutes = [
+            '/api/productos',
+            '/api/products',
+            '/productos',
+            '/products',
+            '/api/producto',
+            '/producto',
+            '/petstyle/productos',
+            '/petstyle/products'
+        ];
+        
+        for (const route of possibleRoutes) {
+            try {
+                console.log(`Testing: ${this.baseURL}${route}`);
+                const response = await fetch(`${this.baseURL}${route}`);
                 
-                if (response.status === 401) {
-                    this.clearToken();
-                    throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (Array.isArray(data) || (data.products && Array.isArray(data.products))) {
+                        this.detectedEndpoints.productos = route;
+                        console.log(`✅ Found products endpoint: ${route}`);
+                        console.log(`📦 Found ${Array.isArray(data) ? data.length : data.products.length} products`);
+                        return route;
+                    }
                 }
-                
-                let errorMessage = `Error ${response.status}`;
-                try {
-                    const errorJson = JSON.parse(errorText);
-                    errorMessage = errorJson.message || errorMessage;
-                } catch (e) {
-                    errorMessage = errorText || errorMessage;
-                }
-                
-                throw new Error(errorMessage);
+            } catch (error) {
+                console.log(`❌ Failed: ${route} - ${error.message}`);
             }
-
-            return await response.json();
+        }
+        
+        console.log('❌ No valid endpoints found');
+        return null;
+    },
+    
+    // Get all products with auto-detection
+    async getAllProducts() {
+        try {
+            // If we haven't detected endpoints yet, do it now
+            if (!this.detectedEndpoints.productos) {
+                await this.detectEndpoints();
+            }
+            
+            // If we found an endpoint, use it
+            if (this.detectedEndpoints.productos) {
+                const response = await fetch(`${this.baseURL}${this.detectedEndpoints.productos}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('🔍 Raw API response:', data);
+                    
+                    // Handle different response formats from your backend
+                    let products = [];
+                    
+                    if (Array.isArray(data)) {
+                        products = data;
+                    } else if (data.products && Array.isArray(data.products)) {
+                        products = data.products;
+                    } else if (data.data && Array.isArray(data.data)) {
+                        products = data.data;
+                    } else if (data.result && Array.isArray(data.result)) {
+                        products = data.result;
+                    } else if (data.items && Array.isArray(data.items)) {
+                        products = data.items;
+                    } else {
+                        console.log('⚠️ Unknown response format, using empty array');
+                        products = [];
+                    }
+                    
+                    console.log(`📦 Processed products: ${products.length}`);
+                    return products;
+                }
+            }
+            
+            throw new Error('No valid products endpoint found');
+            
         } catch (error) {
-            console.error('🚨 API Error:', error);
+            console.error('Error fetching products:', error);
             throw error;
         }
-    }
-
-    // ========== AUTENTICACIÓN ==========
-    async login(credentials) {
-        console.log('🔑 Attempting login...');
-        const response = await this.request('/auth/login', {
-            method: 'POST',
-            body: JSON.stringify(credentials)
-        });
-        
-        if (response.success && response.data.token) {
-            this.setToken(response.data.token);
-            localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(response.data.user));
-            console.log('✅ Login successful');
-        }
-        
-        return response;
-    }
-
-    async register(userData) {
-        console.log('📝 Attempting registration...');
-        const response = await this.request('/auth/register', {
-            method: 'POST',
-            body: JSON.stringify(userData)
-        });
-        
-        if (response.success && response.data.token) {
-            this.setToken(response.data.token);
-            localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(response.data.user));
-            console.log('✅ Registration successful');
-        }
-        
-        return response;
-    }
-
-    async logout() {
+    },
+    
+    // Get single product
+    async getProduct(id) {
         try {
-            await this.request('/auth/logout', { method: 'POST' });
+            if (!this.detectedEndpoints.productos) {
+                await this.detectEndpoints();
+            }
+            
+            if (this.detectedEndpoints.productos) {
+                const response = await fetch(`${this.baseURL}${this.detectedEndpoints.productos}/${id}`);
+                
+                if (response.ok) {
+                    return await response.json();
+                }
+            }
+            
+            throw new Error('Product not found');
+            
         } catch (error) {
-            console.warn('Logout request failed:', error);
-        } finally {
-            this.clearToken();
+            console.error('Error fetching product:', error);
+            throw error;
         }
-        return { success: true };
-    }
-
-    // ========== PRODUCTOS ==========
-    async getProducts(filters = {}) {
-        const queryString = new URLSearchParams(filters).toString();
-        const endpoint = queryString ? `/products?${queryString}` : '/products';
-        return this.request(endpoint);
-    }
-
-    async getProductById(id) {
-        return this.request(`/products/${id}`);
-    }
-
-    async createProduct(productData) {
-        return this.request('/products', {
-            method: 'POST',
-            body: JSON.stringify(productData)
-        });
-    }
-
-    async updateProduct(id, productData) {
-        return this.request(`/products/${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(productData)
-        });
-    }
-
-    async deleteProduct(id) {
-        return this.request(`/products/${id}`, {
-            method: 'DELETE'
-        });
-    }
-
-    // ========== SUBIDA DE ARCHIVOS ==========
-    async uploadProductImages(productData, imageFiles) {
-        const formData = new FormData();
+    },
+    
+    // Test all possible backend configurations
+    async fullDiagnostic() {
+        console.log('🏥 Running full backend diagnostic...');
         
-        // Agregar campos del producto
-        Object.keys(productData).forEach(key => {
-            if (Array.isArray(productData[key])) {
-                formData.append(key, JSON.stringify(productData[key]));
-            } else {
-                formData.append(key, productData[key]);
-            }
-        });
-
-        // Agregar archivos de imagen
-        if (imageFiles && imageFiles.length > 0) {
-            for (let file of imageFiles) {
-                formData.append('images', file);
+        // Test different ports
+        const ports = [3000, 3001, 5000, 8000, 4000];
+        const routes = ['/api/productos', '/api/products', '/productos', '/products'];
+        
+        for (const port of ports) {
+            console.log(`\n🔌 Testing port ${port}:`);
+            
+            for (const route of routes) {
+                try {
+                    const url = `http://localhost:${port}${route}`;
+                    const response = await fetch(url);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log(`✅ SUCCESS: ${url}`);
+                        console.log(`📊 Response type: ${Array.isArray(data) ? 'Array' : 'Object'}`);
+                        console.log(`📦 Items found: ${Array.isArray(data) ? data.length : 'Unknown'}`);
+                        
+                        // Update baseURL if we found a working one
+                        if (port !== 3000) {
+                            this.baseURL = `http://localhost:${port}`;
+                            console.log(`🔄 Updated baseURL to: ${this.baseURL}`);
+                        }
+                        
+                        this.detectedEndpoints.productos = route;
+                        return { port, route, url, data: Array.isArray(data) ? data : data.products || [] };
+                    }
+                } catch (error) {
+                    console.log(`❌ ${port}${route}: ${error.message}`);
+                }
             }
         }
-
-        return this.request('/products/with-images', {
-            method: 'POST',
-            body: formData // No establecer Content-Type para FormData
-        });
+        
+        console.log('❌ No working backend found on any port/route combination');
+        return null;
+    },
+    
+    // Show your backend info
+    async showBackendInfo() {
+        console.log('\n📋 BACKEND DIAGNOSTIC REPORT');
+        console.log('=' * 50);
+        
+        const result = await this.fullDiagnostic();
+        
+        if (result) {
+            console.log(`✅ Working backend found!`);
+            console.log(`🌐 URL: ${result.url}`);
+            console.log(`📦 Products found: ${result.data.length}`);
+            console.log(`🏷️ Sample product:`, result.data[0]);
+        } else {
+            console.log(`❌ No working backend found`);
+            console.log(`💡 Make sure your backend is running with: npm run dev`);
+        }
+        
+        return result;
     }
+};
 
-    async uploadAvatar(file) {
-        const formData = new FormData();
-        formData.append('avatar', file);
+// Auto-detect on page load
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('🚀 Starting backend detection...');
+    
+    // Wait a bit for the page to load
+    setTimeout(async () => {
+        const result = await api.showBackendInfo();
+        
+        if (result) {
+            showToast(`✅ Backend conectado: ${result.data.length} productos encontrados`, 'success');
+        } else {
+            showToast('⚠️ Backend no encontrado - usando datos de prueba', 'warning');
+        }
+    }, 1000);
+});
 
-        return this.request('/users/avatar', {
-            method: 'PUT',
-            body: formData
-        });
-    }
-
-    // ========== USUARIO ==========
-    async getUserProfile() {
-        return this.request('/users/profile');
-    }
-
-    async updateUserProfile(userData) {
-        return this.request('/users/profile', {
-            method: 'PUT',
-            body: JSON.stringify(userData)
-        });
-    }
-
-    // ========== CATEGORÍAS ==========
-    async getCategories() {
-        return this.request('/categories');
-    }
-
-    // ========== CARRITO ==========
-    async getCart() {
-        return this.request('/cart');
-    }
-
-    async addToCart(productId, quantity = 1) {
-        return this.request('/cart/add', {
-            method: 'POST',
-            body: JSON.stringify({ productId, quantity })
-        });
-    }
-
-    async updateCartItem(productId, quantity) {
-        return this.request('/cart/update', {
-            method: 'PUT',
-            body: JSON.stringify({ productId, quantity })
-        });
-    }
-
-    async removeFromCart(productId) {
-        return this.request('/cart/remove', {
-            method: 'DELETE',
-            body: JSON.stringify({ productId })
-        });
-    }
-}
+// Export for global use
+window.api = api;

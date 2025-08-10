@@ -3,511 +3,356 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
-    
-    <title>PetStyle - Iniciar Sesión</title>
-    
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- CSS -->
-    <link rel="stylesheet" href="../css/login.css">
-    
-    <!-- Cordova Script (se carga solo si está disponible) -->
-    <script type="text/javascript" src="cordova.js"></script>
+    <title>Iniciar Sesión - PetStyle</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/auth.css">
+    <link rel="stylesheet" href="../css/components.css">
 </head>
-<body>
-    <div class="container">
+<body class="auth-body">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen hidden">
+        <div class="loading-content">
+            <div class="logo-loading">🐾</div>
+            <h2>PetStyle</h2>
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="auth-container">
         <!-- Header -->
-        <div class="header">
+        <div class="auth-header">
             <button class="back-btn" onclick="goBack()">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-                </svg>
+                <span class="back-icon">←</span>
             </button>
-            
-            <div class="auth-header">
-                <div class="logo">🐾</div>
-                <h1>Iniciar Sesión</h1>
-                <p>Bienvenido de vuelta a PetStyle</p>
+            <div class="auth-logo">
+                <span class="logo-icon">🐾</span>
+                <span class="logo-text">PetStyle</span>
             </div>
         </div>
 
-        <!-- Form Container -->
-        <div class="form-container">
-            <form id="loginForm">
+        <!-- Login Form -->
+        <div class="auth-content">
+            <div class="auth-welcome">
+                <h1>¡Bienvenido de vuelta!</h1>
+                <p>Inicia sesión para acceder a tu cuenta y seguir explorando nuestros productos para mascotas</p>
+            </div>
+
+            <form id="login-form" class="auth-form" novalidate>
                 <div class="form-group">
                     <label for="email" class="form-label">Correo Electrónico</label>
-                    <input 
-                        type="email" 
-                        id="email" 
-                        class="form-input" 
-                        placeholder="ejemplo@correo.com"
-                        required
-                        autocomplete="email"
-                        autocapitalize="none"
-                        autocorrect="off"
-                    >
-                    <div class="form-error" id="emailError"></div>
+                    <div class="input-group">
+                        <span class="input-icon">📧</span>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            class="form-input" 
+                            placeholder="tu-email@ejemplo.com"
+                            required
+                            autocomplete="email"
+                        >
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="password" class="form-label">Contraseña</label>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        class="form-input" 
-                        placeholder="Tu contraseña"
-                        required
-                        autocomplete="current-password"
-                    >
-                    <div class="form-error" id="passwordError"></div>
+                    <div class="input-group">
+                        <span class="input-icon">🔒</span>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-input" 
+                            placeholder="Tu contraseña"
+                            required
+                            autocomplete="current-password"
+                        >
+                        <button type="button" class="toggle-password" tabindex="-1">👁️</button>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn-primary" id="loginBtn">
-                    <span id="loginBtnText">Iniciar Sesión</span>
-                    <div class="loading-spinner" id="loginSpinner" style="display: none;"></div>
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="rememberMe" class="form-checkbox">
+                        <span class="checkbox-text">Recordarme</span>
+                    </label>
+                    <a href="#" class="forgot-password" onclick="showForgotPassword()">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </div>
+
+                <button type="submit" class="btn-primary btn-auth">
+                    <span class="btn-icon">🚀</span>
+                    <span class="btn-text">Iniciar Sesión</span>
+                </button>
+
+                <div class="auth-divider">
+                    <span>o</span>
+                </div>
+
+                <button type="button" class="btn-secondary btn-auth" onclick="showDemoLogin()">
+                    <span class="btn-icon">👤</span>
+                    <span class="btn-text">Cuenta Demo</span>
                 </button>
             </form>
 
-            <div class="divider">
-                <span>o continúa con</span>
-            </div>
-
-            <div class="social-buttons">
-                <button class="social-btn google" onclick="loginWithGoogle()">
-                    <svg class="social-icon" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                    </svg>
-                    Continuar con Google
-                </button>
-
-                <button class="social-btn facebook" onclick="loginWithFacebook()">
-                    <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                    </svg>
-                    Continuar con Facebook
-                </button>
-            </div>
-
-            <div class="auth-links">
-                <p>¿No tienes una cuenta? <a href="register.html">Regístrate aquí</a></p>
-                <p><a href="#" onclick="showForgotPassword()">¿Olvidaste tu contraseña?</a></p>
-                <p><strong>Para probar:</strong> Email: <code>user@petstyle.com</code>, Password: <code>user123</code></p>
+            <div class="auth-footer">
+                <p class="auth-switch">
+                    ¿No tienes cuenta? 
+                    <a href="register.html" class="auth-link">Regístrate aquí</a>
+                </p>
             </div>
         </div>
-    </div>
 
-    <!-- Modals -->
-    <div class="modal-overlay" id="googleModal" style="display: none;">
-        <div class="modal">
-            <div class="modal-icon info">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                </svg>
-            </div>
-            <h3 class="modal-title">Continuar con Google</h3>
-            <p class="modal-text">Esta funcionalidad estará disponible próximamente.</p>
-            <div class="modal-buttons">
-                <button class="modal-btn secondary" onclick="closeModal()">Cancelar</button>
-                <button class="modal-btn primary" onclick="processGoogleLogin()">Entendido</button>
+        <!-- Demo Login Modal -->
+        <div id="demo-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Cuentas Demo</h3>
+                    <button class="close-btn" onclick="closeDemoModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="demo-info">Prueba la aplicación con estas cuentas de demostración:</p>
+                    
+                    <div class="demo-accounts">
+                        <div class="demo-account" onclick="loginAsDemo('customer')">
+                            <div class="demo-avatar">👤</div>
+                            <div class="demo-details">
+                                <div class="demo-name">Usuario Cliente</div>
+                                <div class="demo-email">juan@test.com</div>
+                                <div class="demo-role">Cliente</div>
+                            </div>
+                            <button class="demo-btn">Usar Cuenta</button>
+                        </div>
+                        
+                        <div class="demo-account" onclick="loginAsDemo('admin')">
+                            <div class="demo-avatar">⚙️</div>
+                            <div class="demo-details">
+                                <div class="demo-name">Administrador</div>
+                                <div class="demo-email">admin@petstyle.com</div>
+                                <div class="demo-role">Administrador</div>
+                            </div>
+                            <button class="demo-btn">Usar Cuenta</button>
+                        </div>
+                    </div>
+                    
+                    <div class="demo-warning">
+                        <span class="warning-icon">⚠️</span>
+                        <span>Los datos en cuentas demo son de prueba y pueden ser modificados por otros usuarios.</span>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="modal-overlay" id="facebookModal" style="display: none;">
-        <div class="modal">
-            <div class="modal-icon info">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-            </div>
-            <h3 class="modal-title">Continuar con Facebook</h3>
-            <p class="modal-text">Esta funcionalidad estará disponible próximamente.</p>
-            <div class="modal-buttons">
-                <button class="modal-btn secondary" onclick="closeModal()">Cancelar</button>
-                <button class="modal-btn primary" onclick="processFacebookLogin()">Entendido</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="forgotModal" style="display: none;">
-        <div class="modal">
-            <div class="modal-icon info">💌</div>
-            <h3 class="modal-title">Recuperar Contraseña</h3>
-            <p class="modal-text">Esta funcionalidad estará disponible próximamente.</p>
-            <div style="margin-bottom: 20px;">
-                <input type="email" id="forgotEmail" class="form-input" placeholder="tu@correo.com" style="margin: 0;">
-            </div>
-            <div class="modal-buttons">
-                <button class="modal-btn secondary" onclick="closeModal()">Cancelar</button>
-                <button class="modal-btn primary" onclick="sendPasswordReset()">Entendido</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Success Modal -->
-    <div class="modal-overlay" id="successModal" style="display: none;">
-        <div class="modal">
-            <div class="modal-icon success">✅</div>
-            <h3 class="modal-title">¡Bienvenido!</h3>
-            <p class="modal-text">Has iniciado sesión correctamente</p>
-            <div class="modal-buttons">
-                <button class="modal-btn primary" onclick="closeSuccessModal()">Continuar</button>
+        <!-- Forgot Password Modal -->
+        <div id="forgot-password-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Recuperar Contraseña</h3>
+                    <button class="close-btn" onclick="closeForgotPasswordModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="forgot-info">
+                        Ingresa tu correo electrónico y te enviaremos las instrucciones para restablecer tu contraseña.
+                    </p>
+                    
+                    <form id="forgot-password-form" class="forgot-form">
+                        <div class="form-group">
+                            <label for="forgot-email" class="form-label">Correo Electrónico</label>
+                            <div class="input-group">
+                                <span class="input-icon">📧</span>
+                                <input 
+                                    type="email" 
+                                    id="forgot-email" 
+                                    name="email" 
+                                    class="form-input" 
+                                    placeholder="tu-email@ejemplo.com"
+                                    required
+                                >
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary">
+                            <span class="btn-icon">📤</span>
+                            <span class="btn-text">Enviar Instrucciones</span>
+                        </button>
+                    </form>
+                    
+                    <div class="forgot-note">
+                        <span class="note-icon">💡</span>
+                        <span>Si no recibes el correo en unos minutos, revisa tu carpeta de spam.</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Toast Notifications -->
-    <div class="toast-container" id="toastContainer"></div>
+    <div id="toast-container" class="toast-container"></div>
 
     <!-- Scripts -->
-    <!-- 1. API de autenticación -->
+    <script src="../js/utils.js"></script>
     <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
     
-    <!-- 2. Sistema de login integrado -->
     <script>
-        // ================================================
-        // VARIABLES GLOBALES
-        // ================================================
-        let isLoggingIn = false;
-
-        // ================================================
-        // FUNCIONES DE LOGIN CON API
-        // ================================================
-        async function performLogin(email, password) {
-            if (isLoggingIn) return;
-            isLoggingIn = true;
-
-            try {
-                showLoginLoading(true);
-                
-                console.log('🔐 Intentando login con:', email);
-                
-                // Llamar al endpoint de login de tu API
-                const response = await apiRequest('/auth/login', {
-                    method: 'POST',
-                    body: JSON.stringify({ email, password })
-                });
-
-                console.log('📡 Respuesta del servidor:', response);
-
-                if (response.success) {
-                    // Guardar datos del usuario
-                    if (response.data && response.data.token) {
-                        localStorage.setItem('authToken', response.data.token);
-                        localStorage.setItem('userId', response.data.user.id || response.data.user._id);
-                        localStorage.setItem('userEmail', response.data.user.email);
-                        localStorage.setItem('userName', response.data.user.name);
-                        localStorage.setItem('userRole', response.data.user.role || 'user');
-                    } else if (response.token) {
-                        // Formato alternativo de respuesta
-                        localStorage.setItem('authToken', response.token);
-                        localStorage.setItem('userId', response.user.id || response.user._id);
-                        localStorage.setItem('userEmail', response.user.email);
-                        localStorage.setItem('userName', response.user.name);
-                        localStorage.setItem('userRole', response.user.role || 'user');
-                    }
-
-                    showLoginLoading(false);
-                    showSuccessModal();
-                    
-                    // Redirigir después de 2 segundos
-                    setTimeout(() => {
-                        redirectAfterLogin();
-                    }, 2000);
-
-                } else {
-                    throw new Error(response.message || 'Error al iniciar sesión');
-                }
-
-            } catch (error) {
-                showLoginLoading(false);
-                console.error('❌ Error en login:', error);
-                
-                let errorMessage = 'Error al iniciar sesión';
-                
-                if (error.message.includes('401')) {
-                    errorMessage = 'Credenciales incorrectas';
-                } else if (error.message.includes('404')) {
-                    errorMessage = 'Usuario no encontrado';
-                } else if (error.message.includes('500')) {
-                    errorMessage = 'Error del servidor';
-                } else if (error.message) {
-                    errorMessage = error.message;
-                }
-                
-                showToast(errorMessage, 'error');
-                showFieldError('email', errorMessage);
-                
-            } finally {
-                isLoggingIn = false;
-            }
-        }
-
-        // ================================================
-        // FUNCIONES DE UI
-        // ================================================
-        function showLoginLoading(show) {
-            const btn = document.getElementById('loginBtn');
-            const btnText = document.getElementById('loginBtnText');
-            const spinner = document.getElementById('loginSpinner');
-
-            if (show) {
-                btn.disabled = true;
-                btnText.style.display = 'none';
-                spinner.style.display = 'inline-block';
-                btn.style.opacity = '0.7';
-            } else {
-                btn.disabled = false;
-                btnText.style.display = 'inline';
-                spinner.style.display = 'none';
-                btn.style.opacity = '1';
-            }
-        }
-
-        function showFieldError(fieldName, message) {
-            const errorElement = document.getElementById(fieldName + 'Error');
-            const inputElement = document.getElementById(fieldName);
-            
-            if (errorElement) {
-                errorElement.textContent = message;
-                errorElement.style.display = 'block';
-            }
-            
-            if (inputElement) {
-                inputElement.classList.add('error');
-                setTimeout(() => {
-                    inputElement.classList.remove('error');
-                }, 3000);
-            }
-        }
-
-        function clearErrors() {
-            document.querySelectorAll('.form-error').forEach(error => {
-                error.textContent = '';
-                error.style.display = 'none';
-            });
-            
-            document.querySelectorAll('.form-input').forEach(input => {
-                input.classList.remove('error');
-            });
-        }
-
-        function showSuccessModal() {
-            document.getElementById('successModal').style.display = 'flex';
-        }
-
-        function closeSuccessModal() {
-            document.getElementById('successModal').style.display = 'none';
-            redirectAfterLogin();
-        }
-
-        function redirectAfterLogin() {
-            // Verificar si hay una URL de redirección guardada
-            const redirectUrl = localStorage.getItem('redirectAfterLogin');
-            
-            if (redirectUrl) {
-                localStorage.removeItem('redirectAfterLogin');
-                window.location.href = redirectUrl;
-            } else {
-                // Redirigir a la página principal
-                window.location.href = '../main.html';
-            }
-        }
-
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.innerHTML = `
-                <span>${message}</span>
-                <button onclick="this.parentElement.remove()">×</button>
-            `;
-            
-            container.appendChild(toast);
-            
-            setTimeout(() => {
-                if (toast.parentElement) {
-                    toast.remove();
-                }
-            }, 5000);
-        }
-
-        // ================================================
-        // EVENT LISTENERS
-        // ================================================
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🔐 Página de login cargada');
-
-            // Verificar si ya está logueado
-            if (isUserLoggedIn()) {
-                console.log('👤 Usuario ya logueado, redirigiendo...');
-                window.location.href = '../main.html';
+        // Page-specific JavaScript
+        
+        // Check if already logged in
+        document.addEventListener('DOMContentLoaded', async () => {
+            const isAuthenticated = await Auth.checkAuthStatus();
+            if (isAuthenticated) {
+                // Redirect to main page if already logged in
+                window.location.href = 'main.html';
                 return;
             }
-
-            // Configurar formulario de login
-            const loginForm = document.getElementById('loginForm');
-            if (loginForm) {
-                loginForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    
-                    clearErrors();
-                    
-                    const email = document.getElementById('email').value.trim();
-                    const password = document.getElementById('password').value;
-
-                    // Validaciones básicas
-                    if (!email) {
-                        showFieldError('email', 'El email es requerido');
-                        return;
-                    }
-
-                    if (!isValidEmail(email)) {
-                        showFieldError('email', 'Email inválido');
-                        return;
-                    }
-
-                    if (!password) {
-                        showFieldError('password', 'La contraseña es requerida');
-                        return;
-                    }
-
-                    if (password.length < 6) {
-                        showFieldError('password', 'La contraseña debe tener al menos 6 caracteres');
-                        return;
-                    }
-
-                    // Realizar login
-                    await performLogin(email, password);
-                });
+            
+            // Auto-focus email field
+            document.getElementById('email').focus();
+            
+            // Check for redirect parameter
+            const redirectUrl = UrlUtils.getParam('redirect');
+            if (redirectUrl) {
+                Auth.setRedirectAfterLogin(decodeURIComponent(redirectUrl));
             }
-
-            // Limpiar errores al escribir
-            document.querySelectorAll('.form-input').forEach(input => {
-                input.addEventListener('input', function() {
-                    this.classList.remove('error');
-                    const errorElement = document.getElementById(this.id + 'Error');
-                    if (errorElement) {
-                        errorElement.style.display = 'none';
-                    }
-                });
-            });
         });
 
-        // ================================================
-        // FUNCIONES DE UTILIDAD
-        // ================================================
-        function isValidEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        }
-
-        function isUserLoggedIn() {
-            return localStorage.getItem('authToken') && localStorage.getItem('userId');
-        }
-
+        // Navigation functions
         function goBack() {
             if (window.history.length > 1) {
                 window.history.back();
             } else {
-                window.location.href = '../main.html';
+                window.location.href = 'main.html';
             }
         }
 
-        // ================================================
-        // FUNCIONES DE SOCIAL LOGIN (PLACEHOLDERS)
-        // ================================================
-        function loginWithGoogle() {
-            document.getElementById('googleModal').style.display = 'flex';
+        // Demo login functions
+        function showDemoLogin() {
+            document.getElementById('demo-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
 
-        function loginWithFacebook() {
-            document.getElementById('facebookModal').style.display = 'flex';
+        function closeDemoModal() {
+            document.getElementById('demo-modal').classList.add('hidden');
+            document.body.style.overflow = '';
         }
 
-        function showForgotPassword() {
-            document.getElementById('forgotModal').style.display = 'flex';
-        }
-
-        function closeModal() {
-            document.querySelectorAll('.modal-overlay').forEach(modal => {
-                modal.style.display = 'none';
-            });
-        }
-
-        function processGoogleLogin() {
-            showToast('Funcionalidad de Google próximamente', 'info');
-            closeModal();
-        }
-
-        function processFacebookLogin() {
-            showToast('Funcionalidad de Facebook próximamente', 'info');
-            closeModal();
-        }
-
-        function sendPasswordReset() {
-            const email = document.getElementById('forgotEmail').value;
-            if (email) {
-                showToast('Funcionalidad de recuperación próximamente', 'info');
-            } else {
-                showToast('Ingresa tu email', 'error');
-            }
-            closeModal();
-        }
-
-        // ================================================
-        // FUNCIÓN GLOBAL PARA USAR EN OTRAS PÁGINAS
-        // ================================================
-        window.PetStyleAuth = {
-            isLoggedIn: isUserLoggedIn,
-            logout: function() {
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('userId');
-                localStorage.removeItem('userEmail');
-                localStorage.removeItem('userName');
-                localStorage.removeItem('userRole');
-                localStorage.removeItem('userFavorites');
-                
-                window.location.href = 'login.html';
-            },
-            getCurrentUser: function() {
-                if (isUserLoggedIn()) {
-                    return {
-                        id: localStorage.getItem('userId'),
-                        email: localStorage.getItem('userEmail'),
-                        name: localStorage.getItem('userName'),
-                        role: localStorage.getItem('userRole')
-                    };
+        async function loginAsDemo(type) {
+            const demoCredentials = {
+                customer: {
+                    email: 'juan@test.com',
+                    password: '123456'
+                },
+                admin: {
+                    email: 'admin@petstyle.com',
+                    password: 'admin123'
                 }
-                return null;
+            };
+
+            const credentials = demoCredentials[type];
+            if (!credentials) return;
+
+            closeDemoModal();
+            
+            // Fill form
+            document.getElementById('email').value = credentials.email;
+            document.getElementById('password').value = credentials.password;
+            
+            // Auto-submit form
+            setTimeout(() => {
+                document.getElementById('login-form').dispatchEvent(new Event('submit'));
+            }, 500);
+        }
+
+        // Forgot password functions
+        function showForgotPassword() {
+            document.getElementById('forgot-password-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            // Pre-fill email if entered
+            const currentEmail = document.getElementById('email').value;
+            if (currentEmail) {
+                document.getElementById('forgot-email').value = currentEmail;
             }
-        };
-
-        console.log('✅ Sistema de autenticación PetStyle cargado');
-    </script>
-
-    <!-- 3. Scripts adicionales si los necesitas -->
-    <script src="../js/config.js"></script>
-    <script src="../js/auth.js"></script>
-    <script src="../js/login.js"></script>
-
-    <!-- 4. Inicialización final -->
-    <script>
-        // Crear instancias si son necesarias para compatibilidad
-        if (typeof API !== 'undefined') {
-            window.api = new API();
         }
-        if (typeof AuthManager !== 'undefined') {
-            window.authManager = new AuthManager(window.api);
+
+        function closeForgotPasswordModal() {
+            document.getElementById('forgot-password-modal').classList.add('hidden');
+            document.body.style.overflow = '';
         }
-        console.log('🔧 Compatibilidad con scripts existentes inicializada');
-        
+
+        // Handle forgot password form
+        document.getElementById('forgot-password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const formData = FormUtils.getFormData(form);
+            
+            LoadingUtils.showButton(submitBtn, 'Enviando...');
+            
+            try {
+                // Simulate API call (implement when backend is ready)
+                await TimingUtils.delay(2000);
+                
+                Toast.show('Instrucciones enviadas a tu correo electrónico', 'success');
+                closeForgotPasswordModal();
+                form.reset();
+            } catch (error) {
+                Toast.show('Error al enviar instrucciones', 'error');
+            } finally {
+                LoadingUtils.hideButton(submitBtn);
+            }
+        });
+
+        // Close modals when clicking backdrop
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                if (e.target.id === 'demo-modal') {
+                    closeDemoModal();
+                } else if (e.target.id === 'forgot-password-modal') {
+                    closeForgotPasswordModal();
+                }
+            }
+        });
+
+        // Form enhancements
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('form-input')) {
+                // Remove error styling when user starts typing
+                e.target.classList.remove('error');
+                const errorMsg = e.target.parentNode.nextElementSibling;
+                if (errorMsg && errorMsg.classList.contains('error-message')) {
+                    errorMsg.remove();
+                }
+            }
+        });
+
+        // Enter key handling for better UX
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.type === 'email') {
+                // Move to password field when pressing Enter on email
+                const passwordField = document.getElementById('password');
+                if (passwordField) {
+                    passwordField.focus();
+                }
+            }
+        });
+
+        // Handle browser autofill
+        window.addEventListener('load', () => {
+            // Check if browser autofilled the form
+            const emailField = document.getElementById('email');
+            const passwordField = document.getElementById('password');
+            
+            if (emailField.value && passwordField.value) {
+                // Add visual indicator that form is autofilled
+                [emailField, passwordField].forEach(field => {
+                    field.classList.add('autofilled');
+                });
+            }
+        });
     </script>
-     <script src="../js/api.js"></script>
 </body>
 </html>

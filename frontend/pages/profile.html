@@ -3,996 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PetStyle - Mi Perfil</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/frontend/css/profile.css">
+    <title>Mi Perfil - PetStyle</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/profile.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
+    <div class="app-container">
         <!-- Header -->
-        <div class="header">
-            <h1 class="logo">PetStyle</h1>
-            <p class="subtitle">Tu perfil personalizado</p>
-        </div>
-
-        <!-- Profile Header -->
-        <div class="profile-header">
-            <div class="profile-avatar" id="profileAvatar">
-                👤
-                <div class="camera-btn" onclick="changeAvatar()" style="display: none;" id="cameraBtn">📷</div>
+        <header class="header">
+            <div class="header-content">
+                <button class="back-btn" onclick="window.location.href='main.html'">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1>Mi Perfil</h1>
+                <button class="header-btn" id="settings-btn" onclick="toggleSettings()">
+                    <i class="fas fa-cog"></i>
+                </button>
             </div>
-            <div class="profile-name" id="profileName">Invitado</div>
-            <div class="profile-email" id="profileEmail">Inicia sesión para personalizar tu experiencia</div>
-            
-            <!-- User Stats (Only for logged in users) -->
-            <div class="stats-grid hidden" id="userStats">
-                <div class="stat-item">
-                    <div class="stat-number" id="ordersCount">0</div>
-                    <div class="stat-label">Pedidos</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="favoritesCount">0</div>
-                    <div class="stat-label">Favoritos</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="reviewsCount">0</div>
-                    <div class="stat-label">Reseñas</div>
-                </div>
-            </div>
+        </header>
 
-            <!-- Login CTA (Only for guests) -->
-            <div class="login-cta" id="loginCTA">
-                <h3>¡Únete a PetStyle!</h3>
-                <p>Crea tu cuenta para acceder a ofertas exclusivas, historial de pedidos y mucho más.</p>
-                <a href="login.html" class="login-btn">Iniciar Sesión</a>
-                <a href="register.html" class="register-btn">Crear Cuenta</a>
-            </div>
-
-            <!-- Pet Profiles (Only for logged in users) -->
-            <div class="pet-profile hidden" id="petProfile">
-                <h3>🐾 Mis Mascotas</h3>
-                <div class="pet-grid" id="petGrid">
-                    <div class="pet-card add-pet" onclick="openAddPetModal()">
-                        <div class="pet-avatar">+</div>
-                        <div>Agregar Mascota</div>
-                    </div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Guest Profile (Not Logged In) -->
+            <div id="guest-profile" class="guest-profile" style="display: none;">
+                <div class="guest-avatar">
+                    <i class="fas fa-user-circle"></i>
                 </div>
-            </div>
-        </div>
-
-        <div class="content">
-            <!-- Account Section (For logged in users) -->
-            <div class="menu-section hidden" id="accountSection">
-                <h2 class="section-title">Mi Cuenta</h2>
+                <h2>¡Hola, Invitado!</h2>
+                <p>Inicia sesión para acceder a todas las funciones</p>
                 
-                <div class="menu-item" onclick="openEditProfileModal()">
-                    <div class="menu-icon">👤</div>
-                    <div class="menu-content">
-                        <div class="menu-title">Información Personal</div>
-                        <div class="menu-subtitle">Edita tu perfil y datos personales</div>
-                    </div>
-                    <div class="menu-arrow">›</div>
+                <div class="guest-actions">
+                    <button class="btn-primary" onclick="window.location.href='login.html'">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Iniciar Sesión
+                    </button>
+                    <button class="btn-secondary" onclick="window.location.href='register.html'">
+                        <i class="fas fa-user-plus"></i>
+                        Registrarse
+                    </button>
                 </div>
 
-                <div class="menu-item" onclick="navigateTo('favorites.html')">
-                    <div class="menu-icon">❤️</div>
-                    <div class="menu-content">
-                        <div class="menu-title">Mis Favoritos</div>
-                        <div class="menu-subtitle" id="favoritesSubtitle">Ver productos guardados</div>
+                <div class="guest-features">
+                    <h3>¿Por qué registrarse?</h3>
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <i class="fas fa-heart"></i>
+                            <span>Guardar favoritos</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Carrito personalizado</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-truck"></i>
+                            <span>Seguimiento de pedidos</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-gift"></i>
+                            <span>Ofertas exclusivas</span>
+                        </div>
                     </div>
-                    <div class="menu-arrow">›</div>
-                </div>
-
-                <div class="menu-item" onclick="navigateTo('carrito.html')">
-                    <div class="menu-icon">🛒</div>
-                    <div class="menu-content">
-                        <div class="menu-title">Mi Carrito</div>
-                        <div class="menu-subtitle" id="cartSubtitle">Ver productos en carrito</div>
-                    </div>
-                    <div class="menu-arrow">›</div>
-                </div>
-
-                <div class="menu-item" onclick="openAddressModal()">
-                    <div class="menu-icon">📍</div>
-                    <div class="menu-content">
-                        <div class="menu-title">Direcciones</div>
-                        <div class="menu-subtitle">Gestiona tus direcciones de envío</div>
-                    </div>
-                    <div class="menu-arrow">›</div>
-                </div>
-
-                <div class="menu-item" onclick="openPaymentModal()">
-                    <div class="menu-icon">💳</div>
-                    <div class="menu-content">
-                        <div class="menu-title">Métodos de Pago</div>
-                        <div class="menu-subtitle">Tarjetas y formas de pago</div>
-                    </div>
-                    <div class="menu-arrow">›</div>
-                </div>
-
-                <div class="menu-item" onclick="showOrderHistory()">
-                    <div class="menu-icon">📦</div>
-                    <div class="menu-content">
-                        <div class="menu-title">Historial de Pedidos</div>
-                        <div class="menu-subtitle">Revisa tus compras anteriores</div>
-                    </div>
-                    <div class="menu-arrow">›</div>
                 </div>
             </div>
 
-            <!-- App Settings -->
-            <div class="menu-section">
-                <h2 class="section-title">Configuración</h2>
-                
-                <div class="menu-item">
-                    <div class="menu-icon">🔔</div>
-                    <div class="menu-content">
-                        <div class="menu-title">Notificaciones</div>
-                        <div class="menu-subtitle">Recibe alertas de ofertas y pedidos</div>
+            <!-- Logged In Profile -->
+            <div id="user-profile" class="user-profile" style="display: none;">
+                <!-- User Info -->
+                <div class="profile-header">
+                    <div class="user-avatar">
+                        <img id="user-avatar-img" src="https://via.placeholder.com/100" alt="Avatar">
+                        <button class="avatar-edit-btn" onclick="changeAvatar()">
+                            <i class="fas fa-camera"></i>
+                        </button>
                     </div>
-                    <label class="switch">
-                        <input type="checkbox" id="notificationsToggle" checked>
-                        <span class="slider"></span>
-                    </label>
+                    <div class="user-info">
+                        <h2 id="user-name">Usuario</h2>
+                        <p id="user-email">usuario@email.com</p>
+                        <span id="user-role" class="user-role">Usuario</span>
+                    </div>
                 </div>
 
-                <div class="menu-item">
-                    <div class="menu-icon">🌙</div>
-                    <div class="menu-content">
-                        <div class="menu-title">Modo Oscuro</div>
-                        <div class="menu-subtitle">Cambia el tema de la aplicación</div>
+                <!-- Stats -->
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="favorites-count">0</div>
+                        <div class="stat-label">Favoritos</div>
                     </div>
-                    <label class="switch">
-                        <input type="checkbox" id="darkModeToggle">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="stat-item">
+                        <div class="stat-number" id="cart-count">0</div>
+                        <div class="stat-label">En Carrito</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="orders-count">0</div>
+                        <div class="stat-label">Pedidos</div>
+                    </div>
                 </div>
 
-                <div class="menu-item" onclick="openLanguageModal()">
-                    <div class="menu-icon">🌍</div>
-                    <div class="menu-content">
-                        <div class="menu-title">Idioma</div>
-                        <div class="menu-subtitle">Español</div>
+                <!-- Profile Menu -->
+                <div class="profile-menu">
+                    <div class="menu-section">
+                        <h3>Mi Cuenta</h3>
+                        <button class="menu-item" onclick="editProfile()">
+                            <i class="fas fa-user-edit"></i>
+                            <span>Editar Perfil</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <button class="menu-item" onclick="changePassword()">
+                            <i class="fas fa-lock"></i>
+                            <span>Cambiar Contraseña</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <button class="menu-item" onclick="manageAddresses()">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Direcciones</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
-                    <div class="menu-arrow">›</div>
-                </div>
 
-                <div class="menu-item" onclick="openCurrencyModal()">
-                    <div class="menu-icon">💰</div>
-                    <div class="menu-content">
-                        <div class="menu-title">Moneda</div>
-                        <div class="menu-subtitle">USD - Dólar Americano</div>
+                    <div class="menu-section">
+                        <h3>Compras</h3>
+                        <button class="menu-item" onclick="viewOrders()">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span>Mis Pedidos</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <button class="menu-item" onclick="window.location.href='favorites.html'">
+                            <i class="fas fa-heart"></i>
+                            <span>Favoritos</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <button class="menu-item" onclick="window.location.href='cart.html'">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Mi Carrito</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
-                    <div class="menu-arrow">›</div>
+
+                    <div class="menu-section">
+                        <h3>Configuración</h3>
+                        <div class="menu-item toggle-item">
+                            <i class="fas fa-bell"></i>
+                            <span>Notificaciones</span>
+                            <div class="toggle-switch" onclick="toggleNotifications()">
+                                <input type="checkbox" id="notifications-toggle" checked>
+                                <span class="slider"></span>
+                            </div>
+                        </div>
+                        <div class="menu-item toggle-item">
+                            <i class="fas fa-moon"></i>
+                            <span>Modo Oscuro</span>
+                            <div class="toggle-switch" onclick="toggleDarkMode()">
+                                <input type="checkbox" id="darkmode-toggle">
+                                <span class="slider"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Section (Only for admins) -->
+                    <div class="menu-section" id="admin-section" style="display: none;">
+                        <h3>Administración</h3>
+                        <button class="menu-item admin-item" onclick="window.location.href='admin.html'">
+                            <i class="fas fa-cogs"></i>
+                            <span>Panel de Admin</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <div class="menu-section">
+                        <button class="menu-item logout-item" onclick="handleLogout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Cerrar Sesión</span>
+                        </button>
+                    </div>
                 </div>
             </div>
-
-            <!-- Support -->
-            <div class="menu-section">
-                <h2 class="section-title">Soporte</h2>
-                
-                <div class="menu-item" onclick="openHelpCenter()">
-                    <div class="menu-icon">❓</div>
-                    <div class="menu-content">
-                        <div class="menu-title">Centro de Ayuda</div>
-                        <div class="menu-subtitle">Preguntas frecuentes y guías</div>
-                    </div>
-                    <div class="menu-arrow">›</div>
-                </div>
-
-                <div class="menu-item" onclick="contactSupport()">
-                    <div class="menu-icon">💬</div>
-                    <div class="menu-content">
-                        <div class="menu-title">Contactar Soporte</div>
-                        <div class="menu-subtitle">Chat en vivo y asistencia</div>
-                    </div>
-                    <div class="menu-arrow">›</div>
-                </div>
-
-                <div class="menu-item" onclick="showAbout()">
-                    <div class="menu-icon">ℹ️</div>
-                    <div class="menu-content">
-                        <div class="menu-title">Acerca de PetStyle</div>
-                        <div class="menu-subtitle">Versión 2.1.0</div>
-                    </div>
-                    <div class="menu-arrow">›</div>
-                </div>
-            </div>
-
-            <!-- Logout Button (Only for logged in users) -->
-            <div class="menu-section hidden" id="logoutSection">
-                <button class="logout-btn" onclick="confirmLogout()">Cerrar Sesión</button>
-            </div>
-        </div>
+        </main>
 
         <!-- Bottom Navigation -->
-        <div class="bottom-nav">
-            <div class="nav-item" onclick="navigateTo('main.html')">
-                <div class="nav-icon">🏠</div>
-                <div class="nav-label">Inicio</div>
-            </div>
-            <div class="nav-item" onclick="navigateTo('favorites.html')">
-                <div class="nav-icon">❤️</div>
-                <div class="nav-label">Favoritos</div>
-            </div>
-            <div class="nav-item" onclick="navigateTo('carrito.html')" style="position: relative;">
-                <div class="nav-icon">🛒</div>
-                <div class="nav-label">Carrito</div>
-                <div class="cart-badge" id="cartBadge">0</div>
-            </div>
-            <div class="nav-item active">
-                <div class="nav-icon">👤</div>
-                <div class="nav-label">Perfil</div>
-            </div>
-        </div>
+        <nav class="bottom-nav">
+            <button class="nav-btn" onclick="window.location.href='main.html'">
+                <i class="fas fa-home"></i>
+                <span>Inicio</span>
+            </button>
+            <button class="nav-btn" onclick="window.location.href='favorites.html'">
+                <i class="fas fa-heart"></i>
+                <span>Favoritos</span>
+            </button>
+            <button class="nav-btn" onclick="window.location.href='cart.html'">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Carrito</span>
+            </button>
+            <button class="nav-btn active">
+                <i class="fas fa-user"></i>
+                <span>Perfil</span>
+            </button>
+        </nav>
     </div>
 
     <!-- Edit Profile Modal -->
-    <div class="modal" id="editProfileModal" style="display: none;">
+    <div id="edit-profile-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title">Editar Perfil</div>
-                <button class="close-btn" onclick="closeModal('editProfileModal')">×</button>
+                <h3>Editar Perfil</h3>
+                <button class="close-btn" onclick="closeEditModal()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <form id="editProfileForm">
+            <form id="edit-profile-form" class="modal-body">
                 <div class="form-group">
-                    <label class="form-label">Nombre Completo</label>
-                    <input type="text" class="form-input" id="editName" required>
+                    <label for="edit-name">Nombre</label>
+                    <input type="text" id="edit-name" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-input" id="editEmail" required>
+                    <label for="edit-email">Email</label>
+                    <input type="email" id="edit-email" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Teléfono</label>
-                    <input type="tel" class="form-input" id="editPhone">
+                    <label for="edit-phone">Teléfono</label>
+                    <input type="tel" id="edit-phone">
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Fecha de Nacimiento</label>
-                    <input type="date" class="form-input" id="editBirthdate">
-                </div>
-                <div class="modal-buttons">
-                    <button type="button" class="btn-secondary" onclick="closeModal('editProfileModal')">Cancelar</button>
-                    <button type="submit" class="btn-primary">Guardar</button>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeEditModal()">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        Guardar Cambios
+                    </button>
                 </div>
             </form>
         </div>
     </div>
-
-    <!-- Add Pet Modal -->
-    <div class="modal" id="addPetModal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Agregar Mascota</div>
-                <button class="close-btn" onclick="closeModal('addPetModal')">×</button>
-            </div>
-            <form id="addPetForm">
-                <div class="form-group">
-                    <label class="form-label">Nombre de la Mascota</label>
-                    <input type="text" class="form-input" id="petName" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Tipo</label>
-                    <select class="form-input" id="petType" required>
-                        <option value="">Seleccionar tipo</option>
-                        <option value="dog">🐕 Perro</option>
-                        <option value="cat">🐱 Gato</option>
-                        <option value="bird">🐦 Ave</option>
-                        <option value="rabbit">🐰 Conejo</option>
-                        <option value="hamster">🐹 Hámster</option>
-                        <option value="fish">🐠 Pez</option>
-                        <option value="other">🐾 Otro</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Raza</label>
-                    <input type="text" class="form-input" id="petBreed">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Edad</label>
-                    <input type="number" class="form-input" id="petAge" min="0" max="30">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Peso (kg)</label>
-                    <input type="number" class="form-input" id="petWeight" step="0.1" min="0">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Notas Especiales</label>
-                    <textarea class="form-input form-textarea" id="petNotes" placeholder="Alergias, preferencias, cuidados especiales..."></textarea>
-                </div>
-                <div class="modal-buttons">
-                    <button type="button" class="btn-secondary" onclick="closeModal('addPetModal')">Cancelar</button>
-                    <button type="submit" class="btn-primary">Agregar Mascota</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Address Modal -->
-    <div class="modal" id="addressModal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Gestionar Direcciones</div>
-                <button class="close-btn" onclick="closeModal('addressModal')">×</button>
-            </div>
-            <div id="addressList">
-                <div class="menu-item" onclick="openAddAddressModal()">
-                    <div class="menu-icon">➕</div>
-                    <div class="menu-content">
-                        <div class="menu-title">Agregar Nueva Dirección</div>
-                        <div class="menu-subtitle">Casa, trabajo, etc.</div>
-                    </div>
-                    <div class="menu-arrow">›</div>
-                </div>
-            </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn-secondary" onclick="closeModal('addressModal')">Cerrar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Payment Modal -->
-    <div class="modal" id="paymentModal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Métodos de Pago</div>
-                <button class="close-btn" onclick="closeModal('paymentModal')">×</button>
-            </div>
-            <div id="paymentList">
-                <div class="menu-item" onclick="openAddPaymentModal()">
-                    <div class="menu-icon">➕</div>
-                    <div class="menu-content">
-                        <div class="menu-title">Agregar Tarjeta</div>
-                        <div class="menu-subtitle">Visa, Mastercard, etc.</div>
-                    </div>
-                    <div class="menu-arrow">›</div>
-                </div>
-            </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn-secondary" onclick="closeModal('paymentModal')">Cerrar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Language Modal -->
-    <div class="modal" id="languageModal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Seleccionar Idioma</div>
-                <button class="close-btn" onclick="closeModal('languageModal')">×</button>
-            </div>
-            <div>
-                <div class="menu-item" onclick="changeLanguage('es')">
-                    <div class="menu-icon">🇪🇸</div>
-                    <div class="menu-content">
-                        <div class="menu-title">Español</div>
-                    </div>
-                    <div class="menu-arrow" id="lang-es">✓</div>
-                </div>
-                <div class="menu-item" onclick="changeLanguage('en')">
-                    <div class="menu-icon">🇺🇸</div>
-                    <div class="menu-content">
-                        <div class="menu-title">English</div>
-                    </div>
-                    <div class="menu-arrow" id="lang-en"></div>
-                </div>
-                <div class="menu-item" onclick="changeLanguage('pt')">
-                    <div class="menu-icon">🇧🇷</div>
-                    <div class="menu-content">
-                        <div class="menu-title">Português</div>
-                    </div>
-                    <div class="menu-arrow" id="lang-pt"></div>
-                </div>
-            </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn-secondary" onclick="closeModal('languageModal')">Cerrar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Currency Modal -->
-    <div class="modal" id="currencyModal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Seleccionar Moneda</div>
-                <button class="close-btn" onclick="closeModal('currencyModal')">×</button>
-            </div>
-            <div>
-                <div class="menu-item" onclick="changeCurrency('USD')">
-                    <div class="menu-icon">💵</div>
-                    <div class="menu-content">
-                        <div class="menu-title">USD - Dólar Americano</div>
-                    </div>
-                    <div class="menu-arrow" id="curr-USD">✓</div>
-                </div>
-                <div class="menu-item" onclick="changeCurrency('MXN')">
-                    <div class="menu-icon">🇲🇽</div>
-                    <div class="menu-content">
-                        <div class="menu-title">MXN - Peso Mexicano</div>
-                    </div>
-                    <div class="menu-arrow" id="curr-MXN"></div>
-                </div>
-                <div class="menu-item" onclick="changeCurrency('EUR')">
-                    <div class="menu-icon">💶</div>
-                    <div class="menu-content">
-                        <div class="menu-title">EUR - Euro</div>
-                    </div>
-                    <div class="menu-arrow" id="curr-EUR"></div>
-                </div>
-            </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn-secondary" onclick="closeModal('currencyModal')">Cerrar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Logout Confirmation Modal -->
-    <div class="modal-overlay" id="logoutModal" style="display: none;">
-        <div class="modal">
-            <div class="modal-icon">⚠️</div>
-            <h3 class="modal-title">Cerrar Sesión</h3>
-            <p class="modal-text">¿Estás seguro de que quieres cerrar sesión?</p>
-            <div class="modal-buttons">
-                <button class="modal-btn secondary" onclick="closeLogoutModal()">Cancelar</button>
-                <button class="modal-btn primary" onclick="performLogout()">Cerrar Sesión</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notifications -->
-    <div class="toast-container" id="toastContainer"></div>
 
     <!-- Scripts -->
-    <!-- 1. API Connection -->
-    <script src="/frontend/js/api.js"></script>
-    
-    <!-- 2. Profile functionality -->
-    <script>
-        // ================================================
-        // VARIABLES GLOBALES
-        // ================================================
-        let currentUser = null;
-        let userPets = [];
-        let userStats = {
-            orders: 0,
-            favorites: 0,
-            reviews: 0
-        };
-
-        // ================================================
-        // INICIALIZACIÓN
-        // ================================================
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('👤 Iniciando página de perfil...');
-            
-            // Verificar si el usuario está logueado
-            if (isUserLoggedIn()) {
-                await loadUserProfile();
-                showLoggedInUI();
-            } else {
-                showGuestUI();
-            }
-
-            // Configurar event listeners
-            setupEventListeners();
-            
-            console.log('✅ Página de perfil inicializada');
-        });
-
-        // ================================================
-        // FUNCIONES DE CARGA DE DATOS
-        // ================================================
-        async function loadUserProfile() {
-            try {
-                // Obtener datos del usuario del localStorage
-                currentUser = {
-                    id: localStorage.getItem('userId'),
-                    name: localStorage.getItem('userName'),
-                    email: localStorage.getItem('userEmail'),
-                    role: localStorage.getItem('userRole')
-                };
-
-                // Cargar estadísticas del usuario
-                await loadUserStats();
-                
-                // Cargar mascotas del usuario
-                await loadUserPets();
-                
-                // Actualizar contador del carrito
-                await updateCartCounter();
-                
-                // Actualizar UI con datos del usuario
-                updateProfileUI();
-                
-            } catch (error) {
-                console.error('Error cargando perfil:', error);
-                showToast('Error al cargar el perfil', 'error');
-            }
-        }
-
-        async function loadUserStats() {
-            try {
-                // Cargar favoritos del localStorage
-                const favorites = JSON.parse(localStorage.getItem('userFavorites') || '[]');
-                userStats.favorites = favorites.length;
-
-                // Cargar carrito para estadísticas
-                if (isUserLoggedIn()) {
-                    try {
-                        const cart = await getCart();
-                        // No mostrar items del carrito como estadística, solo favoritos reales
-                    } catch (error) {
-                        console.log('No se pudo cargar carrito para stats');
-                    }
-                }
-
-                // Por ahora, orders y reviews son simulados
-                userStats.orders = parseInt(localStorage.getItem('userOrders') || '0');
-                userStats.reviews = parseInt(localStorage.getItem('userReviews') || '0');
-
-            } catch (error) {
-                console.error('Error cargando estadísticas:', error);
-            }
-        }
-
-        async function loadUserPets() {
-            try {
-                // Cargar mascotas del localStorage (en el futuro desde API)
-                userPets = JSON.parse(localStorage.getItem('userPets') || '[]');
-                displayUserPets();
-            } catch (error) {
-                console.error('Error cargando mascotas:', error);
-            }
-        }
-
-        async function updateCartCounter() {
-            try {
-                if (!isUserLoggedIn()) {
-                    document.getElementById('cartBadge').style.display = 'none';
-                    return;
-                }
-
-                const cart = await getCart();
-                const badge = document.getElementById('cartBadge');
-                
-                if (cart.data && cart.data.items) {
-                    const totalItems = cart.data.items.reduce((sum, item) => sum + item.quantity, 0);
-                    badge.textContent = totalItems;
-                    badge.style.display = totalItems > 0 ? 'block' : 'none';
-                    
-                    // Actualizar subtitle del carrito
-                    const cartSubtitle = document.getElementById('cartSubtitle');
-                    if (cartSubtitle) {
-                        cartSubtitle.textContent = totalItems > 0 ? `${totalItems} productos en el carrito` : 'Carrito vacío';
-                    }
-                } else {
-                    badge.style.display = 'none';
-                }
-            } catch (error) {
-                console.error('Error actualizando contador:', error);
-                document.getElementById('cartBadge').style.display = 'none';
-            }
-        }
-
-        // ================================================
-        // FUNCIONES DE UI
-        // ================================================
-        function showLoggedInUI() {
-            // Mostrar secciones para usuarios logueados
-            document.getElementById('userStats').classList.remove('hidden');
-            document.getElementById('petProfile').classList.remove('hidden');
-            document.getElementById('accountSection').classList.remove('hidden');
-            document.getElementById('logoutSection').classList.remove('hidden');
-            
-            // Ocultar CTA de login
-            document.getElementById('loginCTA').style.display = 'none';
-            
-            // Mostrar cámara de avatar
-            document.getElementById('cameraBtn').style.display = 'block';
-        }
-
-        function showGuestUI() {
-            // Ocultar secciones para usuarios logueados
-            document.getElementById('userStats').classList.add('hidden');
-            document.getElementById('petProfile').classList.add('hidden');
-            document.getElementById('accountSection').classList.add('hidden');
-            document.getElementById('logoutSection').classList.add('hidden');
-            
-            // Mostrar CTA de login
-            document.getElementById('loginCTA').style.display = 'block';
-            
-            // Ocultar cámara de avatar
-            document.getElementById('cameraBtn').style.display = 'none';
-            
-            // Ocultar contador del carrito
-            document.getElementById('cartBadge').style.display = 'none';
-        }
-
-        function updateProfileUI() {
-            if (!currentUser) return;
-
-            // Actualizar nombre y email
-            document.getElementById('profileName').textContent = currentUser.name || 'Usuario';
-            document.getElementById('profileEmail').textContent = currentUser.email || '';
-
-            // Actualizar estadísticas
-            document.getElementById('ordersCount').textContent = userStats.orders;
-            document.getElementById('favoritesCount').textContent = userStats.favorites;
-            document.getElementById('reviewsCount').textContent = userStats.reviews;
-
-            // Actualizar subtitle de favoritos
-            const favoritesSubtitle = document.getElementById('favoritesSubtitle');
-            if (favoritesSubtitle) {
-                favoritesSubtitle.textContent = userStats.favorites > 0 ? 
-                    `${userStats.favorites} productos guardados` : 'No tienes favoritos aún';
-            }
-
-            // Actualizar avatar si tiene imagen
-            const avatar = document.getElementById('profileAvatar');
-            const userAvatar = localStorage.getItem('userAvatar');
-            if (userAvatar && userAvatar !== 'null') {
-                avatar.textContent = userAvatar;
-            }
-        }
-
-        function displayUserPets() {
-            const petGrid = document.getElementById('petGrid');
-            
-            // Limpiar grid excepto el botón de agregar
-            const addPetCard = petGrid.querySelector('.add-pet');
-            petGrid.innerHTML = '';
-            petGrid.appendChild(addPetCard);
-
-            // Agregar mascotas del usuario
-            userPets.forEach(pet => {
-                const petCard = document.createElement('div');
-                petCard.className = 'pet-card';
-                petCard.innerHTML = `
-                    <div class="pet-avatar">${getPetEmoji(pet.type)}</div>
-                    <div class="pet-name">${pet.name}</div>
-                    <div class="pet-info">${pet.breed || pet.type}</div>
-                    <button class="pet-edit-btn" onclick="editPet('${pet.id}')">✏️</button>
-                `;
-                petGrid.insertBefore(petCard, addPetCard);
-            });
-        }
-
-        function getPetEmoji(type) {
-            const emojis = {
-                dog: '🐕',
-                cat: '🐱',
-                bird: '🐦',
-                rabbit: '🐰',
-                hamster: '🐹',
-                fish: '🐠',
-                other: '🐾'
-            };
-            return emojis[type] || '🐾';
-        }
-
-        // ================================================
-        // FUNCIONES DE MODAL
-        // ================================================
-        function openEditProfileModal() {
-            if (!currentUser) return;
-
-            // Prellenar formulario con datos actuales
-            document.getElementById('editName').value = currentUser.name || '';
-            document.getElementById('editEmail').value = currentUser.email || '';
-            document.getElementById('editPhone').value = localStorage.getItem('userPhone') || '';
-            document.getElementById('editBirthdate').value = localStorage.getItem('userBirthdate') || '';
-
-            document.getElementById('editProfileModal').style.display = 'flex';
-        }
-
-        function openAddPetModal() {
-            // Limpiar formulario
-            document.getElementById('addPetForm').reset();
-            document.getElementById('addPetModal').style.display = 'flex';
-        }
-
-        function openAddressModal() {
-            document.getElementById('addressModal').style.display = 'flex';
-        }
-
-        function openPaymentModal() {
-            document.getElementById('paymentModal').style.display = 'flex';
-        }
-
-        function openLanguageModal() {
-            document.getElementById('languageModal').style.display = 'flex';
-        }
-
-        function openCurrencyModal() {
-            document.getElementById('currencyModal').style.display = 'flex';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        function confirmLogout() {
-            document.getElementById('logoutModal').style.display = 'flex';
-        }
-
-        function closeLogoutModal() {
-            document.getElementById('logoutModal').style.display = 'none';
-        }
-
-        // ================================================
-        // FUNCIONES DE FORMULARIOS
-        // ================================================
-        function setupEventListeners() {
-            // Formulario de editar perfil
-            const editProfileForm = document.getElementById('editProfileForm');
-            if (editProfileForm) {
-                editProfileForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    await saveProfileChanges();
-                });
-            }
-
-            // Formulario de agregar mascota
-            const addPetForm = document.getElementById('addPetForm');
-            if (addPetForm) {
-                addPetForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    await addPet();
-                });
-            }
-
-            // Toggle de notificaciones
-            const notificationsToggle = document.getElementById('notificationsToggle');
-            if (notificationsToggle) {
-                notificationsToggle.addEventListener('change', function() {
-                    localStorage.setItem('notificationsEnabled', this.checked);
-                    showToast(this.checked ? 'Notificaciones activadas' : 'Notificaciones desactivadas', 'info');
-                });
-                
-                // Cargar estado guardado
-                const notificationsEnabled = localStorage.getItem('notificationsEnabled');
-                if (notificationsEnabled !== null) {
-                    notificationsToggle.checked = notificationsEnabled === 'true';
-                }
-            }
-
-            // Toggle de modo oscuro
-            const darkModeToggle = document.getElementById('darkModeToggle');
-            if (darkModeToggle) {
-                darkModeToggle.addEventListener('change', function() {
-                    localStorage.setItem('darkModeEnabled', this.checked);
-                    document.body.classList.toggle('dark-mode', this.checked);
-                    showToast(this.checked ? 'Modo oscuro activado' : 'Modo oscuro desactivado', 'info');
-                });
-                
-                // Cargar estado guardado
-                const darkModeEnabled = localStorage.getItem('darkModeEnabled');
-                if (darkModeEnabled === 'true') {
-                    darkModeToggle.checked = true;
-                    document.body.classList.add('dark-mode');
-                }
-            }
-        }
-
-        async function saveProfileChanges() {
-            try {
-                const name = document.getElementById('editName').value.trim();
-                const email = document.getElementById('editEmail').value.trim();
-                const phone = document.getElementById('editPhone').value.trim();
-                const birthdate = document.getElementById('editBirthdate').value;
-
-                if (!name || !email) {
-                    showToast('Nombre y email son requeridos', 'error');
-                    return;
-                }
-
-                // Guardar en localStorage (en el futuro enviar a API)
-                localStorage.setItem('userName', name);
-                localStorage.setItem('userEmail', email);
-                localStorage.setItem('userPhone', phone);
-                localStorage.setItem('userBirthdate', birthdate);
-
-                // Actualizar objeto currentUser
-                currentUser.name = name;
-                currentUser.email = email;
-
-                // Actualizar UI
-                updateProfileUI();
-
-                showToast('Perfil actualizado correctamente', 'success');
-                closeModal('editProfileModal');
-
-            } catch (error) {
-                console.error('Error guardando perfil:', error);
-                showToast('Error al guardar cambios', 'error');
-            }
-        }
-
-        async function addPet() {
-            try {
-                const name = document.getElementById('petName').value.trim();
-                const type = document.getElementById('petType').value;
-                const breed = document.getElementById('petBreed').value.trim();
-                const age = document.getElementById('petAge').value;
-                const weight = document.getElementById('petWeight').value;
-                const notes = document.getElementById('petNotes').value.trim();
-
-                if (!name || !type) {
-                    showToast('Nombre y tipo de mascota son requeridos', 'error');
-                    return;
-                }
-
-                const newPet = {
-                    id: Date.now().toString(),
-                    name,
-                    type,
-                    breed,
-                    age: age ? parseInt(age) : null,
-                    weight: weight ? parseFloat(weight) : null,
-                    notes,
-                    createdAt: new Date().toISOString()
-                };
-
-                userPets.push(newPet);
-                localStorage.setItem('userPets', JSON.stringify(userPets));
-
-                displayUserPets();
-                showToast(`${name} agregado/a como mascota`, 'success');
-                closeModal('addPetModal');
-
-            } catch (error) {
-                console.error('Error agregando mascota:', error);
-                showToast('Error al agregar mascota', 'error');
-            }
-        }
-
-        function editPet(petId) {
-            const pet = userPets.find(p => p.id === petId);
-            if (pet) {
-                // Prellenar formulario con datos de la mascota
-                document.getElementById('petName').value = pet.name;
-                document.getElementById('petType').value = pet.type;
-                document.getElementById('petBreed').value = pet.breed || '';
-                document.getElementById('petAge').value = pet.age || '';
-                document.getElementById('petWeight').value = pet.weight || '';
-                document.getElementById('petNotes').value = pet.notes || '';
-
-                // Cambiar el comportamiento del formulario para editar
-                const form = document.getElementById('addPetForm');
-                form.dataset.editingPetId = petId;
-
-                openAddPetModal();
-            }
-        }
-
-        // ================================================
-        // FUNCIONES DE NAVEGACIÓN Y UTILIDADES
-        // ================================================
-        function navigateTo(page) {
-            window.location.href = page;
-        }
-
-        function isUserLoggedIn() {
-            return localStorage.getItem('authToken') && localStorage.getItem('userId');
-        }
-
-        async function performLogout() {
-            try {
-                // Limpiar datos del usuario
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('userId');
-                localStorage.removeItem('userEmail');
-                localStorage.removeItem('userName');
-                localStorage.removeItem('userRole');
-                localStorage.removeItem('userPhone');
-                localStorage.removeItem('userBirthdate');
-                localStorage.removeItem('userAvatar');
-                localStorage.removeItem('userFavorites');
-                localStorage.removeItem('userPets');
-
-                showToast('Sesión cerrada correctamente', 'success');
-                
-                // Redirigir al login después de 1 segundo
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 1000);
-
-            } catch (error) {
-                console.error('Error cerrando sesión:', error);
-                showToast('Error al cerrar sesión', 'error');
-            }
-        }
-
-        function changeAvatar() {
-            const emojis = ['👤', '🧑', '👩', '🧔', '👱', '🦳', '🦲', '🧑‍🦰', '👩‍🦰', '🧑‍🦱', '👩‍🦱'];
-            const currentAvatar = document.getElementById('profileAvatar').textContent;
-            const currentIndex = emojis.indexOf(currentAvatar);
-            const nextIndex = (currentIndex + 1) % emojis.length;
-            const newAvatar = emojis[nextIndex];
-            
-            document.getElementById('profileAvatar').textContent = newAvatar;
-            localStorage.setItem('userAvatar', newAvatar);
-            showToast('Avatar actualizado', 'success');
-        }
-
-        function changeLanguage(lang) {
-            // Limpiar checkmarks anteriores
-            document.querySelectorAll('[id^="lang-"]').forEach(el => el.textContent = '');
-            
-            // Marcar idioma seleccionado
-            document.getElementById(`lang-${lang}`).textContent = '✓';
-            
-            localStorage.setItem('selectedLanguage', lang);
-            showToast('Idioma actualizado', 'success');
-            
-            // Aquí puedes implementar la lógica de cambio de idioma
-            closeModal('languageModal');
-        }
-
-        function changeCurrency(currency) {
-            // Limpiar checkmarks anteriores
-            document.querySelectorAll('[id^="curr-"]').forEach(el => el.textContent = '');
-            
-            // Marcar moneda seleccionada
-            document.getElementById(`curr-${currency}`).textContent = '✓';
-            
-            localStorage.setItem('selectedCurrency', currency);
-            showToast('Moneda actualizada', 'success');
-            
-            // Aquí puedes implementar la lógica de cambio de moneda
-            closeModal('currencyModal');
-        }
-
-        function showOrderHistory() {
-            // Simular historial de pedidos
-            showToast('Función de historial próximamente', 'info');
-        }
-
-        function openHelpCenter() {
-            showToast('Centro de ayuda próximamente', 'info');
-        }
-
-        function contactSupport() {
-            showToast('Soporte en línea próximamente', 'info');
-        }
-
-        function showAbout() {
-            showToast('PetStyle v2.1.0 - Hecho con ❤️ para mascotas', 'info');
-        }
-
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.innerHTML = `
-                <span>${message}</span>
-                <button onclick="this.parentElement.remove()">×</button>
-            `;
-            
-            container.appendChild(toast);
-            
-            setTimeout(() => {
-                if (toast.parentElement) {
-                    toast.remove();
-                }
-            }, 5000);
-        }
-
-        // ================================================
-        // FUNCIONES GLOBALES PARA INTEGRACIÓN
-        // ================================================
-        window.ProfileAPI = {
-            getCurrentUser: () => currentUser,
-            isLoggedIn: isUserLoggedIn,
-            updateStats: loadUserStats,
-            refreshProfile: loadUserProfile
-        };
-
-        console.log('✅ Sistema de perfil PetStyle cargado');
-    </script>
-
-    <!-- 3. Script original del perfil (para compatibilidad) -->
-      <script src="../js/api.js"></script>
-    <script src="/frontend/js/profile.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/favorites.js"></script>
+    <script src="../js/cart.js"></script>
+    <script src="../js/profile-page.js"></script>
 </body>
 </html>

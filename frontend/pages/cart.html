@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Carrito - PetStyle</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/cart.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <button class="back-btn" onclick="window.location.href='main.html'">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1>Mi Carrito</h1>
+                <button class="header-btn" onclick="clearCart()">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Loading State -->
+            <div id="loading-cart" class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Cargando carrito...</p>
+            </div>
+
+            <!-- Empty Cart State -->
+            <div id="empty-cart" class="empty-state" style="display: none;">
+                <i class="fas fa-shopping-cart empty-icon"></i>
+                <h3>Tu carrito está vacío</h3>
+                <p>Agrega algunos productos para mascotas</p>
+                <button class="btn-primary" onclick="window.location.href='main.html'">
+                    Explorar Productos
+                </button>
+            </div>
+
+            <!-- Cart Items -->
+            <div id="cart-items" class="cart-items" style="display: none;">
+                <!-- Items will be loaded here -->
+            </div>
+
+            <!-- Cart Summary -->
+            <div id="cart-summary" class="cart-summary" style="display: none;">
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">$0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Envío:</span>
+                    <span id="shipping">$5.00</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total:</span>
+                    <span id="total">$5.00</span>
+                </div>
+                <button class="btn-checkout" onclick="proceedToCheckout()">
+                    <i class="fas fa-credit-card"></i>
+                    Proceder al Pago
+                </button>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-btn" onclick="window.location.href='main.html'">
+                <i class="fas fa-home"></i>
+                <span>Inicio</span>
+            </button>
+            <button class="nav-btn" onclick="window.location.href='favorites.html'">
+                <i class="fas fa-heart"></i>
+                <span>Favoritos</span>
+            </button>
+            <button class="nav-btn active">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Carrito</span>
+            </button>
+            <button class="nav-btn" onclick="window.location.href='profile.html'">
+                <i class="fas fa-user"></i>
+                <span>Perfil</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="../js/utils.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/favorites.js"></script>
+    <script src="../js/cart.js"></script>
+    
+    <script>
+        // Initialize cart page
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadCartItems();
+        });
+
+        async function loadCartItems() {
+            const loadingEl = document.getElementById('loading-cart');
+            const emptyEl = document.getElementById('empty-cart');
+            const itemsEl = document.getElementById('cart-items');
+            const summaryEl = document.getElementById('cart-summary');
+
+            try {
+                loadingEl.style.display = 'flex';
+                emptyEl.style.display = 'none';
+                itemsEl.style.display = 'none';
+                summaryEl.style.display = 'none';
+
+                // Simulate loading time
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                const cartItems = getCartItems ? getCartItems() : [];
+                
+                if (cartItems.length === 0) {
+                    loadingEl.style.display = 'none';
+                    emptyEl.style.display = 'flex';
+                    return;
+                }
+
+                // If there are items, fetch product details
+                const itemsWithDetails = await Promise.all(
+                    cartItems.map(async (item) => {
+                        try {
+                            const product = await api.getProduct(item.productId);
+                            return { ...item, ...product };
+                        } catch (error) {
+                            console.error('Error fetching product:', error);
+                            return null;
+                        }
+                    })
+                );
+
+                const validItems = itemsWithDetails.filter(item => item !== null);
+
+                if (validItems.length === 0) {
+                    loadingEl.style.display = 'none';
+                    emptyEl.style.display = 'flex';
+                    return;
+                }
+
+                renderCartItems(validItems);
+                updateCartSummary();
+
+                loadingEl.style.display = 'none';
+                itemsEl.style.display = 'flex';
+                summaryEl.style.display = 'block';
+
+            } catch (error) {
+                console.error('Error loading cart:', error);
+                loadingEl.style.display = 'none';
+                emptyEl.style.display = 'flex';
+                if (typeof showToast === 'function') {
+                    showToast('Error al cargar el carrito', 'error');
+                }
+            }
+        }
+
+        function renderCartItems(items) {
+            const container = document.getElementById('cart-items');
+            container.innerHTML = items.map(item => `
+                <div class="cart-item" data-id="${item.productId}">
+                    <img src="${item.imagen || 'https://via.placeholder.com/80'}" 
+                         alt="${item.nombre}" class="item-image">
+                    <div class="item-details">
+                        <h4 class="item-name">${item.nombre}</h4>
+                        <p class="item-price">$${item.precio}</p>
+                        <p class="item-category">${item.categoria}</p>
+                    </div>
+                    <div class="item-controls">
+                        <div class="quantity-control">
+                            <button class="qty-btn" onclick="updateQuantity('${item.productId}', ${item.quantity - 1})">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="quantity">${item.quantity}</span>
+                            <button class="qty-btn" onclick="updateQuantity('${item.productId}', ${item.quantity + 1})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <button class="remove-btn" onclick="removeFromCart('${item.productId}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateQuantity(productId, newQuantity) {
+            if (newQuantity <= 0) {
+                removeFromCart(productId);
+                return;
+            }
+            
+            if (typeof updateCartItemQuantity === 'function') {
+                updateCartItemQuantity(productId, newQuantity);
+            }
+            loadCartItems();
+            if (typeof showToast === 'function') {
+                showToast('Cantidad actualizada', 'success');
+            }
+        }
+
+        function removeFromCart(productId) {
+            if (typeof removeCartItem === 'function') {
+                removeCartItem(productId);
+            }
+            loadCartItems();
+            if (typeof showToast === 'function') {
+                showToast('Producto eliminado del carrito', 'success');
+            }
+        }
+
+        function clearCart() {
+            if (confirm('¿Estás seguro de que quieres vaciar el carrito?')) {
+                if (typeof clearCartItems === 'function') {
+                    clearCartItems();
+                }
+                loadCartItems();
+                if (typeof showToast === 'function') {
+                    showToast('Carrito vaciado', 'success');
+                }
+            }
+        }
+
+        function updateCartSummary() {
+            const cartItems = getCartItems ? getCartItems() : [];
+            const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const shipping = subtotal > 50 ? 0 : 5;
+            const total = subtotal + shipping;
+
+            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('shipping').textContent = subtotal > 50 ? 'Gratis' : `$${shipping.toFixed(2)}`;
+            document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+        }
+
+        function proceedToCheckout() {
+            const user = getCurrentUser ? getCurrentUser() : null;
+            if (!user) {
+                if (typeof showToast === 'function') {
+                    showToast('Debes iniciar sesión para continuar', 'warning');
+                }
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const cartItems = getCartItems ? getCartItems() : [];
+            if (cartItems.length === 0) {
+                if (typeof showToast === 'function') {
+                    showToast('Tu carrito está vacío', 'warning');
+                }
+                return;
+            }
+
+            if (typeof showToast === 'function') {
+                showToast('Redirigiendo al pago...', 'success');
+            }
+            // Aquí puedes redirigir a una página de checkout
+            // window.location.href = 'checkout.html';
+        }
+
+        // Fallback functions if not loaded
+        function getCartItems() {
+            return [];
+        }
+
+        function getCurrentUser() {
+            try {
+                const user = localStorage.getItem('currentUser');
+                return user ? JSON.parse(user) : null;
+            } catch (error) {
+                return null;
+            }
+        }
+    </script>
+</body>
+</html>
