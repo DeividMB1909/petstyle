@@ -12,7 +12,7 @@
         <!-- Header -->
         <div class="header">
             <button class="back-btn" onclick="goBack()">
-                <svg fill="none" viewBox="0 0 24 24">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                 </svg>
             </button>
@@ -63,6 +63,7 @@
                         required
                         autocomplete="new-password"
                     >
+                    <div class="password-strength" id="passwordStrength"></div>
                     <div class="form-error" id="passwordError"></div>
                 </div>
 
@@ -91,8 +92,22 @@
                     <div class="form-error" id="phoneError"></div>
                 </div>
 
+                <!-- Términos y condiciones -->
+                <div class="form-group">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="termsCheckbox" required>
+                        <span class="checkmark"></span>
+                        <span class="checkbox-text">
+                            Acepto los <a href="#" onclick="showTerms()">Términos y Condiciones</a> 
+                            y la <a href="#" onclick="showPrivacy()">Política de Privacidad</a>
+                        </span>
+                    </label>
+                    <div class="form-error" id="termsError"></div>
+                </div>
+
                 <button type="submit" class="btn-primary" id="registerBtn">
-                    Registrarse
+                    <span id="registerBtnText">Registrarse</span>
+                    <div class="loading-spinner" id="registerSpinner" style="display: none;"></div>
                 </button>
             </form>
 
@@ -101,7 +116,7 @@
             </div>
 
             <div class="social-buttons">
-                <button class="social-btn google" onclick="loginWithGoogle()">
+                <button class="social-btn google" onclick="registerWithGoogle()">
                     <svg class="social-icon" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -111,7 +126,7 @@
                     Continuar con Google
                 </button>
 
-                <button class="social-btn facebook" onclick="loginWithFacebook()">
+                <button class="social-btn facebook" onclick="registerWithFacebook()">
                     <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                     </svg>
@@ -125,41 +140,492 @@
         </div>
     </div>
 
-    <!-- Modals -->
-    <div class="modal-overlay" id="googleModal">
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal" style="display: none;">
         <div class="modal">
-            <div class="modal-icon info">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                </svg>
-            </div>
-            <h3 class="modal-title">Continuar con Google</h3>
-            <p class="modal-text">Serás redirigido a Google para completar el proceso de registro de forma segura.</p>
+            <div class="modal-icon success">🎉</div>
+            <h3 class="modal-title">¡Registro Exitoso!</h3>
+            <p class="modal-text">Tu cuenta ha sido creada correctamente. Ahora puedes iniciar sesión.</p>
             <div class="modal-buttons">
-                <button class="modal-btn secondary" onclick="closeModal()">Cancelar</button>
-                <button class="modal-btn primary" onclick="processGoogleRegister()">Continuar</button>
+                <button class="modal-btn primary" onclick="goToLogin()">Iniciar Sesión</button>
             </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="facebookModal">
+    <!-- Terms Modal -->
+    <div class="modal-overlay" id="termsModal" style="display: none;">
+        <div class="modal large">
+            <div class="modal-header">
+                <h3 class="modal-title">Términos y Condiciones</h3>
+                <button class="close-btn" onclick="closeModal('termsModal')">×</button>
+            </div>
+            <div class="modal-content">
+                <div class="terms-content">
+                    <h4>1. Aceptación de los Términos</h4>
+                    <p>Al registrarte en PetStyle, aceptas estar sujeto a estos términos y condiciones.</p>
+                    
+                    <h4>2. Uso del Servicio</h4>
+                    <p>PetStyle es una plataforma de comercio electrónico dedicada a productos para mascotas.</p>
+                    
+                    <h4>3. Cuenta de Usuario</h4>
+                    <p>Eres responsable de mantener la confidencialidad de tu cuenta y contraseña.</p>
+                    
+                    <h4>4. Privacidad</h4>
+                    <p>Respetamos tu privacidad y protegemos tus datos personales según nuestra política de privacidad.</p>
+                    
+                    <h4>5. Productos y Precios</h4>
+                    <p>Los precios están sujetos a cambios sin previo aviso. Las imágenes son referenciales.</p>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeModal('termsModal')">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Modal -->
+    <div class="modal-overlay" id="privacyModal" style="display: none;">
+        <div class="modal large">
+            <div class="modal-header">
+                <h3 class="modal-title">Política de Privacidad</h3>
+                <button class="close-btn" onclick="closeModal('privacyModal')">×</button>
+            </div>
+            <div class="modal-content">
+                <div class="terms-content">
+                    <h4>1. Información que Recopilamos</h4>
+                    <p>Recopilamos información que nos proporcionas directamente, como nombre, email y teléfono.</p>
+                    
+                    <h4>2. Uso de la Información</h4>
+                    <p>Utilizamos tu información para proporcionar y mejorar nuestros servicios.</p>
+                    
+                    <h4>3. Compartir Información</h4>
+                    <p>No vendemos ni compartimos tu información personal con terceros sin tu consentimiento.</p>
+                    
+                    <h4>4. Seguridad</h4>
+                    <p>Implementamos medidas de seguridad para proteger tu información personal.</p>
+                    
+                    <h4>5. Contacto</h4>
+                    <p>Si tienes preguntas sobre esta política, contáctanos en privacy@petstyle.com</p>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeModal('privacyModal')">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Social Login Modals -->
+    <div class="modal-overlay" id="googleModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-icon info">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                </svg>
+            </div>
+            <h3 class="modal-title">Continuar con Google</h3>
+            <p class="modal-text">Esta funcionalidad estará disponible próximamente.</p>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeModal('googleModal')">Cancelar</button>
+                <button class="modal-btn primary" onclick="processGoogleRegister()">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="facebookModal" style="display: none;">
         <div class="modal">
             <div class="modal-icon info">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
+            </svg>
             </div>
             <h3 class="modal-title">Continuar con Facebook</h3>
-            <p class="modal-text">Serás redirigido a Facebook para completar el proceso de registro de forma segura.</p>
+            <p class="modal-text">Esta funcionalidad estará disponible próximamente.</p>
             <div class="modal-buttons">
-                <button class="modal-btn secondary" onclick="closeModal()">Cancelar</button>
-                <button class="modal-btn primary" onclick="processFacebookRegister()">Continuar</button>
+                <button class="modal-btn secondary" onclick="closeModal('facebookModal')">Cancelar</button>
+                <button class="modal-btn primary" onclick="processFacebookRegister()">Entendido</button>
             </div>
         </div>
     </div>
 
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <!-- Scripts -->
+    <!-- 1. API Connection -->
+    <script src="/frontend/js/api.js"></script>
+    
+    <!-- 2. Register functionality -->
+    <script>
+        // ================================================
+        // VARIABLES GLOBALES
+        // ================================================
+        let isRegistering = false;
+
+        // ================================================
+        // FUNCIONES DE REGISTRO CON API
+        // ================================================
+        async function performRegister(userData) {
+            if (isRegistering) return;
+            isRegistering = true;
+
+            try {
+                showRegisterLoading(true);
+                
+                console.log('📝 Intentando registro con:', userData.email);
+                
+                // Llamar al endpoint de registro de tu API
+                const response = await apiRequest('/auth/register', {
+                    method: 'POST',
+                    body: JSON.stringify(userData)
+                });
+
+                console.log('📡 Respuesta del servidor:', response);
+
+                if (response.success) {
+                    showRegisterLoading(false);
+                    showSuccessModal();
+                    
+                    // Limpiar formulario
+                    document.getElementById('registerForm').reset();
+                    clearErrors();
+                    
+                } else {
+                    throw new Error(response.message || 'Error al registrarse');
+                }
+
+            } catch (error) {
+                showRegisterLoading(false);
+                console.error('❌ Error en registro:', error);
+                
+                let errorMessage = 'Error al registrarse';
+                
+                if (error.message.includes('400')) {
+                    errorMessage = 'Datos inválidos';
+                } else if (error.message.includes('409') || error.message.includes('duplicate')) {
+                    errorMessage = 'Este email ya está registrado';
+                    showFieldError('email', errorMessage);
+                } else if (error.message.includes('500')) {
+                    errorMessage = 'Error del servidor';
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                showToast(errorMessage, 'error');
+                
+            } finally {
+                isRegistering = false;
+            }
+        }
+
+        // ================================================
+        // VALIDACIONES
+        // ================================================
+        function validateForm() {
+            clearErrors();
+            let isValid = true;
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const phone = document.getElementById('phone').value.trim();
+            const termsAccepted = document.getElementById('termsCheckbox').checked;
+
+            // Validar nombre
+            if (!name) {
+                showFieldError('name', 'El nombre es requerido');
+                isValid = false;
+            } else if (name.length < 2) {
+                showFieldError('name', 'El nombre debe tener al menos 2 caracteres');
+                isValid = false;
+            }
+
+            // Validar email
+            if (!email) {
+                showFieldError('email', 'El email es requerido');
+                isValid = false;
+            } else if (!isValidEmail(email)) {
+                showFieldError('email', 'Email inválido');
+                isValid = false;
+            }
+
+            // Validar contraseña
+            if (!password) {
+                showFieldError('password', 'La contraseña es requerida');
+                isValid = false;
+            } else if (password.length < 6) {
+                showFieldError('password', 'La contraseña debe tener al menos 6 caracteres');
+                isValid = false;
+            }
+
+            // Validar confirmación de contraseña
+            if (!confirmPassword) {
+                showFieldError('confirmPassword', 'Confirma tu contraseña');
+                isValid = false;
+            } else if (password !== confirmPassword) {
+                showFieldError('confirmPassword', 'Las contraseñas no coinciden');
+                isValid = false;
+            }
+
+            // Validar teléfono (opcional pero si se proporciona debe ser válido)
+            if (phone && !isValidPhone(phone)) {
+                showFieldError('phone', 'Número de teléfono inválido');
+                isValid = false;
+            }
+
+            // Validar términos y condiciones
+            if (!termsAccepted) {
+                showFieldError('terms', 'Debes aceptar los términos y condiciones');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function isValidPhone(phone) {
+            // Acepta números con espacios, guiones y paréntesis
+            const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+            const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+            return phoneRegex.test(cleanPhone) && cleanPhone.length >= 10;
+        }
+
+        function checkPasswordStrength(password) {
+            const strengthIndicator = document.getElementById('passwordStrength');
+            let strength = 0;
+            let strengthText = '';
+            let strengthClass = '';
+
+            if (password.length >= 6) strength++;
+            if (password.match(/[a-z]/)) strength++;
+            if (password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+
+            switch (strength) {
+                case 0:
+                case 1:
+                    strengthText = 'Muy débil';
+                    strengthClass = 'very-weak';
+                    break;
+                case 2:
+                    strengthText = 'Débil';
+                    strengthClass = 'weak';
+                    break;
+                case 3:
+                    strengthText = 'Regular';
+                    strengthClass = 'medium';
+                    break;
+                case 4:
+                    strengthText = 'Fuerte';
+                    strengthClass = 'strong';
+                    break;
+                case 5:
+                    strengthText = 'Muy fuerte';
+                    strengthClass = 'very-strong';
+                    break;
+            }
+
+            strengthIndicator.textContent = password ? `Seguridad: ${strengthText}` : '';
+            strengthIndicator.className = `password-strength ${strengthClass}`;
+        }
+
+        // ================================================
+        // FUNCIONES DE UI
+        // ================================================
+        function showRegisterLoading(show) {
+            const btn = document.getElementById('registerBtn');
+            const btnText = document.getElementById('registerBtnText');
+            const spinner = document.getElementById('registerSpinner');
+
+            if (show) {
+                btn.disabled = true;
+                btnText.style.display = 'none';
+                spinner.style.display = 'inline-block';
+                btn.style.opacity = '0.7';
+            } else {
+                btn.disabled = false;
+                btnText.style.display = 'inline';
+                spinner.style.display = 'none';
+                btn.style.opacity = '1';
+            }
+        }
+
+        function showFieldError(fieldName, message) {
+            const errorElement = document.getElementById(fieldName + 'Error');
+            const inputElement = document.getElementById(fieldName);
+            
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+            
+            if (inputElement) {
+                inputElement.classList.add('error');
+            }
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.form-error').forEach(error => {
+                error.textContent = '';
+                error.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.form-input').forEach(input => {
+                input.classList.remove('error');
+            });
+        }
+
+        function showSuccessModal() {
+            document.getElementById('successModal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 5000);
+        }
+
+        // ================================================
+        // EVENT LISTENERS
+        // ================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📝 Página de registro cargada');
+
+            // Verificar si ya está logueado
+            if (isUserLoggedIn()) {
+                console.log('👤 Usuario ya logueado, redirigiendo...');
+                window.location.href = 'main.html';
+                return;
+            }
+
+            // Configurar formulario de registro
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    if (!validateForm()) {
+                        return;
+                    }
+
+                    const userData = {
+                        name: document.getElementById('name').value.trim(),
+                        email: document.getElementById('email').value.trim(),
+                        password: document.getElementById('password').value,
+                        phone: document.getElementById('phone').value.trim()
+                    };
+
+                    await performRegister(userData);
+                });
+            }
+
+            // Validación en tiempo real de contraseña
+            const passwordInput = document.getElementById('password');
+            if (passwordInput) {
+                passwordInput.addEventListener('input', function() {
+                    checkPasswordStrength(this.value);
+                });
+            }
+
+            // Validación de confirmación de contraseña
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            if (confirmPasswordInput) {
+                confirmPasswordInput.addEventListener('input', function() {
+                    const password = document.getElementById('password').value;
+                    if (this.value && this.value !== password) {
+                        showFieldError('confirmPassword', 'Las contraseñas no coinciden');
+                    } else {
+                        document.getElementById('confirmPasswordError').style.display = 'none';
+                    }
+                });
+            }
+
+            // Limpiar errores al escribir
+            document.querySelectorAll('.form-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    this.classList.remove('error');
+                    const errorElement = document.getElementById(this.id + 'Error');
+                    if (errorElement) {
+                        errorElement.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // ================================================
+        // FUNCIONES DE NAVEGACIÓN
+        // ================================================
+        function isUserLoggedIn() {
+            return localStorage.getItem('authToken') && localStorage.getItem('userId');
+        }
+
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'login.html';
+            }
+        }
+
+        function goToLogin() {
+            window.location.href = 'login.html';
+        }
+
+        function showTerms() {
+            document.getElementById('termsModal').style.display = 'flex';
+        }
+
+        function showPrivacy() {
+            document.getElementById('privacyModal').style.display = 'flex';
+        }
+
+        // ================================================
+        // FUNCIONES DE SOCIAL REGISTER (PLACEHOLDERS)
+        // ================================================
+        function registerWithGoogle() {
+            document.getElementById('googleModal').style.display = 'flex';
+        }
+
+        function registerWithFacebook() {
+            document.getElementById('facebookModal').style.display = 'flex';
+        }
+
+        function processGoogleRegister() {
+            showToast('Funcionalidad de Google próximamente', 'info');
+            closeModal('googleModal');
+        }
+
+        function processFacebookRegister() {
+            showToast('Funcionalidad de Facebook próximamente', 'info');
+            closeModal('facebookModal');
+        }
+
+        console.log('✅ Sistema de registro PetStyle cargado');
+    </script>
+
+    <!-- 3. Script original del registro (para compatibilidad) -->
+      <script src="../js/api.js"></script>
     <script src="/frontend/js/register.js"></script>
 </body>
 </html>

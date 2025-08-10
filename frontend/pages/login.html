@@ -65,7 +65,8 @@
                 </div>
 
                 <button type="submit" class="btn-primary" id="loginBtn">
-                    Iniciar Sesión
+                    <span id="loginBtnText">Iniciar Sesión</span>
+                    <div class="loading-spinner" id="loginSpinner" style="display: none;"></div>
                 </button>
             </form>
 
@@ -95,6 +96,7 @@
             <div class="auth-links">
                 <p>¿No tienes una cuenta? <a href="register.html">Regístrate aquí</a></p>
                 <p><a href="#" onclick="showForgotPassword()">¿Olvidaste tu contraseña?</a></p>
+                <p><strong>Para probar:</strong> Email: <code>user@petstyle.com</code>, Password: <code>user123</code></p>
             </div>
         </div>
     </div>
@@ -147,16 +149,365 @@
         </div>
     </div>
 
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-icon success">✅</div>
+            <h3 class="modal-title">¡Bienvenido!</h3>
+            <p class="modal-text">Has iniciado sesión correctamente</p>
+            <div class="modal-buttons">
+                <button class="modal-btn primary" onclick="closeSuccessModal()">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <!-- Scripts -->
-<script src="../js/config.js"></script>
-<script src="../js/api.js"></script>
-<script src="../js/auth.js"></script>
-<script>
-         // Crear instancias globales
-    window.api = new API();
-    window.authManager = new AuthManager(window.api);
-    console.log('🔧 API y AuthManager instanciados');
-</script>
-<script src="../js/login.js"></script>
+    <!-- 1. API de autenticación -->
+    <script src="../js/api.js"></script>
+    
+    <!-- 2. Sistema de login integrado -->
+    <script>
+        // ================================================
+        // VARIABLES GLOBALES
+        // ================================================
+        let isLoggingIn = false;
+
+        // ================================================
+        // FUNCIONES DE LOGIN CON API
+        // ================================================
+        async function performLogin(email, password) {
+            if (isLoggingIn) return;
+            isLoggingIn = true;
+
+            try {
+                showLoginLoading(true);
+                
+                console.log('🔐 Intentando login con:', email);
+                
+                // Llamar al endpoint de login de tu API
+                const response = await apiRequest('/auth/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ email, password })
+                });
+
+                console.log('📡 Respuesta del servidor:', response);
+
+                if (response.success) {
+                    // Guardar datos del usuario
+                    if (response.data && response.data.token) {
+                        localStorage.setItem('authToken', response.data.token);
+                        localStorage.setItem('userId', response.data.user.id || response.data.user._id);
+                        localStorage.setItem('userEmail', response.data.user.email);
+                        localStorage.setItem('userName', response.data.user.name);
+                        localStorage.setItem('userRole', response.data.user.role || 'user');
+                    } else if (response.token) {
+                        // Formato alternativo de respuesta
+                        localStorage.setItem('authToken', response.token);
+                        localStorage.setItem('userId', response.user.id || response.user._id);
+                        localStorage.setItem('userEmail', response.user.email);
+                        localStorage.setItem('userName', response.user.name);
+                        localStorage.setItem('userRole', response.user.role || 'user');
+                    }
+
+                    showLoginLoading(false);
+                    showSuccessModal();
+                    
+                    // Redirigir después de 2 segundos
+                    setTimeout(() => {
+                        redirectAfterLogin();
+                    }, 2000);
+
+                } else {
+                    throw new Error(response.message || 'Error al iniciar sesión');
+                }
+
+            } catch (error) {
+                showLoginLoading(false);
+                console.error('❌ Error en login:', error);
+                
+                let errorMessage = 'Error al iniciar sesión';
+                
+                if (error.message.includes('401')) {
+                    errorMessage = 'Credenciales incorrectas';
+                } else if (error.message.includes('404')) {
+                    errorMessage = 'Usuario no encontrado';
+                } else if (error.message.includes('500')) {
+                    errorMessage = 'Error del servidor';
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                showToast(errorMessage, 'error');
+                showFieldError('email', errorMessage);
+                
+            } finally {
+                isLoggingIn = false;
+            }
+        }
+
+        // ================================================
+        // FUNCIONES DE UI
+        // ================================================
+        function showLoginLoading(show) {
+            const btn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('loginBtnText');
+            const spinner = document.getElementById('loginSpinner');
+
+            if (show) {
+                btn.disabled = true;
+                btnText.style.display = 'none';
+                spinner.style.display = 'inline-block';
+                btn.style.opacity = '0.7';
+            } else {
+                btn.disabled = false;
+                btnText.style.display = 'inline';
+                spinner.style.display = 'none';
+                btn.style.opacity = '1';
+            }
+        }
+
+        function showFieldError(fieldName, message) {
+            const errorElement = document.getElementById(fieldName + 'Error');
+            const inputElement = document.getElementById(fieldName);
+            
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+            
+            if (inputElement) {
+                inputElement.classList.add('error');
+                setTimeout(() => {
+                    inputElement.classList.remove('error');
+                }, 3000);
+            }
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.form-error').forEach(error => {
+                error.textContent = '';
+                error.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.form-input').forEach(input => {
+                input.classList.remove('error');
+            });
+        }
+
+        function showSuccessModal() {
+            document.getElementById('successModal').style.display = 'flex';
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').style.display = 'none';
+            redirectAfterLogin();
+        }
+
+        function redirectAfterLogin() {
+            // Verificar si hay una URL de redirección guardada
+            const redirectUrl = localStorage.getItem('redirectAfterLogin');
+            
+            if (redirectUrl) {
+                localStorage.removeItem('redirectAfterLogin');
+                window.location.href = redirectUrl;
+            } else {
+                // Redirigir a la página principal
+                window.location.href = '../main.html';
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 5000);
+        }
+
+        // ================================================
+        // EVENT LISTENERS
+        // ================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔐 Página de login cargada');
+
+            // Verificar si ya está logueado
+            if (isUserLoggedIn()) {
+                console.log('👤 Usuario ya logueado, redirigiendo...');
+                window.location.href = '../main.html';
+                return;
+            }
+
+            // Configurar formulario de login
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    clearErrors();
+                    
+                    const email = document.getElementById('email').value.trim();
+                    const password = document.getElementById('password').value;
+
+                    // Validaciones básicas
+                    if (!email) {
+                        showFieldError('email', 'El email es requerido');
+                        return;
+                    }
+
+                    if (!isValidEmail(email)) {
+                        showFieldError('email', 'Email inválido');
+                        return;
+                    }
+
+                    if (!password) {
+                        showFieldError('password', 'La contraseña es requerida');
+                        return;
+                    }
+
+                    if (password.length < 6) {
+                        showFieldError('password', 'La contraseña debe tener al menos 6 caracteres');
+                        return;
+                    }
+
+                    // Realizar login
+                    await performLogin(email, password);
+                });
+            }
+
+            // Limpiar errores al escribir
+            document.querySelectorAll('.form-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    this.classList.remove('error');
+                    const errorElement = document.getElementById(this.id + 'Error');
+                    if (errorElement) {
+                        errorElement.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // ================================================
+        // FUNCIONES DE UTILIDAD
+        // ================================================
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function isUserLoggedIn() {
+            return localStorage.getItem('authToken') && localStorage.getItem('userId');
+        }
+
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = '../main.html';
+            }
+        }
+
+        // ================================================
+        // FUNCIONES DE SOCIAL LOGIN (PLACEHOLDERS)
+        // ================================================
+        function loginWithGoogle() {
+            document.getElementById('googleModal').style.display = 'flex';
+        }
+
+        function loginWithFacebook() {
+            document.getElementById('facebookModal').style.display = 'flex';
+        }
+
+        function showForgotPassword() {
+            document.getElementById('forgotModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.style.display = 'none';
+            });
+        }
+
+        function processGoogleLogin() {
+            showToast('Funcionalidad de Google próximamente', 'info');
+            closeModal();
+        }
+
+        function processFacebookLogin() {
+            showToast('Funcionalidad de Facebook próximamente', 'info');
+            closeModal();
+        }
+
+        function sendPasswordReset() {
+            const email = document.getElementById('forgotEmail').value;
+            if (email) {
+                showToast('Funcionalidad de recuperación próximamente', 'info');
+            } else {
+                showToast('Ingresa tu email', 'error');
+            }
+            closeModal();
+        }
+
+        // ================================================
+        // FUNCIÓN GLOBAL PARA USAR EN OTRAS PÁGINAS
+        // ================================================
+        window.PetStyleAuth = {
+            isLoggedIn: isUserLoggedIn,
+            logout: function() {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('userId');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userName');
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('userFavorites');
+                
+                window.location.href = 'login.html';
+            },
+            getCurrentUser: function() {
+                if (isUserLoggedIn()) {
+                    return {
+                        id: localStorage.getItem('userId'),
+                        email: localStorage.getItem('userEmail'),
+                        name: localStorage.getItem('userName'),
+                        role: localStorage.getItem('userRole')
+                    };
+                }
+                return null;
+            }
+        };
+
+        console.log('✅ Sistema de autenticación PetStyle cargado');
+    </script>
+
+    <!-- 3. Scripts adicionales si los necesitas -->
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/login.js"></script>
+
+    <!-- 4. Inicialización final -->
+    <script>
+        // Crear instancias si son necesarias para compatibilidad
+        if (typeof API !== 'undefined') {
+            window.api = new API();
+        }
+        if (typeof AuthManager !== 'undefined') {
+            window.authManager = new AuthManager(window.api);
+        }
+        console.log('🔧 Compatibilidad con scripts existentes inicializada');
+        
+    </script>
+     <script src="../js/api.js"></script>
 </body>
 </html>

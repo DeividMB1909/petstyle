@@ -18,25 +18,25 @@
 
         <!-- Search Bar -->
         <div class="search-container">
-            <input type="text" class="search-bar" placeholder="Buscar productos...">
+            <input type="text" class="search-bar" id="searchInput" placeholder="Buscar productos...">
         </div>
 
         <div class="content">
             <!-- Categories -->
             <div class="categories">
                 <h2 class="categories-title">Categorías</h2>
-                <div class="category-chips">
-                    <button class="category-chip active" data-category="all">Todos</button>
-                    <button class="category-chip" data-category="collars">Collares</button>
-                    <button class="category-chip" data-category="toys">Juguetes</button>
-                    <button class="category-chip" data-category="beds">Camas</button>
-                    <button class="category-chip" data-category="food">Comida</button>
+                <div class="category-chips" id="categoryChips">
+                    <button class="category-chip active" data-category="all" onclick="filterByCategory('all')">Todos</button>
+                    <button class="category-chip" data-category="collars" onclick="filterByCategory('collars')">Collares</button>
+                    <button class="category-chip" data-category="toys" onclick="filterByCategory('toys')">Juguetes</button>
+                    <button class="category-chip" data-category="beds" onclick="filterByCategory('beds')">Camas</button>
+                    <button class="category-chip" data-category="food" onclick="filterByCategory('food')">Comida</button>
                 </div>
             </div>
 
             <!-- Featured Products -->
             <div class="section">
-                <h2 class="section-title">Destacados</h2>
+                <h2 class="section-title">Productos Destacados</h2>
                 <div class="product-grid" id="productGrid">
                     <!-- Products will be loaded here -->
                 </div>
@@ -66,7 +66,7 @@
     </div>
 
     <!-- Product Modal -->
-    <div class="modal" id="productModal">
+    <div class="modal" id="productModal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 style="margin: 0; color: #8B5CF6; font-family: 'Poppins', sans-serif;">Detalle del Producto</h3>
@@ -81,59 +81,542 @@
             <h2 class="modal-title" id="modalTitle"></h2>
             <div class="modal-price" id="modalPrice"></div>
             <div class="modal-rating" style="margin-bottom: 15px;">
-                <span class="stars" id="modalStars"></span>
-                <span id="modalRating"></span>
+                <span class="stars" id="modalStars">⭐⭐⭐⭐⭐</span>
+                <span id="modalRating">(4.8)</span>
             </div>
             <p class="modal-description" id="modalDescription"></p>
-            <button class="add-to-cart-btn" onclick="addToCart()">Agregar al Carrito</button>
+            <div class="modal-stock" id="modalStock"></div>
+            <button class="add-to-cart-btn" id="modalAddCartBtn" onclick="addToCartFromModal()">Agregar al Carrito</button>
         </div>
     </div>
 
-    <script src="/frontend/js/main.js"></script>
-    <!-- Agregar antes del cierre del </body> -->
-<script src="js/config.js"></script>
-<script src="js/notifications.js"></script>
-<script src="js/api-client.js"></script>
-<script src="js/login.js"></script>
-<script src="js/products.js"></script>
+    <!-- Login Required Modal -->
+    <div class="modal-overlay" id="loginModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-icon">🔐</div>
+            <h3 class="modal-title">Inicia Sesión</h3>
+            <p class="modal-text">Necesitas iniciar sesión para agregar productos al carrito y favoritos.</p>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeLoginModal()">Cancelar</button>
+                <button class="modal-btn primary" onclick="goToLogin()">Iniciar Sesión</button>
+            </div>
+        </div>
+    </div>
 
-<script>
-// Inicializar la aplicación cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', async function() {
-    // Actualizar contador del carrito si está autenticado
-    if (authManager.isAuthenticated()) {
-        await productManager.updateCartCounter();
-        
-        // Cargar productos en la página principal
-        if (document.getElementById('products-container')) {
-            await productManager.loadProducts(1);
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p id="loadingText">Cargando productos...</p>
+    </div>
+
+    <!-- SCRIPTS -->
+    <!-- 1. API Connection -->
+    <script src="/frontend/js/api.js"></script>
+    
+    <!-- 2. Sistema de Favoritos -->
+    <script>
+        // ================================================
+        // SISTEMA DE FAVORITOS PARA MAIN.HTML
+        // ================================================
+
+        // Variables para favoritos
+        let userFavorites = [];
+        let currentProducts = [];
+        let selectedProduct = null;
+        let isLoading = false;
+
+        // ================================================
+        // INICIALIZACIÓN DE FAVORITOS
+        // ================================================
+        function initializeFavorites() {
+            userFavorites = JSON.parse(localStorage.getItem('userFavorites') || '[]');
+            console.log('✅ Favoritos inicializados:', userFavorites.length, 'productos');
         }
-    }
-    
-    // Event listeners para el menú móvil, búsqueda, etc.
-    initializeEventListeners();
-});
 
-function initializeEventListeners() {
-    // Botón de logout si existe
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            await authManager.logout();
-        });
-    }
-    
-    // Botón del carrito
-    const cartBtn = document.getElementById('cart-btn');
-    if (cartBtn) {
-        cartBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.location.href = '/pages/cart.html';
-        });
-    }
-}
-</script>
+        // ================================================
+        // FUNCIONES DE GESTIÓN DE FAVORITOS
+        // ================================================
 
+        function isFavorite(productId) {
+            return userFavorites.includes(productId);
+        }
+
+        async function addToFavorites(productId) {
+            if (!isUserLoggedIn()) {
+                showLoginRequired();
+                return false;
+            }
+
+            try {
+                if (!userFavorites.includes(productId)) {
+                    userFavorites.push(productId);
+                    localStorage.setItem('userFavorites', JSON.stringify(userFavorites));
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Error agregando a favoritos:', error);
+                return false;
+            }
+        }
+
+        async function removeFromFavorites(productId) {
+            try {
+                const index = userFavorites.indexOf(productId);
+                if (index > -1) {
+                    userFavorites.splice(index, 1);
+                    localStorage.setItem('userFavorites', JSON.stringify(userFavorites));
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Error eliminando de favoritos:', error);
+                return false;
+            }
+        }
+
+        // ================================================
+        // FUNCIONES DE UI PARA FAVORITOS
+        // ================================================
+
+        async function toggleProductFavorite(event, productId) {
+            event.stopPropagation();
+            event.preventDefault();
+            
+            if (!isUserLoggedIn()) {
+                showLoginRequired();
+                return;
+            }
+
+            const heartButton = event.currentTarget;
+            const wasActive = heartButton.classList.contains('active');
+            
+            try {
+                heartButton.style.transform = 'scale(1.3)';
+                heartButton.style.transition = 'transform 0.15s ease';
+                
+                setTimeout(() => {
+                    heartButton.style.transform = 'scale(1)';
+                }, 150);
+
+                if (wasActive) {
+                    const success = await removeFromFavorites(productId);
+                    if (success) {
+                        updateHeartButton(heartButton, false);
+                        showToast('💔 Eliminado de favoritos', 'info');
+                        updateModalFavoriteButton(productId, false);
+                    }
+                } else {
+                    const success = await addToFavorites(productId);
+                    if (success) {
+                        updateHeartButton(heartButton, true);
+                        showToast('❤️ Agregado a favoritos', 'success');
+                        updateModalFavoriteButton(productId, true);
+                    }
+                }
+            } catch (error) {
+                console.error('Error toggling favorite:', error);
+                showToast('Error al actualizar favoritos', 'error');
+            }
+        }
+
+        function updateHeartButton(button, isActive) {
+            if (isActive) {
+                button.classList.add('active');
+                button.innerHTML = '❤️';
+                button.title = 'Quitar de favoritos';
+            } else {
+                button.classList.remove('active');
+                button.innerHTML = '🤍';
+                button.title = 'Agregar a favoritos';
+            }
+        }
+
+        function updateModalFavoriteButton(productId, isActive) {
+            const modalFavoriteBtn = document.getElementById('modalFavoriteBtn');
+            if (modalFavoriteBtn && selectedProduct && selectedProduct._id === productId) {
+                updateHeartButton(modalFavoriteBtn, isActive);
+            }
+        }
+
+        function generateFavoriteHeartHTML(productId) {
+            const isProductFavorite = isFavorite(productId);
+            return `
+                <button class="favorite-heart ${isProductFavorite ? 'active' : ''}" 
+                        onclick="toggleProductFavorite(event, '${productId}')"
+                        title="${isProductFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}">
+                    ${isProductFavorite ? '❤️' : '🤍'}
+                </button>
+            `;
+        }
+
+        async function toggleModalFavorite() {
+            if (!selectedProduct) return;
+            
+            if (!isUserLoggedIn()) {
+                showLoginRequired();
+                return;
+            }
+
+            const productId = selectedProduct._id;
+            const modalFavoriteBtn = document.getElementById('modalFavoriteBtn');
+            const wasActive = isFavorite(productId);
+            
+            try {
+                modalFavoriteBtn.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    modalFavoriteBtn.style.transform = 'scale(1)';
+                }, 150);
+
+                if (wasActive) {
+                    const success = await removeFromFavorites(productId);
+                    if (success) {
+                        updateAllHeartsForProduct(productId, false);
+                        showToast('💔 Eliminado de favoritos', 'info');
+                    }
+                } else {
+                    const success = await addToFavorites(productId);
+                    if (success) {
+                        updateAllHeartsForProduct(productId, true);
+                        showToast('❤️ Agregado a favoritos', 'success');
+                    }
+                }
+            } catch (error) {
+                console.error('Error en modal favorite:', error);
+                showToast('Error al actualizar favoritos', 'error');
+            }
+        }
+
+        function updateAllHeartsForProduct(productId, isActive) {
+            const productCard = document.querySelector(`[data-product-id="${productId}"]`);
+            if (productCard) {
+                const heartButton = productCard.querySelector('.favorite-heart');
+                if (heartButton) {
+                    updateHeartButton(heartButton, isActive);
+                }
+            }
+            updateModalFavoriteButton(productId, isActive);
+        }
+
+        // ================================================
+        // FUNCIONES DE PRODUCTOS Y API
+        // ================================================
+
+        async function loadProducts() {
+            if (isLoading) return;
+            isLoading = true;
+
+            try {
+                showLoadingOverlay('Cargando productos...');
+                
+                const response = await getProducts({ featured: true, limit: 12 });
+                
+                if (response.success && response.data) {
+                    currentProducts = response.data;
+                    displayProducts();
+                }
+                
+                hideLoadingOverlay();
+            } catch (error) {
+                hideLoadingOverlay();
+                console.error('Error cargando productos:', error);
+                showToast('Error al cargar productos', 'error');
+            } finally {
+                isLoading = false;
+            }
+        }
+
+        function displayProducts() {
+            const container = document.getElementById('productGrid');
+            
+            if (!currentProducts || currentProducts.length === 0) {
+                container.innerHTML = `
+                    <div class="no-products">
+                        <h3>No se encontraron productos</h3>
+                        <p>Intenta más tarde</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = currentProducts.map(product => `
+                <div class="product-card" data-product-id="${product._id}">
+                    <div class="product-image" onclick="openProductModal('${product._id}')">
+                        <img src="${getProductImage(product)}" 
+                             alt="${product.name}"
+                             onerror="this.src='/frontend/images/default-product.jpg'"
+                             loading="lazy">
+                        
+                        ${generateFavoriteHeartHTML(product._id)}
+                        
+                        ${product.featured ? '<span class="featured-badge">Destacado</span>' : ''}
+                        ${product.discount ? `<span class="discount-badge">-${product.discount}%</span>` : ''}
+                    </div>
+                    
+                    <div class="product-info">
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-brand">${product.brand || ''}</p>
+                        
+                        <div class="product-price">
+                            ${product.originalPrice && product.discount ? 
+                                `<span class="original-price">$${product.originalPrice}</span>` : ''
+                            }
+                            <span class="current-price">$${product.price}</span>
+                        </div>
+                        
+                        <p class="product-description">${product.description.substring(0, 80)}...</p>
+                        
+                        <div class="product-actions">
+                            <button onclick="addToCartFromGrid('${product._id}')" 
+                                    class="add-to-cart-btn ${product.stock <= 0 ? 'disabled' : ''}"
+                                    ${product.stock <= 0 ? 'disabled' : ''}>
+                                ${product.stock <= 0 ? '😔 Sin Stock' : '🛒 Agregar'}
+                            </button>
+                            <button onclick="openProductModal('${product._id}')" 
+                                    class="view-details-btn">
+                                👁️ Ver
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ================================================
+        // FUNCIONES DE CARRITO
+        // ================================================
+
+        async function addToCartFromGrid(productId) {
+            if (!isUserLoggedIn()) {
+                showLoginRequired();
+                return;
+            }
+
+            if (isLoading) return;
+            isLoading = true;
+
+            try {
+                showLoadingOverlay('Agregando al carrito...');
+                const response = await addToCart(productId, 1);
+                
+                if (response.success) {
+                    showToast('Producto agregado al carrito', 'success');
+                    await updateCartCounter();
+                }
+            } catch (error) {
+                console.error('Error agregando al carrito:', error);
+                showToast('Error al agregar al carrito', 'error');
+            } finally {
+                hideLoadingOverlay();
+                isLoading = false;
+            }
+        }
+
+        async function updateCartCounter() {
+            try {
+                if (!isUserLoggedIn()) {
+                    document.getElementById('cartBadge').style.display = 'none';
+                    return;
+                }
+
+                const cart = await getCart();
+                const badge = document.getElementById('cartBadge');
+                
+                if (cart.data && cart.data.items) {
+                    const totalItems = cart.data.items.reduce((sum, item) => sum + item.quantity, 0);
+                    badge.textContent = totalItems;
+                    badge.style.display = totalItems > 0 ? 'block' : 'none';
+                } else {
+                    badge.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error actualizando contador:', error);
+                document.getElementById('cartBadge').style.display = 'none';
+            }
+        }
+
+        // ================================================
+        // FUNCIONES DE MODAL Y UI
+        // ================================================
+
+        function openProductModal(productId) {
+            const product = currentProducts.find(p => p._id === productId);
+            if (!product) return;
+
+            selectedProduct = product;
+            
+            document.getElementById('modalImage').src = getProductImage(product);
+            document.getElementById('modalTitle').textContent = product.name;
+            document.getElementById('modalPrice').innerHTML = `
+                ${product.originalPrice && product.discount ? 
+                    `<span class="original-price">$${product.originalPrice}</span>` : ''
+                }
+                <span class="current-price">$${product.price}</span>
+            `;
+            document.getElementById('modalDescription').textContent = product.description;
+            
+            const stockElement = document.getElementById('modalStock');
+            stockElement.innerHTML = `
+                <div class="stock-indicator ${product.stock <= product.minStock ? 'low-stock' : ''}">
+                    ${product.stock <= 0 ? '❌ Sin stock' : 
+                      product.stock <= product.minStock ? `⚠️ Solo ${product.stock} disponibles` : 
+                      `✅ ${product.stock} disponibles`}
+                </div>
+            `;
+            
+            const favoriteBtn = document.getElementById('modalFavoriteBtn');
+            favoriteBtn.innerHTML = isFavorite(productId) ? '❤️' : '🤍';
+            
+            const addCartBtn = document.getElementById('modalAddCartBtn');
+            addCartBtn.disabled = product.stock <= 0;
+            addCartBtn.textContent = product.stock <= 0 ? 'Sin Stock' : 'Agregar al Carrito';
+            
+            document.getElementById('productModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('productModal').style.display = 'none';
+            selectedProduct = null;
+        }
+
+        async function addToCartFromModal() {
+            if (!selectedProduct) return;
+            await addToCartFromGrid(selectedProduct._id);
+            closeModal();
+        }
+
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+
+        function showLoginRequired() {
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        function goToLogin() {
+            localStorage.setItem('redirectAfterLogin', window.location.href);
+            window.location.href = 'login.html';
+        }
+
+        function showLoadingOverlay(text = 'Cargando...') {
+            const overlay = document.getElementById('loadingOverlay');
+            const loadingText = document.getElementById('loadingText');
+            loadingText.textContent = text;
+            overlay.style.display = 'flex';
+        }
+
+        function hideLoadingOverlay() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 5000);
+        }
+
+        function getProductImage(product) {
+            if (product.images && product.images.length > 0) {
+                const primaryImage = product.images.find(img => img.isPrimary) || product.images[0];
+                return primaryImage.optimizedUrl || primaryImage.url;
+            }
+            return '/frontend/images/default-product.jpg';
+        }
+
+        // ================================================
+        // FUNCIONES DE FILTROS
+        // ================================================
+
+        async function filterByCategory(category) {
+            document.querySelectorAll('.category-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            document.querySelector(`[data-category="${category}"]`).classList.add('active');
+            
+            // Aquí puedes implementar filtros por categoría si tu API lo soporta
+            await loadProducts();
+        }
+
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                const searchTerm = event.target.value.trim();
+                console.log('Buscando:', searchTerm);
+                // Aquí puedes implementar la búsqueda
+                performSearch(searchTerm);
+            }
+        }
+
+        async function performSearch(searchTerm) {
+            try {
+                showLoadingOverlay('Buscando productos...');
+                const response = await getProducts({ search: searchTerm, limit: 12 });
+                
+                if (response.success && response.data) {
+                    currentProducts = response.data;
+                    displayProducts();
+                }
+                hideLoadingOverlay();
+            } catch (error) {
+                hideLoadingOverlay();
+                console.error('Error en búsqueda:', error);
+                showToast('Error al buscar productos', 'error');
+            }
+        }
+
+        // ================================================
+        // INICIALIZACIÓN
+        // ================================================
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🏠 Iniciando página principal...');
+            
+            // Inicializar favoritos
+            initializeFavorites();
+            
+            // Cargar productos
+            await loadProducts();
+            
+            // Actualizar contador del carrito si está logueado
+            if (isUserLoggedIn()) {
+                await updateCartCounter();
+            }
+
+            // Agregar event listener para búsqueda
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('keyup', handleSearch);
+            }
+            
+            console.log('✅ Página principal inicializada correctamente');
+        });
+    </script>
+
+    <!-- 3. Scripts originales (mantener si son necesarios) -->
+      <script src="../js/api.js"></script>
+    <script src="/frontend/js/main.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/api-client.js"></script>
+    <script src="js/login.js"></script>
+    <script src="js/products.js"></script>
 </body>
 </html>
