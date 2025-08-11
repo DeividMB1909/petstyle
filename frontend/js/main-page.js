@@ -1,4 +1,4 @@
-// ===== MAIN PAGE JAVASCRIPT - DISEÑO PREMIUM =====
+// ===== MAIN PAGE JAVASCRIPT - LIMPIO Y FUNCIONAL =====
 let allProducts = [];
 let filteredProducts = [];
 let currentCategory = '';
@@ -18,7 +18,7 @@ const categoryMap = {
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Inicializando página premium...');
+    console.log('🚀 Inicializando main page...');
     initializePage();
 });
 
@@ -37,9 +37,9 @@ async function initializePage() {
         // Actualizar contadores
         updateNavigationCounts();
         
-        console.log('✅ Página premium inicializada correctamente');
+        console.log('✅ Main page inicializada correctamente');
     } catch (error) {
-        console.error('❌ Error inicializando página premium:', error);
+        console.error('❌ Error inicializando main page:', error);
         showError('Error cargando la página');
     }
 }
@@ -57,9 +57,9 @@ function getCurrentUser() {
 }
 
 function updateUserGreeting() {
-    const userGreeting = document.querySelector('.user-greeting');
-    if (userGreeting && currentUser) {
-        userGreeting.textContent = `Hola ${currentUser.name || 'Invitado'}, encuentra lo mejor para tu mascota`;
+    const userNameElement = document.getElementById('user-name');
+    if (userNameElement && currentUser) {
+        userNameElement.textContent = currentUser.name || 'Invitado';
     }
 }
 
@@ -104,7 +104,7 @@ function setupEventListeners() {
 
 async function loadProducts() {
     try {
-        console.log('📦 Cargando productos premium...');
+        console.log('📦 Cargando productos...');
         
         // Mostrar loading
         showLoading();
@@ -123,7 +123,21 @@ async function loadProducts() {
     } catch (error) {
         console.error('❌ Error cargando productos:', error);
         showError('Error cargando productos');
-        showErrorGrid();
+        
+        // Mostrar mensaje de error
+        const grid = document.getElementById('products-grid');
+        if (grid) {
+            grid.innerHTML = `
+                <div class="error-message" style="grid-column: 1 / -1; text-align: center; color: white; padding: 40px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px;"></i>
+                    <h3>Error cargando productos</h3>
+                    <p>Por favor, intenta recargar la página</p>
+                    <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        Recargar
+                    </button>
+                </div>
+            `;
+        }
     }
 }
 
@@ -131,31 +145,16 @@ function showLoading() {
     const grid = document.getElementById('products-grid');
     if (grid) {
         grid.innerHTML = `
-            <div class="loading">
-                <i class="fas fa-spinner"></i>
-                <div>Cargando productos premium...</div>
-            </div>
-        `;
-    }
-}
-
-function showErrorGrid() {
-    const grid = document.getElementById('products-grid');
-    if (grid) {
-        grid.innerHTML = `
-            <div class="no-products">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Error cargando productos</h3>
-                <p>Por favor, intenta recargar la página</p>
-                <button onclick="location.reload()" style="margin-top: 15px; padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600;">
-                    Recargar
-                </button>
+            <div class="loading" style="grid-column: 1 / -1; text-align: center; color: white; padding: 40px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <div>Cargando productos...</div>
             </div>
         `;
     }
 }
 
 function showError(message) {
+    // Aquí puedes implementar un sistema de notificaciones
     console.error('Error:', message);
 }
 
@@ -167,19 +166,8 @@ function renderProducts() {
     
     // Actualizar título
     if (title) {
-        let categoryName = 'Destacados';
-        if (currentCategory) {
-            categoryName = categoryMap[currentCategory] || 'Categoría';
-        }
-        title.textContent = `${categoryName}`;
-        
-        // Agregar emoji según categoría
-        if (currentCategory) {
-            const emoji = getCategoryEmoji(currentCategory);
-            title.innerHTML = `${emoji} ${categoryName}`;
-        } else {
-            title.innerHTML = `⭐ ${categoryName}`;
-        }
+        const categoryName = currentCategory ? categoryMap[currentCategory] || 'Categoría' : 'Todos los Productos';
+        title.textContent = `${categoryName} (${filteredProducts.length})`;
     }
     
     // Limpiar grid
@@ -187,8 +175,8 @@ function renderProducts() {
     
     if (filteredProducts.length === 0) {
         grid.innerHTML = `
-            <div class="no-products">
-                <i class="fas fa-search"></i>
+            <div class="no-products" style="grid-column: 1 / -1; text-align: center; color: white; padding: 40px;">
+                <i class="fas fa-search" style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;"></i>
                 <h3>No se encontraron productos</h3>
                 <p>Intenta cambiar los filtros de búsqueda</p>
             </div>
@@ -205,17 +193,6 @@ function renderProducts() {
     console.log(`✅ ${filteredProducts.length} productos renderizados`);
 }
 
-function getCategoryEmoji(categoryId) {
-    const emojis = {
-        '6898049bdd53186ec08fd313': '🐕',
-        '6898049bdd53186ec08fd316': '🐱',
-        '6898049bdd53186ec08fd319': '🦜',
-        '6898049bdd53186ec08fd31c': '🐟',
-        '6898049bdd53186ec08fd31f': '🎾'
-    };
-    return emojis[categoryId] || '⭐';
-}
-
 function createProductCard(product) {
     const card = document.createElement('div');
     card.className = 'product-card';
@@ -229,7 +206,7 @@ function createProductCard(product) {
     const category = getCategoryName(product.category || product.categoria);
     
     // Procesar imagen
-    let imageUrl = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=300&h=300&fit=crop';
+    let imageUrl = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=200&h=200&fit=crop';
     
     if (product.images && Array.isArray(product.images) && product.images.length > 0) {
         imageUrl = product.images[0].url || product.images[0];
@@ -240,13 +217,10 @@ function createProductCard(product) {
     // Verificar si está en favoritos
     const isFavorite = isProductInFavorites(product._id);
     
-    // Generar rating aleatorio para demo
-    const rating = generateRating();
-    
     // Crear HTML del card
     card.innerHTML = `
         <div class="product-image">
-            <img src="${imageUrl}" alt="${name}" onerror="this.src='https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=300&h=300&fit=crop'">
+            <img src="${imageUrl}" alt="${name}" onerror="this.src='https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=200&h=200&fit=crop'">
             <button class="favorite-btn ${isFavorite ? 'active' : ''}" onclick="toggleFavorite('${product._id}', event)">
                 <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
             </button>
@@ -254,19 +228,15 @@ function createProductCard(product) {
         <div class="product-info">
             <div class="product-category">${category}</div>
             <div class="product-name">${name}</div>
-            <div class="product-rating">
-                <div class="stars">${rating.stars}</div>
-                <span class="rating-number">${rating.value}</span>
+            <div class="product-description">${truncateText(description, 45)}</div>
+            <div class="product-footer">
+                <div class="product-price">${price.toFixed(2)}</div>
+                <button class="add-to-cart-btn ${stock <= 0 ? 'disabled' : ''}" 
+                        onclick="addToCart('${product._id}', event)" 
+                        ${stock <= 0 ? 'disabled' : ''}>
+                    ${stock <= 0 ? 'Agotado' : 'Agregar'}
+                </button>
             </div>
-            <div class="product-description">${truncateText(description, 60)}</div>
-        </div>
-        <div class="product-footer">
-            <div class="product-price">${price.toFixed(2)}</div>
-            <button class="add-to-cart-btn ${stock <= 0 ? 'disabled' : ''}" 
-                    onclick="addToCart('${product._id}', event)" 
-                    ${stock <= 0 ? 'disabled' : ''}>
-                ${stock <= 0 ? 'Agotado' : 'Agregar'}
-            </button>
         </div>
     `;
     
@@ -282,25 +252,8 @@ function createProductCard(product) {
     return card;
 }
 
-function generateRating() {
-    // Generar rating entre 3.0 y 5.0
-    const value = (Math.random() * 2 + 3).toFixed(1);
-    const fullStars = Math.floor(value);
-    const hasHalfStar = value % 1 >= 0.5;
-    
-    let stars = '';
-    for (let i = 0; i < fullStars; i++) {
-        stars += '<span class="star">★</span>';
-    }
-    if (hasHalfStar) {
-        stars += '<span class="star">☆</span>';
-    }
-    
-    return { stars, value };
-}
-
 function getCategoryName(categoryId) {
-    if (!categoryId) return 'General';
+    if (!categoryId) return 'Sin categoría';
     return categoryMap[categoryId] || categoryId;
 }
 
@@ -384,7 +337,7 @@ function sortProducts(sortType) {
 
 // Funciones del modal
 function openProductModal(productId) {
-    console.log('🎯 Abriendo modal premium para producto:', productId);
+    console.log('🎯 Abriendo modal para producto:', productId);
     
     const product = allProducts.find(p => p._id === productId);
     if (!product) {
@@ -405,7 +358,7 @@ function openProductModal(productId) {
 }
 
 function closeProductModal() {
-    console.log('❌ Cerrando modal premium');
+    console.log('❌ Cerrando modal');
     const modal = document.getElementById('product-modal');
     if (modal) {
         modal.classList.remove('active');
@@ -419,13 +372,13 @@ function populateModal(product) {
     // Datos básicos
     const name = product.name || product.nombre || 'Producto sin nombre';
     const price = product.price || product.precio || 0;
-    const description = product.description || product.descripcion || 'Sin descripción disponible';
+    const description = product.description || product.descripcion || 'Sin descripción';
     const stock = product.stock || 0;
     const sku = product.sku || 'N/A';
     const category = getCategoryName(product.category || product.categoria);
     
     // Imagen
-    let imageUrl = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=500&h=500&fit=crop';
+    let imageUrl = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=400&fit=crop';
     if (product.images && Array.isArray(product.images) && product.images.length > 0) {
         imageUrl = product.images[0].url || product.images[0];
     } else if (product.image) {
@@ -466,7 +419,7 @@ function populateModal(product) {
         favoriteBtn.innerHTML = `<i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>`;
     }
     
-    console.log('✅ Modal premium poblado con producto:', name);
+    console.log('✅ Modal poblado con producto:', name);
 }
 
 // Funciones de cantidad en modal
@@ -512,7 +465,7 @@ function toggleFavorite(productId, event) {
         event.stopPropagation();
     }
     
-    console.log('❤️ Toggle favorito premium:', productId);
+    console.log('❤️ Toggle favorito:', productId);
     
     const product = allProducts.find(p => p._id === productId);
     if (!product) return;
@@ -524,7 +477,6 @@ function toggleFavorite(productId, event) {
         // Remover de favoritos
         favorites.splice(existingIndex, 1);
         console.log('💔 Removido de favoritos');
-        showNotification('Removido de favoritos', 'remove');
     } else {
         // Agregar a favoritos
         favorites.push({
@@ -535,7 +487,6 @@ function toggleFavorite(productId, event) {
             addedAt: new Date().toISOString()
         });
         console.log('💖 Agregado a favoritos');
-        showNotification('Agregado a favoritos', 'add');
     }
     
     saveFavorites(favorites);
@@ -595,13 +546,13 @@ function addToCart(productId, event) {
         event.stopPropagation();
     }
     
-    console.log('🛒 Agregando al carrito premium:', productId);
+    console.log('🛒 Agregando al carrito:', productId);
     
     const product = allProducts.find(p => p._id === productId);
     if (!product) return;
     
     if ((product.stock || 0) <= 0) {
-        showNotification('Producto agotado', 'error');
+        alert('Producto agotado');
         return;
     }
     
@@ -627,18 +578,18 @@ function addToCart(productId, event) {
     updateNavigationCounts();
     
     // Feedback visual
-    showNotification('Agregado al carrito', 'success');
+    showCartNotification();
     
-    console.log('✅ Producto agregado al carrito premium');
+    console.log('✅ Producto agregado al carrito');
 }
 
 function addToCartFromModal() {
     if (!currentModalProduct) return;
     
-    console.log(`🛒 Agregando ${modalQuantity} unidades al carrito desde modal premium`);
+    console.log(`🛒 Agregando ${modalQuantity} unidades al carrito desde modal`);
     
     if ((currentModalProduct.stock || 0) <= 0) {
-        showNotification('Producto agotado', 'error');
+        alert('Producto agotado');
         return;
     }
     
@@ -664,7 +615,7 @@ function addToCartFromModal() {
     updateNavigationCounts();
     
     // Feedback y cerrar modal
-    showNotification(`${modalQuantity} productos agregados al carrito`, 'success');
+    showCartNotification();
     closeProductModal();
 }
 
@@ -675,29 +626,29 @@ function getProductImage(product) {
     return product.image || 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=200&h=200&fit=crop';
 }
 
-function showNotification(message, type = 'success') {
+function showCartNotification() {
+    // Crear notificación temporal
     const notification = document.createElement('div');
     notification.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
-        background: ${type === 'success' ? '#4CAF50' : type === 'remove' ? '#FF9800' : '#f44336'};
+        background: #667eea;
         color: white;
-        padding: 16px 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        padding: 15px 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         z-index: 10000;
-        font-weight: 500;
         animation: slideInRight 0.3s ease;
-        max-width: 280px;
     `;
-    
-    const icon = type === 'success' ? '✅' : type === 'remove' ? '💔' : '❌';
-    notification.innerHTML = `${icon} ${message}`;
+    notification.innerHTML = `
+        <i class="fas fa-check-circle"></i>
+        Producto agregado al carrito
+    `;
     
     document.body.appendChild(notification);
     
-    // Remover después de 3 segundos
+    // Remover después de 2 segundos
     setTimeout(() => {
         notification.style.animation = 'slideOutRight 0.3s ease';
         setTimeout(() => {
@@ -705,7 +656,7 @@ function showNotification(message, type = 'success') {
                 notification.parentNode.removeChild(notification);
             }
         }, 300);
-    }, 3000);
+    }, 2000);
 }
 
 // Actualizar contadores de navegación
@@ -729,9 +680,9 @@ function updateNavigationCounts() {
     }
 }
 
-// Funciones globales para debugging
+// Funciones globales para debugging (accesibles desde consola)
 window.testModal = function() {
-    console.log('🧪 Probando modal premium...');
+    console.log('🧪 Probando modal...');
     if (allProducts.length > 0) {
         openProductModal(allProducts[0]._id);
     } else {
@@ -740,14 +691,21 @@ window.testModal = function() {
 };
 
 window.debugProducts = function() {
-    console.log('🔍 Debug productos premium:');
+    console.log('🔍 Debug productos:');
     console.log('Total productos:', allProducts.length);
     console.log('Productos filtrados:', filteredProducts.length);
     console.log('Categoría actual:', currentCategory);
     console.log('Productos:', allProducts);
 };
 
-// Añadir estilos de animación
+window.debugUser = function() {
+    console.log('👤 Debug usuario:');
+    console.log('Usuario actual:', currentUser);
+    console.log('Favoritos:', getFavorites().length);
+    console.log('Carrito:', getCart().length);
+};
+
+// Añadir estilos de animación al head
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideInRight {
@@ -761,4 +719,4 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-console.log('📱 Main page premium script cargado correctamente');
+console.log('📱 Main page script cargado correctamente');

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Logout Test</title>
+</head>
+<body>
+    <h1>Prueba de Cerrar Sesión</h1>
+    <button id="logoutBtn">Cerrar sesión</button>
+
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            // Borrar el JWT
+            localStorage.removeItem('token');
+            sessionStorage.removeItem('token');
+
+            // Opcional: si guardas datos del usuario
+            localStorage.removeItem('user');
+            sessionStorage.removeItem('user');
+
+            // Redirigir
+            window.location.href = '../pages/login.html';
+        });
+    </script>
+</body>
+</html>
