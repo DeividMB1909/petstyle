@@ -1,3 +1,4 @@
+
 // ===== ADMIN PANEL JAVASCRIPT - CORREGIDO PARA TUS CATEGORÍAS =====
 
 let currentEditingProduct = null;

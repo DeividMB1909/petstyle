@@ -1,4 +1,7 @@
-// ===== MAIN PAGE JAVASCRIPT - LIMPIO Y FUNCIONAL =====
+// ===== MAIN PAGE JAVASCRIPT - VERSIÓN UNIVERSAL =====
+console.log('🏠 Main page script cargado correctamente');
+
+// Variables globales
 let allProducts = [];
 let filteredProducts = [];
 let currentCategory = '';
@@ -16,16 +19,33 @@ const categoryMap = {
     '6898049bdd53186ec08fd31f': 'Accesorios'
 };
 
-// Inicialización
+// === INICIALIZACIÓN ===
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Inicializando main page...');
-    initializePage();
+    
+    // Esperar a que el auth system esté listo
+    if (window.authSystem && window.authSystem.isInitialized) {
+        initializePage();
+    } else {
+        window.addEventListener('authSystemReady', initializePage);
+        
+        // Fallback si no carga el auth system en 2 segundos
+        setTimeout(() => {
+            if (!window.authSystem) {
+                console.warn('⚠️ AuthSystem no disponible, usando modo básico...');
+                initializeBasicPage();
+            }
+        }, 2000);
+    }
 });
 
+// === INICIALIZACIÓN PRINCIPAL ===
 async function initializePage() {
     try {
-        // Obtener usuario actual
-        currentUser = getCurrentUser();
+        console.log('✅ Auth system disponible');
+        
+        // Obtener usuario actual del sistema universal
+        currentUser = authSystem.getUser();
         updateUserGreeting();
         
         // Configurar event listeners
@@ -44,30 +64,61 @@ async function initializePage() {
     }
 }
 
-function getCurrentUser() {
-    const userData = localStorage.getItem('currentUser');
-    if (userData) {
-        try {
-            return JSON.parse(userData);
-        } catch (error) {
-            console.error('Error parsing user data:', error);
-        }
+// === INICIALIZACIÓN BÁSICA (FALLBACK) ===
+async function initializeBasicPage() {
+    try {
+        console.log('⚙️ Inicializando modo básico...');
+        
+        // Obtener usuario de forma básica
+        currentUser = getCurrentUserBasic();
+        updateUserGreeting();
+        
+        setupEventListeners();
+        await loadProducts();
+        updateNavigationCounts();
+        
+        console.log('✅ Main page inicializada en modo básico');
+    } catch (error) {
+        console.error('❌ Error en inicialización básica:', error);
     }
-    return { name: 'Invitado', email: 'guest@example.com' };
 }
 
+// === OBTENER USUARIO ===
+function getCurrentUserBasic() {
+    try {
+        const userData = localStorage.getItem('currentUser') || 
+                        sessionStorage.getItem('currentUser');
+        if (userData) {
+            return JSON.parse(userData);
+        }
+    } catch (error) {
+        console.error('Error obteniendo usuario básico:', error);
+    }
+    return null;
+}
+
+// === ACTUALIZAR SALUDO DEL USUARIO ===
 function updateUserGreeting() {
     const userNameElement = document.getElementById('user-name');
-    if (userNameElement && currentUser) {
-        userNameElement.textContent = currentUser.name || 'Invitado';
+    if (userNameElement) {
+        if (currentUser) {
+            userNameElement.textContent = currentUser.name || 'Usuario';
+        } else {
+            userNameElement.textContent = 'Invitado';
+        }
     }
 }
 
+// === CONFIGURAR EVENT LISTENERS ===
 function setupEventListeners() {
-    // Búsqueda
+    // Búsqueda con debounce
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
-        searchInput.addEventListener('input', handleSearch);
+        let searchTimeout;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => handleSearch(e), 300);
+        });
     }
 
     // Ordenamiento
@@ -102,6 +153,7 @@ function setupEventListeners() {
     console.log('✅ Event listeners configurados');
 }
 
+// === CARGAR PRODUCTOS ===
 async function loadProducts() {
     try {
         console.log('📦 Cargando productos...');
@@ -122,22 +174,7 @@ async function loadProducts() {
         console.log(`✅ ${allProducts.length} productos cargados`);
     } catch (error) {
         console.error('❌ Error cargando productos:', error);
-        showError('Error cargando productos');
-        
-        // Mostrar mensaje de error
-        const grid = document.getElementById('products-grid');
-        if (grid) {
-            grid.innerHTML = `
-                <div class="error-message" style="grid-column: 1 / -1; text-align: center; color: white; padding: 40px;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px;"></i>
-                    <h3>Error cargando productos</h3>
-                    <p>Por favor, intenta recargar la página</p>
-                    <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">
-                        Recargar
-                    </button>
-                </div>
-            `;
-        }
+        showErrorMessage();
     }
 }
 
@@ -153,11 +190,27 @@ function showLoading() {
     }
 }
 
+function showErrorMessage() {
+    const grid = document.getElementById('products-grid');
+    if (grid) {
+        grid.innerHTML = `
+            <div class="error-message" style="grid-column: 1 / -1; text-align: center; color: white; padding: 40px;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px;"></i>
+                <h3>Error cargando productos</h3>
+                <p>Por favor, intenta recargar la página</p>
+                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                    Recargar
+                </button>
+            </div>
+        `;
+    }
+}
+
 function showError(message) {
-    // Aquí puedes implementar un sistema de notificaciones
     console.error('Error:', message);
 }
 
+// === RENDERIZAR PRODUCTOS ===
 function renderProducts() {
     const grid = document.getElementById('products-grid');
     const title = document.getElementById('products-title');
@@ -221,7 +274,7 @@ function createProductCard(product) {
     card.innerHTML = `
         <div class="product-image">
             <img src="${imageUrl}" alt="${name}" onerror="this.src='https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=200&h=200&fit=crop'">
-            <button class="favorite-btn ${isFavorite ? 'active' : ''}" onclick="toggleFavorite('${product._id}', event)">
+            <button class="favorite-btn ${isFavorite ? 'active' : ''}" onclick="handleFavoriteClick('${product._id}', event)">
                 <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
             </button>
         </div>
@@ -230,9 +283,9 @@ function createProductCard(product) {
             <div class="product-name">${name}</div>
             <div class="product-description">${truncateText(description, 45)}</div>
             <div class="product-footer">
-                <div class="product-price">${price.toFixed(2)}</div>
+                <div class="product-price">$${price.toFixed(2)}</div>
                 <button class="add-to-cart-btn ${stock <= 0 ? 'disabled' : ''}" 
-                        onclick="addToCart('${product._id}', event)" 
+                        onclick="handleCartClick('${product._id}', event)" 
                         ${stock <= 0 ? 'disabled' : ''}>
                     ${stock <= 0 ? 'Agotado' : 'Agregar'}
                 </button>
@@ -263,7 +316,96 @@ function truncateText(text, maxLength) {
     return text.substring(0, maxLength) + '...';
 }
 
-// Funciones de filtrado y búsqueda
+// === MANEJADORES CON GUARDS DE AUTENTICACIÓN ===
+function handleFavoriteClick(productId, event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    
+    // Verificar autenticación usando el sistema universal
+    if (window.authGuards && !authGuards.canAddToFavorites()) {
+        return; // El guard ya muestra el modal de login
+    }
+    
+    // Si no hay authGuards, verificar de forma básica
+    if (!window.authGuards && !isUserAuthenticated()) {
+        showLoginRequired('Para agregar a favoritos necesitas iniciar sesión');
+        return;
+    }
+    
+    toggleFavorite(productId, event);
+}
+
+function handleCartClick(productId, event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    
+    // Verificar autenticación usando el sistema universal
+    if (window.authGuards && !authGuards.canAddToCart()) {
+        return; // El guard ya muestra el modal de login
+    }
+    
+    // Si no hay authGuards, verificar de forma básica
+    if (!window.authGuards && !isUserAuthenticated()) {
+        showLoginRequired('Para agregar al carrito necesitas iniciar sesión');
+        return;
+    }
+    
+    addToCart(productId, event);
+}
+
+function isUserAuthenticated() {
+    if (window.authSystem) {
+        return authSystem.isAuthenticated();
+    }
+    
+    // Verificación básica
+    return !!(currentUser && currentUser.email);
+}
+
+function showLoginRequired(message) {
+    // Crear modal básico si no hay authGuards
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: white; padding: 30px; border-radius: 12px; max-width: 400px; text-align: center;">
+            <h3 style="margin: 0 0 15px 0; color: #333;">Iniciar Sesión Requerido</h3>
+            <p style="margin: 0 0 20px 0; color: #666;">${message}</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button onclick="this.closest('[style*=fixed]').remove()" style="padding: 10px 20px; background: #f5f5f5; border: none; border-radius: 6px; cursor: pointer;">
+                    Cancelar
+                </button>
+                <button onclick="window.location.href='/pages/login.html'" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                    Iniciar Sesión
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Remover al hacer clic fuera
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
+// === FUNCIONES DE FILTRADO Y BÚSQUEDA ===
 function handleSearch(e) {
     const searchTerm = e.target.value.toLowerCase();
     console.log('🔍 Buscando:', searchTerm);
@@ -335,7 +477,7 @@ function sortProducts(sortType) {
     }
 }
 
-// Funciones del modal
+// === FUNCIONES DEL MODAL ===
 function openProductModal(productId) {
     console.log('🎯 Abriendo modal para producto:', productId);
     
@@ -391,7 +533,7 @@ function populateModal(product) {
         'modal-name': name,
         'modal-description': description,
         'modal-category': category,
-        'modal-price': `${price.toFixed(2)}`,
+        'modal-price': `$${price.toFixed(2)}`,
         'modal-sku': sku,
         'modal-stock': `${stock} disponibles`,
         'modal-quantity': modalQuantity
@@ -422,7 +564,7 @@ function populateModal(product) {
     console.log('✅ Modal poblado con producto:', name);
 }
 
-// Funciones de cantidad en modal
+// === FUNCIONES DE CANTIDAD EN MODAL ===
 function increaseQuantity() {
     if (currentModalProduct && modalQuantity < (currentModalProduct.stock || 0)) {
         modalQuantity++;
@@ -437,7 +579,7 @@ function decreaseQuantity() {
     }
 }
 
-// Funciones de favoritos
+// === FUNCIONES DE FAVORITOS ===
 function isProductInFavorites(productId) {
     if (!currentUser || !currentUser.email) return false;
     
@@ -477,6 +619,7 @@ function toggleFavorite(productId, event) {
         // Remover de favoritos
         favorites.splice(existingIndex, 1);
         console.log('💔 Removido de favoritos');
+        showNotification('Removido de favoritos', 'info');
     } else {
         // Agregar a favoritos
         favorites.push({
@@ -484,9 +627,11 @@ function toggleFavorite(productId, event) {
             name: product.name || product.nombre,
             price: product.price || product.precio,
             image: getProductImage(product),
+            category: getCategoryName(product.category || product.categoria),
             addedAt: new Date().toISOString()
         });
         console.log('💖 Agregado a favoritos');
+        showNotification('Agregado a favoritos', 'success');
     }
     
     saveFavorites(favorites);
@@ -497,9 +642,19 @@ function toggleFavorite(productId, event) {
 }
 
 function toggleModalFavorite() {
-    if (currentModalProduct) {
-        toggleFavorite(currentModalProduct._id);
+    if (!currentModalProduct) return;
+    
+    // Verificar autenticación
+    if (window.authGuards && !authGuards.canAddToFavorites()) {
+        return;
     }
+    
+    if (!window.authGuards && !isUserAuthenticated()) {
+        showLoginRequired('Para agregar a favoritos necesitas iniciar sesión');
+        return;
+    }
+    
+    toggleFavorite(currentModalProduct._id);
 }
 
 function updateFavoriteButtons(productId) {
@@ -525,7 +680,7 @@ function updateFavoriteButtons(productId) {
     }
 }
 
-// Funciones de carrito
+// === FUNCIONES DE CARRITO ===
 function getCart() {
     if (!currentUser || !currentUser.email) return [];
     
@@ -552,7 +707,7 @@ function addToCart(productId, event) {
     if (!product) return;
     
     if ((product.stock || 0) <= 0) {
-        alert('Producto agotado');
+        showNotification('Producto agotado', 'warning');
         return;
     }
     
@@ -570,6 +725,7 @@ function addToCart(productId, event) {
             quantity: 1,
             subtotal: product.price || product.precio,
             image: getProductImage(product),
+            category: getCategoryName(product.category || product.categoria),
             addedAt: new Date().toISOString()
         });
     }
@@ -578,7 +734,7 @@ function addToCart(productId, event) {
     updateNavigationCounts();
     
     // Feedback visual
-    showCartNotification();
+    showNotification('Producto agregado al carrito', 'success');
     
     console.log('✅ Producto agregado al carrito');
 }
@@ -586,10 +742,20 @@ function addToCart(productId, event) {
 function addToCartFromModal() {
     if (!currentModalProduct) return;
     
+    // Verificar autenticación
+    if (window.authGuards && !authGuards.canAddToCart()) {
+        return;
+    }
+    
+    if (!window.authGuards && !isUserAuthenticated()) {
+        showLoginRequired('Para agregar al carrito necesitas iniciar sesión');
+        return;
+    }
+    
     console.log(`🛒 Agregando ${modalQuantity} unidades al carrito desde modal`);
     
     if ((currentModalProduct.stock || 0) <= 0) {
-        alert('Producto agotado');
+        showNotification('Producto agotado', 'warning');
         return;
     }
     
@@ -607,6 +773,7 @@ function addToCartFromModal() {
             quantity: modalQuantity,
             subtotal: (currentModalProduct.price || currentModalProduct.precio) * modalQuantity,
             image: getProductImage(currentModalProduct),
+            category: getCategoryName(currentModalProduct.category || currentModalProduct.categoria),
             addedAt: new Date().toISOString()
         });
     }
@@ -615,7 +782,7 @@ function addToCartFromModal() {
     updateNavigationCounts();
     
     // Feedback y cerrar modal
-    showCartNotification();
+    showNotification(`${modalQuantity} producto(s) agregado(s) al carrito`, 'success');
     closeProductModal();
 }
 
@@ -626,40 +793,72 @@ function getProductImage(product) {
     return product.image || 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=200&h=200&fit=crop';
 }
 
-function showCartNotification() {
-    // Crear notificación temporal
+// === SISTEMA DE NOTIFICACIONES ===
+function showNotification(message, type = 'info') {
+    // Crear notificación
     const notification = document.createElement('div');
     notification.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
-        background: #667eea;
+        background: ${getNotificationColor(type)};
         color: white;
         padding: 15px 20px;
         border-radius: 10px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         z-index: 10000;
-        animation: slideInRight 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 350px;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
     `;
+    
     notification.innerHTML = `
-        <i class="fas fa-check-circle"></i>
-        Producto agregado al carrito
+        <i class="fas ${getNotificationIcon(type)}"></i>
+        <span>${message}</span>
     `;
     
     document.body.appendChild(notification);
     
-    // Remover después de 2 segundos
+    // Mostrar con animación
     setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.3s ease';
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Ocultar después de 3 segundos
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
         setTimeout(() => {
             if (notification.parentNode) {
                 notification.parentNode.removeChild(notification);
             }
         }, 300);
-    }, 2000);
+    }, 3000);
 }
 
-// Actualizar contadores de navegación
+function getNotificationColor(type) {
+    const colors = {
+        success: '#10b981',
+        error: '#ef4444',
+        warning: '#f59e0b',
+        info: '#3b82f6'
+    };
+    return colors[type] || colors.info;
+}
+
+function getNotificationIcon(type) {
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
+    return icons[type] || icons.info;
+}
+
+// === ACTUALIZAR CONTADORES DE NAVEGACIÓN ===
 function updateNavigationCounts() {
     const favorites = getFavorites();
     const cart = getCart();
@@ -668,7 +867,7 @@ function updateNavigationCounts() {
     const favoritesCount = document.getElementById('favorites-count');
     if (favoritesCount) {
         favoritesCount.textContent = favorites.length;
-        favoritesCount.className = `notification-badge ${favorites.length > 0 ? 'show' : ''}`;
+        favoritesCount.style.display = favorites.length > 0 ? 'flex' : 'none';
     }
     
     // Actualizar contador de carrito
@@ -676,11 +875,18 @@ function updateNavigationCounts() {
     if (cartCount) {
         const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
         cartCount.textContent = totalItems;
-        cartCount.className = `notification-badge ${totalItems > 0 ? 'show' : ''}`;
+        cartCount.style.display = totalItems > 0 ? 'flex' : 'none';
     }
 }
 
-// Funciones globales para debugging (accesibles desde consola)
+// === FUNCIONES GLOBALES PARA EL HTML ===
+window.increaseQuantity = increaseQuantity;
+window.decreaseQuantity = decreaseQuantity;
+window.toggleModalFavorite = toggleModalFavorite;
+window.addToCartFromModal = addToCartFromModal;
+window.closeProductModal = closeProductModal;
+
+// === FUNCIONES DE DEBUGGING ===
 window.testModal = function() {
     console.log('🧪 Probando modal...');
     if (allProducts.length > 0) {
@@ -695,28 +901,17 @@ window.debugProducts = function() {
     console.log('Total productos:', allProducts.length);
     console.log('Productos filtrados:', filteredProducts.length);
     console.log('Categoría actual:', currentCategory);
-    console.log('Productos:', allProducts);
+    console.log('Usuario actual:', currentUser);
+    console.log('Auth system disponible:', !!window.authSystem);
+    console.log('Auth guards disponible:', !!window.authGuards);
 };
 
 window.debugUser = function() {
     console.log('👤 Debug usuario:');
     console.log('Usuario actual:', currentUser);
+    console.log('Autenticado:', isUserAuthenticated());
     console.log('Favoritos:', getFavorites().length);
     console.log('Carrito:', getCart().length);
 };
 
-// Añadir estilos de animación al head
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideInRight {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideOutRight {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-`;
-document.head.appendChild(style);
-
-console.log('📱 Main page script cargado correctamente');
+console.log('✅ Main page universal completamente cargado');
