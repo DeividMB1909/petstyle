@@ -58,6 +58,7 @@
 
             <!-- Account Actions -->
             <div class="actions-section">
+                <h3 style="margin-bottom: 1rem; font-size: 1.1rem; font-weight: 700; color: #1a1a1a;">Configuración de Cuenta</h3>
                 <button class="action-btn secondary" onclick="editProfile()">
                     ✏️ Editar Perfil
                 </button>
@@ -109,9 +110,9 @@
                 <p class="guest-description">
                     Inicia sesión para acceder a tu perfil, favoritos y configuraciones personalizadas.
                 </p>
-                <a href="../pages/login.html" class="login-btn">
-                    Iniciar Sesión
-                </a>
+                <a href="/frontend/pages/login.html" class="login-btn">
+    Iniciar Sesión
+</a>
             </div>
         </template>
     </div>
@@ -136,12 +137,12 @@
         </a>
     </nav>
 
-    <!-- Scripts -->
+    <!-- Scripts - CORRECTED ORDER -->
     <script src="../js/utils.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/cart.js"></script>
     <script src="../js/favorites.js"></script>
-    <script src="../js/profile-page.js"></script>
+    <script src="../js/profile.js"></script> <!-- ✅ CORRECTED NAME -->
 </body>
 </html>
