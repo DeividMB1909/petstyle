@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Cuenta - PetStyle</title>
     <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/auth.css">
+    <link rel="stylesheet" href="../css/register.css">
     <link rel="stylesheet" href="../css/components.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="auth-body">
     <!-- Loading Screen -->
@@ -15,6 +16,7 @@
             <div class="logo-loading">🐾</div>
             <h2>PetStyle</h2>
             <div class="loading-spinner"></div>
+            <p id="loading-message">Creando tu cuenta...</p>
         </div>
     </div>
 
@@ -55,6 +57,7 @@
                             maxlength="50"
                         >
                     </div>
+                    <div class="field-error" id="name-error"></div>
                 </div>
 
                 <div class="form-group">
@@ -72,6 +75,7 @@
                         >
                     </div>
                     <div class="field-hint">Usaremos este email para enviarte confirmaciones de pedidos</div>
+                    <div class="field-error" id="email-error"></div>
                 </div>
 
                 <div class="form-group">
@@ -91,6 +95,7 @@
                         >
                     </div>
                     <div class="field-hint">10 dígitos sin espacios ni guiones</div>
+                    <div class="field-error" id="phone-error"></div>
                 </div>
 
                 <div class="form-group">
@@ -107,7 +112,7 @@
                             autocomplete="new-password"
                             minlength="6"
                         >
-                        <button type="button" class="toggle-password" tabindex="-1">👁️</button>
+                        <button type="button" class="toggle-password" onclick="togglePassword('password')" tabindex="-1">👁️</button>
                     </div>
                     <div class="password-strength" id="password-strength">
                         <div class="strength-bar">
@@ -115,6 +120,7 @@
                         </div>
                         <div class="strength-text" id="strength-text">Ingresa una contraseña</div>
                     </div>
+                    <div class="field-error" id="password-error"></div>
                 </div>
 
                 <div class="form-group">
@@ -130,9 +136,10 @@
                             required
                             autocomplete="new-password"
                         >
-                        <button type="button" class="toggle-password" tabindex="-1">👁️</button>
+                        <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword')" tabindex="-1">👁️</button>
                     </div>
                     <div class="match-indicator" id="match-indicator"></div>
+                    <div class="field-error" id="confirmPassword-error"></div>
                 </div>
 
                 <!-- Optional Address Fields -->
@@ -216,6 +223,7 @@
                             <a href="#" class="terms-link" onclick="showPrivacy()">Política de Privacidad</a>
                         </span>
                     </label>
+                    <div class="field-error" id="acceptTerms-error"></div>
                 </div>
 
                 <div class="form-group">
@@ -227,7 +235,7 @@
                     </label>
                 </div>
 
-                <button type="submit" class="btn-primary btn-auth">
+                <button type="submit" class="btn-primary btn-auth" id="register-btn">
                     <span class="btn-icon">🚀</span>
                     <span class="btn-text">Crear Mi Cuenta</span>
                 </button>
@@ -334,20 +342,22 @@
     <div id="toast-container" class="toast-container"></div>
 
     <!-- Scripts -->
+    <script src="../js/config.js"></script>
     <script src="../js/utils.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/auth.js"></script>
     
     <script>
-        // Page-specific JavaScript
-        
+        // ===== REGISTER PAGE INTEGRATION =====
+        console.log('📝 Register Page Loading...');
+
         // Check if already logged in
         document.addEventListener('DOMContentLoaded', async () => {
-            const isAuthenticated = await Auth.checkAuthStatus();
-            if (isAuthenticated) {
-                // Redirect to main page if already logged in
-                window.location.href = 'main.html';
-                return;
+            // Wait for auth system to be ready
+            if (window.auth && window.auth.initialized) {
+                checkExistingSession();
+            } else {
+                document.addEventListener('authSystemReady', checkExistingSession);
             }
             
             // Auto-focus name field
@@ -357,14 +367,217 @@
             setupPasswordStrength();
             setupPasswordMatch();
             setupPhoneFormatting();
+            setupRealTimeValidation();
         });
+
+        function checkExistingSession() {
+            if (window.auth && window.auth.isLoggedIn()) {
+                console.log('User already logged in, redirecting...');
+                showToast('Ya tienes una sesión activa', 'info');
+                
+                setTimeout(() => {
+                    if (auth.isAdmin()) {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'main.html';
+                    }
+                }, 1000);
+            }
+        }
+
+        // Form submission handler
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Clear previous errors
+            clearAllErrors();
+            
+            // Get form data
+            const formData = getFormData();
+            
+            // Validate form
+            if (!validateForm(formData)) {
+                return;
+            }
+            
+            // Show loading
+            showLoading('Creando tu cuenta...');
+            
+            try {
+                // Prepare user data exactly as your backend expects
+                const userData = {
+                    name: formData.name.trim(),
+                    email: formData.email.trim().toLowerCase(),
+                    password: formData.password,
+                    phone: formData.phone.trim(),
+                    role: 'customer' // Your backend uses 'customer' not 'user'
+                };
+                
+                // Add optional fields only if provided
+                if (formData.address && formData.address.street) {
+                    userData.address = formData.address;
+                }
+                
+                console.log('📤 Sending registration data:', userData);
+                
+                // Register with API first
+                let response;
+                
+                // Direct API call using your correct endpoint and format
+                const apiResponse = await fetch('http://localhost:3000/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData)
+                });
+                
+                const data = await apiResponse.json();
+                console.log('📥 Registration response:', data);
+                
+                if (apiResponse.ok && data.success) {
+                    hideLoading();
+                    showToast('¡Cuenta creada exitosamente! Ahora puedes iniciar sesión', 'success');
+                    
+                    // Redirect to login instead of auto-login
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    // Handle validation errors from your backend
+                    const errorMessage = data.message || 'Error en el registro';
+                    console.error('❌ Registration failed:', errorMessage);
+                    throw new Error(errorMessage);
+                }
+                
+                
+            } catch (error) {
+                hideLoading();
+                
+                if (error.message.includes('email') || error.message.includes('Email')) {
+                    showToast('El email ya está registrado', 'error');
+                } else if (error.message.includes('fetch') || error.message.includes('network')) {
+                    showToast('Error de conexión. Verifica tu internet.', 'error');
+                } else {
+                    showToast(error.message || 'Error al registrar usuario. Intenta nuevamente.', 'error');
+                }
+            }
+        });
+
+        // Get form data
+        function getFormData() {
+            const form = document.getElementById('register-form');
+            const data = new FormData(form);
+            
+            const userData = {
+                name: data.get('name').trim(),
+                email: data.get('email').trim().toLowerCase(),
+                phone: data.get('phone').trim(),
+                password: data.get('password'),
+                confirmPassword: data.get('confirmPassword'),
+                acceptTerms: data.get('acceptTerms') === 'on',
+                acceptMarketing: data.get('acceptMarketing') === 'on'
+            };
+            
+            // Add address if provided
+            const street = data.get('address.street');
+            if (street && street.trim()) {
+                userData.address = {
+                    street: street.trim(),
+                    city: data.get('address.city')?.trim() || '',
+                    state: data.get('address.state')?.trim() || '',
+                    zipCode: data.get('address.zipCode')?.trim() || '',
+                    country: data.get('address.country') || 'México'
+                };
+            }
+            
+            return userData;
+        }
+
+        // Form validation
+        function validateForm(data) {
+            let isValid = true;
+            console.log('🔍 Validating form data:', data);
+            
+            // Name validation
+            if (!data.name || data.name.trim().length < 2) {
+                showFieldError('name', 'El nombre debe tener al menos 2 caracteres');
+                isValid = false;
+                console.log('❌ Name validation failed');
+            }
+            
+            // Email validation
+            if (!data.email || !data.email.trim()) {
+                showFieldError('email', 'El email es obligatorio');
+                isValid = false;
+                console.log('❌ Email required validation failed');
+            } else if (!isValidEmail(data.email)) {
+                showFieldError('email', 'Email no válido');
+                isValid = false;
+                console.log('❌ Email format validation failed');
+            }
+            
+            // Phone validation
+            if (!data.phone || !data.phone.trim()) {
+                showFieldError('phone', 'El teléfono es obligatorio');
+                isValid = false;
+                console.log('❌ Phone required validation failed');
+            } else if (!isValidPhone(data.phone)) {
+                showFieldError('phone', 'El teléfono debe tener 10 dígitos');
+                isValid = false;
+                console.log('❌ Phone format validation failed');
+            }
+            
+            // Password validation
+            if (!data.password || !data.password.trim()) {
+                showFieldError('password', 'La contraseña es obligatoria');
+                isValid = false;
+                console.log('❌ Password required validation failed');
+            } else if (data.password.length < 6) {
+                showFieldError('password', 'La contraseña debe tener al menos 6 caracteres');
+                isValid = false;
+                console.log('❌ Password length validation failed');
+            }
+            
+            // Confirm password validation
+            if (!data.confirmPassword || !data.confirmPassword.trim()) {
+                showFieldError('confirmPassword', 'Confirma tu contraseña');
+                isValid = false;
+                console.log('❌ Confirm password required validation failed');
+            } else if (data.password !== data.confirmPassword) {
+                showFieldError('confirmPassword', 'Las contraseñas no coinciden');
+                isValid = false;
+                console.log('❌ Password match validation failed');
+            }
+            
+            // Terms validation
+            if (!data.acceptTerms) {
+                showFieldError('acceptTerms', 'Debes aceptar los términos y condiciones');
+                showToast('Debes aceptar los términos y condiciones', 'error');
+                isValid = false;
+                console.log('❌ Terms validation failed');
+            }
+            
+            // Password strength check
+            if (data.password) {
+                const strength = calculatePasswordStrength(data.password);
+                if (strength.score < 3) {
+                    showFieldError('password', 'La contraseña es muy débil. Intenta con una más segura.');
+                    isValid = false;
+                    console.log('❌ Password strength validation failed');
+                }
+            }
+            
+            console.log('🔍 Validation result:', isValid ? '✅ Valid' : '❌ Invalid');
+            return isValid;
+        }
 
         // Navigation functions
         function goBack() {
             if (window.history.length > 1) {
                 window.history.back();
             } else {
-                window.location.href = 'main.html';
+                window.location.href = 'login.html';
             }
         }
 
@@ -391,13 +604,12 @@
             passwordInput.addEventListener('input', (e) => {
                 const password = e.target.value;
                 const strength = calculatePasswordStrength(password);
-                
                 updatePasswordStrength(strength, strengthBar, strengthText);
             });
         }
 
         function calculatePasswordStrength(password) {
-            if (!password) return { score: 0, text: 'Ingresa una contraseña' };
+            if (!password) return { score: 0, text: 'Ingresa una contraseña', class: 'empty' };
             
             let score = 0;
             const checks = [
@@ -477,20 +689,56 @@
                 }
                 
                 e.target.value = value;
-                
-                // Visual feedback for valid phone
-                if (value.length === 10) {
-                    e.target.classList.add('success');
-                    e.target.classList.remove('error');
-                } else {
-                    e.target.classList.remove('success');
-                    if (value.length > 0) {
-                        e.target.classList.add('error');
-                    } else {
-                        e.target.classList.remove('error');
-                    }
+            });
+        }
+
+        // Real-time validation
+        function setupRealTimeValidation() {
+            // Name validation
+            document.getElementById('name').addEventListener('input', function() {
+                if (this.value.length >= 2) {
+                    clearFieldError('name');
+                    this.classList.add('valid');
+                } else if (this.value.length > 0) {
+                    this.classList.remove('valid');
                 }
             });
+
+            // Email validation
+            document.getElementById('email').addEventListener('input', function() {
+                const email = this.value.trim();
+                if (email && isValidEmail(email)) {
+                    clearFieldError('email');
+                    this.classList.add('valid');
+                } else if (email) {
+                    this.classList.remove('valid');
+                }
+            });
+
+            // Phone validation
+            document.getElementById('phone').addEventListener('input', function() {
+                const phone = this.value.trim();
+                if (isValidPhone(phone)) {
+                    clearFieldError('phone');
+                    this.classList.add('valid');
+                } else {
+                    this.classList.remove('valid');
+                }
+            });
+        }
+
+        // Password toggle
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const button = field.nextElementSibling;
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                field.type = 'password';
+                button.textContent = '👁️';
+            }
         }
 
         // Terms and Privacy modals
@@ -507,8 +755,9 @@
         function acceptTerms() {
             const termsCheckbox = document.querySelector('input[name="acceptTerms"]');
             termsCheckbox.checked = true;
+            clearFieldError('acceptTerms');
             closeTermsModal();
-            Toast.show('Términos aceptados', 'success');
+            showToast('Términos aceptados', 'success');
         }
 
         function showPrivacy() {
@@ -521,78 +770,95 @@
             document.body.style.overflow = '';
         }
 
-        // Form validation enhancements
-        document.addEventListener('input', (e) => {
-            if (e.target.classList.contains('form-input')) {
-                validateField(e.target);
+        // Utility functions
+        function showLoading(message = 'Cargando...') {
+            document.getElementById('loading-message').textContent = message;
+            document.getElementById('loading-screen').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-screen').classList.add('hidden');
+        }
+
+        function showToast(message, type = 'info') {
+            // Use global toast system if available
+            if (window.utils && window.utils.notifications) {
+                window.utils.notifications[type](message);
+                return;
             }
-        });
-
-        function validateField(field) {
-            const value = field.value.trim();
-            let isValid = true;
-            let errorMessage = '';
-
-            // Remove previous error state
-            field.classList.remove('error', 'success');
-            const existingError = field.parentNode.parentNode.querySelector('.error-message');
-            if (existingError) {
-                existingError.remove();
-            }
-
-            // Field-specific validation
-            switch (field.name) {
-                case 'name':
-                    if (value.length < 2) {
-                        isValid = false;
-                        errorMessage = 'El nombre debe tener al menos 2 caracteres';
-                    }
-                    break;
-                
-                case 'email':
-                    if (value && !Validators.email(value)) {
-                        isValid = false;
-                        errorMessage = 'Email inválido';
-                    }
-                    break;
-                
-                case 'phone':
-                    if (value && !Validators.phone(value)) {
-                        isValid = false;
-                        errorMessage = 'Teléfono debe tener 10 dígitos';
-                    }
-                    break;
-                
-                case 'password':
-                    if (value && value.length < 6) {
-                        isValid = false;
-                        errorMessage = 'La contraseña debe tener al menos 6 caracteres';
-                    }
-                    break;
-                
-                case 'confirmPassword':
-                    const password = document.getElementById('password').value;
-                    if (value && value !== password) {
-                        isValid = false;
-                        errorMessage = 'Las contraseñas no coinciden';
-                    }
-                    break;
-            }
-
-            // Apply validation state
-            if (value && field.required) {
-                if (isValid) {
-                    field.classList.add('success');
-                } else {
-                    field.classList.add('error');
-                    if (errorMessage) {
-                        const errorDiv = document.createElement('div');
-                        errorDiv.className = 'error-message';
-                        errorDiv.textContent = errorMessage;
-                        field.parentNode.parentNode.appendChild(errorDiv);
-                    }
+            
+            // Fallback toast implementation
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+            
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
+                <span class="toast-message">${message}</span>
+                <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
                 }
+            }, 5000);
+        }
+
+        function showFieldError(fieldId, message) {
+            const errorElement = document.getElementById(`${fieldId}-error`);
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
             }
+            
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.classList.add('error');
+                field.classList.remove('valid');
+            }
+        }
+
+        function clearFieldError(fieldId) {
+            const errorElement = document.getElementById(`${fieldId}-error`);
+            if (errorElement) {
+                errorElement.textContent = '';
+                errorElement.style.display = 'none';
+            }
+            
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.classList.remove('error');
+            }
+        }
+
+        function clearAllErrors() {
+            document.querySelectorAll('.field-error').forEach(error => {
+                error.textContent = '';
+                error.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.form-input, input').forEach(input => {
+                input.classList.remove('error');
+            });
+        }
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function isValidPhone(phone) {
+            return /^[0-9]{10}$/.test(phone);
         }
 
         // Close modals when clicking backdrop
@@ -604,32 +870,6 @@
                     closePrivacyModal();
                 }
             }
-        });
-
-        // Form submission with additional validation
-        document.getElementById('register-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            // Additional client-side validation
-            const form = e.target;
-            const formData = FormUtils.getFormData(form);
-            
-            // Check terms acceptance
-            if (!formData.acceptTerms) {
-                Toast.show('Debes aceptar los términos y condiciones', 'error');
-                return;
-            }
-            
-            // Check password strength
-            const password = formData.password;
-            const strength = calculatePasswordStrength(password);
-            if (strength.score < 3) {
-                Toast.show('La contraseña es muy débil. Intenta con una más segura.', 'warning');
-                return;
-            }
-            
-            // Let Auth handle the submission
-            Auth.handleRegisterSubmit(e);
         });
 
         // Auto-advance on form completion
@@ -645,7 +885,7 @@
 
         // Prevent form submission on Enter for specific fields
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && e.target.type !== 'submit') {
+            if (e.key === 'Enter' && e.target.type !== 'submit' && e.target.type !== 'checkbox') {
                 e.preventDefault();
                 
                 // Move to next field
@@ -656,31 +896,50 @@
                 }
             }
         });
+
+        console.log('✅ Register Page Ready');
     </script>
 
     <style>
         /* Additional styles for register page */
         .field-hint {
             font-size: 0.8rem;
-            color: var(--text-light);
+            color: var(--text-light, #666);
             margin-top: 0.25rem;
         }
 
+        .field-error {
+            color: #dc3545;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .form-input.error {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2) !important;
+        }
+
+        .form-input.valid {
+            border-color: #28a745 !important;
+            box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2) !important;
+        }
+
         .form-section {
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius);
+            border: 1px solid var(--border-light, #e9ecef);
+            border-radius: var(--radius, 8px);
             overflow: hidden;
             margin: 1rem 0;
         }
 
         .section-header {
             padding: 1rem;
-            background: var(--secondary-color);
+            background: var(--secondary-color, #f8f9fa);
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: var(--transition);
+            transition: var(--transition, all 0.3s ease);
         }
 
         .section-header:hover {
@@ -689,18 +948,18 @@
 
         .section-title {
             font-weight: 600;
-            color: var(--text-dark);
+            color: var(--text-dark, #333);
         }
 
         .section-toggle {
             font-size: 1.2rem;
             font-weight: bold;
-            color: var(--primary-color);
+            color: var(--primary-color, #FF6B6B);
         }
 
         .section-content {
             padding: 1rem;
-            border-top: 1px solid var(--border-light);
+            border-top: 1px solid var(--border-light, #e9ecef);
         }
 
         .form-row {
@@ -721,7 +980,7 @@
 
         .strength-bar {
             height: 4px;
-            background: var(--border-light);
+            background: var(--border-light, #e9ecef);
             border-radius: 2px;
             overflow: hidden;
             margin-bottom: 0.25rem;
@@ -730,7 +989,7 @@
         .strength-fill {
             height: 100%;
             width: 0%;
-            transition: var(--transition);
+            transition: var(--transition, all 0.3s ease);
             border-radius: 2px;
         }
 
@@ -759,11 +1018,11 @@
         }
 
         .match-indicator.match {
-            color: var(--success);
+            color: var(--success, #28a745);
         }
 
         .match-indicator.no-match {
-            color: var(--error);
+            color: var(--error, #dc3545);
         }
 
         /* Terms Modal Styles */
@@ -783,13 +1042,13 @@
         }
 
         .terms-section h4 {
-            color: var(--text-dark);
+            color: var(--text-dark, #333);
             margin-bottom: 0.5rem;
             font-size: 1rem;
         }
 
         .terms-section p {
-            color: var(--text-light);
+            color: var(--text-light, #666);
             line-height: 1.6;
         }
 
@@ -798,17 +1057,108 @@
             gap: 1rem;
             justify-content: flex-end;
             padding-top: 1rem;
-            border-top: 1px solid var(--border-light);
+            border-top: 1px solid var(--border-light, #e9ecef);
         }
 
         .terms-link {
-            color: var(--primary-color);
+            color: var(--primary-color, #FF6B6B);
             text-decoration: none;
             font-weight: 500;
         }
 
         .terms-link:hover {
             text-decoration: underline;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            max-width: 350px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .toast-success { border-left: 4px solid #28a745; }
+        .toast-error { border-left: 4px solid #dc3545; }
+        .toast-warning { border-left: 4px solid #ffc107; }
+        .toast-info { border-left: 4px solid #007bff; }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-left: auto;
+            color: #999;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #FF6B6B;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
         }
 
         /* Responsive Design */

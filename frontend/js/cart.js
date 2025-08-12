@@ -1,4 +1,4 @@
-// ===== CART PAGE - INTEGRATED & OPTIMIZED =====
+// ===== CART PAGE - GUEST RESTRICTIONS ADDED =====
 console.log('🛒 Cart Page Script Loading...');
 
 class CartPage {
@@ -11,6 +11,176 @@ class CartPage {
         this.initialized = false;
         this.itemToRemove = null;
         this.isProcessingCheckout = false;
+    }
+
+    // ================================
+    // INITIALIZATION
+    // ================================
+
+    async initialize() {
+        try {
+            console.log('🚀 Initializing Cart Page...');
+            
+            // ⭐ CHECK USER AUTHENTICATION FIRST
+            await this.checkUserAccess();
+            
+            // Wait for dependencies
+            await this.waitForDependencies();
+            
+            // Setup event listeners
+            this.setupEventListeners();
+            
+            // Load data
+            await this.loadCartData();
+            
+            // Initial render
+            await this.renderPage();
+            
+            // Update counters
+            utils.storage.updateCounters();
+            
+            this.initialized = true;
+            console.log('✅ Cart Page initialized successfully');
+            
+        } catch (error) {
+            console.error('❌ Error initializing Cart Page:', error);
+            this.showError('Error cargando el carrito');
+        }
+    }
+
+    // ⭐ NEW: Check if user has cart access
+    async checkUserAccess() {
+        // Wait for auth system to be ready
+        let retries = 0;
+        while (!window.auth && retries < 10) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            retries++;
+        }
+
+        if (!window.auth) {
+            console.log('⚠️ Auth system not available');
+            this.showGuestRestriction();
+            return false;
+        }
+
+        // Check if user is logged in
+        if (!auth.isLoggedIn()) {
+            console.log('🚫 Guest user detected - restricting cart access');
+            this.showGuestRestriction();
+            return false;
+        }
+
+        // Check if user is guest
+        const currentUser = auth.getCurrentUser();
+        if (currentUser && currentUser.isGuest) {
+            console.log('🚫 Guest user detected - restricting cart access');
+            this.showGuestRestriction();
+            return false;
+        }
+
+        console.log('✅ User has cart access');
+        return true;
+    }
+
+    // ⭐ NEW: Show restriction message for guests
+    showGuestRestriction() {
+        const container = document.querySelector('.main-content .container');
+        if (container) {
+            container.innerHTML = `
+                <div class="guest-restriction">
+                    <div class="restriction-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h2>Inicia sesión para ver tu carrito</h2>
+                    <p>Para agregar productos al carrito y realizar compras, necesitas tener una cuenta</p>
+                    <div class="restriction-actions">
+                        <a href="login.html" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Iniciar Sesión
+                        </a>
+                        <a href="register.html" class="btn btn-outline">
+                            <i class="fas fa-user-plus"></i>
+                            Crear Cuenta
+                        </a>
+                    </div>
+                    <div class="continue-browsing">
+                        <p>También puedes continuar explorando nuestros productos</p>
+                        <a href="main.html" class="btn btn-secondary">
+                            <i class="fas fa-paw"></i>
+                            Explorar Productos
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Add custom styles
+        this.addGuestRestrictionStyles();
+    }
+
+    // ⭐ NEW: Add styles for guest restriction
+    addGuestRestrictionStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .guest-restriction {
+                text-align: center;
+                padding: 3rem 1rem;
+                max-width: 500px;
+                margin: 2rem auto;
+                background: #fff;
+                border-radius: 15px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            }
+
+            .restriction-icon {
+                font-size: 4rem;
+                color: #ff6b6b;
+                margin-bottom: 1.5rem;
+            }
+
+            .guest-restriction h2 {
+                color: #333;
+                margin-bottom: 1rem;
+                font-size: 1.8rem;
+            }
+
+            .guest-restriction p {
+                color: #666;
+                margin-bottom: 2rem;
+                line-height: 1.6;
+            }
+
+            .restriction-actions {
+                display: flex;
+                gap: 1rem;
+                justify-content: center;
+                margin-bottom: 2rem;
+                flex-wrap: wrap;
+            }
+
+            .continue-browsing {
+                padding-top: 2rem;
+                border-top: 1px solid #eee;
+            }
+
+            .continue-browsing p {
+                margin-bottom: 1rem;
+                font-size: 0.9rem;
+            }
+
+            @media (max-width: 480px) {
+                .restriction-actions {
+                    flex-direction: column;
+                    align-items: center;
+                }
+                
+                .restriction-actions .btn {
+                    width: 100%;
+                    max-width: 250px;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     }
 
     initializeCoupons() {
@@ -40,38 +210,6 @@ class CartPage {
                 type: 'fixed'
             }
         };
-    }
-
-    // ================================
-    // INITIALIZATION
-    // ================================
-
-    async initialize() {
-        try {
-            console.log('🚀 Initializing Cart Page...');
-            
-            // Wait for dependencies
-            await this.waitForDependencies();
-            
-            // Setup event listeners
-            this.setupEventListeners();
-            
-            // Load data
-            await this.loadCartData();
-            
-            // Initial render
-            await this.renderPage();
-            
-            // Update counters
-            utils.storage.updateCounters();
-            
-            this.initialized = true;
-            console.log('✅ Cart Page initialized successfully');
-            
-        } catch (error) {
-            console.error('❌ Error initializing Cart Page:', error);
-            this.showError('Error cargando el carrito');
-        }
     }
 
     async waitForDependencies() {
@@ -151,9 +289,101 @@ class CartPage {
         }
     }
 
-    // ================================
-    // EVENT LISTENERS SETUP
-    // ================================
+    // ⭐ MODIFIED: Add authentication check to checkout
+    proceedToCheckout() {
+        // Double-check authentication before checkout
+        if (!this.checkUserAccess()) {
+            utils.notifications.error('Debes iniciar sesión para realizar compras');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+            return;
+        }
+
+        if (this.cartProducts.length === 0) {
+            utils.notifications.warning('El carrito está vacío');
+            return;
+        }
+
+        if (this.isProcessingCheckout) {
+            utils.notifications.info('Ya se está procesando el checkout');
+            return;
+        }
+
+        // Validate stock before checkout
+        const outOfStockItems = this.cartProducts.filter(item => 
+            item.currentStock < item.quantity
+        );
+
+        if (outOfStockItems.length > 0) {
+            const itemNames = outOfStockItems.map(item => item.name).join(', ');
+            utils.notifications.error(`Sin stock suficiente: ${itemNames}`);
+            return;
+        }
+
+        this.populateCheckoutModal();
+        utils.showModal('checkout-modal');
+    }
+
+    // ⭐ MODIFIED: Add authentication check to purchase processing
+    async processPurchase() {
+        // Final authentication check
+        if (!this.checkUserAccess()) {
+            utils.notifications.error('Sesión expirada. Inicia sesión nuevamente');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+            return;
+        }
+
+        if (this.isProcessingCheckout) return;
+        
+        try {
+            this.isProcessingCheckout = true;
+            
+            // Validate form
+            const form = document.getElementById('shipping-form');
+            if (form && !form.checkValidity()) {
+                utils.notifications.warning('Por favor completa todos los campos requeridos');
+                return;
+            }
+            
+            // Show processing state
+            const confirmBtn = document.getElementById('confirm-purchase');
+            if (confirmBtn) {
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+            }
+            
+            // Simulate purchase processing
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Show success
+            const orderNumber = this.generateOrderNumber();
+            this.showPurchaseSuccess(orderNumber);
+            
+            // Clear cart after successful purchase
+            utils.storage.clearCart();
+            
+        } catch (error) {
+            console.error('❌ Error processing purchase:', error);
+            utils.notifications.error('Error procesando la compra');
+            
+        } finally {
+            this.isProcessingCheckout = false;
+            
+            // Reset button
+            const confirmBtn = document.getElementById('confirm-purchase');
+            if (confirmBtn) {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fas fa-check"></i> Confirmar Compra';
+            }
+        }
+    }
+
+    // Rest of the methods remain the same...
+    // [Include all other methods from the original cart.js]
+    // setupEventListeners, renderPage, updateQuantity, etc.
 
     setupEventListeners() {
         // Action buttons
@@ -304,9 +534,35 @@ class CartPage {
         });
     }
 
-    // ================================
-    // RENDERING METHODS
-    // ================================
+    // Continue with all other methods...
+    generateOrderNumber() {
+        const timestamp = Date.now();
+        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+        return `PS-${timestamp}-${random}`;
+    }
+
+    showPurchaseSuccess(orderNumber) {
+        utils.hideModal('checkout-modal');
+        
+        // Populate success modal
+        const orderNumberElement = document.getElementById('order-number');
+        const orderTotalElement = document.getElementById('order-total');
+        
+        if (orderNumberElement) orderNumberElement.textContent = orderNumber;
+        if (orderTotalElement) {
+            const totals = this.calculateTotals();
+            orderTotalElement.textContent = utils.formatPrice(totals.total);
+        }
+        
+        utils.showModal('success-modal');
+        
+        // Auto-reload cart
+        setTimeout(() => {
+            this.reloadCart();
+        }, 1000);
+        
+        console.log('🎉 Purchase completed successfully!');
+    }
 
     async renderPage() {
         // Update cart items count
@@ -457,10 +713,6 @@ class CartPage {
         `;
     }
 
-    // ================================
-    // CART ACTIONS
-    // ================================
-
     async updateQuantity(productId, newQuantity) {
         try {
             newQuantity = parseInt(newQuantity) || 1;
@@ -486,6 +738,68 @@ class CartPage {
         }
     }
 
+    calculateTotals() {
+        const subtotal = this.cartProducts.reduce((total, item) => {
+            return total + ((item.currentPrice || item.price) * item.quantity);
+        }, 0);
+
+        let discount = 0;
+        let shipping = subtotal >= 50000 ? 0 : 5000; // Free shipping over $50,000
+
+        if (this.appliedCoupon) {
+            switch (this.appliedCoupon.type) {
+                case 'percentage':
+                    discount = Math.floor(subtotal * this.appliedCoupon.discount);
+                    break;
+                case 'fixed':
+                    discount = this.appliedCoupon.discount;
+                    break;
+                case 'free_shipping':
+                    shipping = 0;
+                    break;
+            }
+        }
+
+        const total = Math.max(0, subtotal - discount + shipping);
+
+        return {
+            subtotal,
+            discount,
+            shipping,
+            total,
+            itemCount: this.cartProducts.reduce((sum, item) => sum + item.quantity, 0)
+        };
+    }
+
+    updateTotals() {
+        const totals = this.calculateTotals();
+        
+        // Update summary elements
+        const elements = {
+            'summary-items-count': totals.itemCount,
+            'subtotal': utils.formatPrice(totals.subtotal),
+            'shipping-cost': totals.shipping === 0 ? 'GRATIS' : utils.formatPrice(totals.shipping),
+            'discount-amount': totals.discount > 0 ? `-${utils.formatPrice(totals.discount)}` : utils.formatPrice(0),
+            'total': utils.formatPrice(totals.total)
+        };
+
+        Object.entries(elements).forEach(([id, value]) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+            }
+        });
+
+        // Show/hide discount row
+        const discountRow = document.getElementById('discount-row');
+        if (discountRow) {
+            discountRow.style.display = totals.discount > 0 ? 'flex' : 'none';
+        }
+
+        console.log('💰 Updated totals:', totals);
+    }
+
+    // Additional utility methods...
     showRemoveItemConfirmation(productId) {
         const item = this.cartProducts.find(item => item.productId === productId);
         if (!item) return;
@@ -568,10 +882,6 @@ class CartPage {
         }
     }
 
-    // ================================
-    // COUPON SYSTEM
-    // ================================
-
     applyCoupon(code) {
         const upperCode = code.toUpperCase();
         const coupon = this.couponCodes[upperCode];
@@ -592,7 +902,7 @@ class CartPage {
 
         this.appliedCoupon = { code: upperCode, ...coupon };
         
-        // Clear input
+        // Clear
         const couponInput = document.getElementById('coupon-code');
         if (couponInput) couponInput.value = '';
         

@@ -1,0 +1,11 @@
+# frontend/.dockerignore
+node_modules
+.git
+.gitignore
+README.md
+.DS_Store
+.vscode
+.idea
+*.test.js
+*.spec.js
+.env

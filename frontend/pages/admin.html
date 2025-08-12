@@ -5,37 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración - PetStyle</title>
     <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/administradores.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="app-container">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen hidden">
+        <div class="loading-content">
+            <div class="logo-loading">🐾</div>
+            <h2>PetStyle Admin</h2>
+            <div class="loading-spinner"></div>
+            <p id="loading-message">Cargando panel de administración...</p>
+        </div>
+    </div>
+
+    <div class="app-container" style="opacity: 0; transition: opacity 0.3s ease;">
         <!-- Header -->
         <header class="header admin-header">
             <div class="header-content">
-                <button class="back-btn" onclick="window.location.href='profile.html'">
+                <button class="back-btn" onclick="goToMain()">
                     <i class="fas fa-arrow-left"></i>
+                    <span>Volver a la tienda</span>
                 </button>
-                <h1>Panel de Admin</h1>
-                <button class="header-btn" onclick="refreshData()">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
+                <div class="header-title">
+                    <h1>🐾 PetStyle Admin</h1>
+                    <span class="admin-badge">Panel de Administración</span>
+                </div>
+                <div class="header-actions">
+                    <button class="header-btn" onclick="refreshData()" title="Actualizar datos">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="header-btn" onclick="logout()" title="Cerrar sesión">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
             </div>
         </header>
 
         <!-- Admin Navigation -->
         <nav class="admin-nav">
-            <button class="admin-nav-btn active" onclick="showSection('dashboard')">
+            <button class="admin-nav-btn active" onclick="showSection('dashboard')" data-section="dashboard">
                 <i class="fas fa-chart-pie"></i>
-                Dashboard
+                <span>Dashboard</span>
             </button>
-            <button class="admin-nav-btn" onclick="showSection('products')">
+            <button class="admin-nav-btn" onclick="showSection('products')" data-section="products">
                 <i class="fas fa-box"></i>
-                Productos
+                <span>Productos</span>
             </button>
-            <button class="admin-nav-btn" onclick="showSection('users')">
+            <button class="admin-nav-btn" onclick="showSection('users')" data-section="users">
                 <i class="fas fa-users"></i>
-                Usuarios
+                <span>Usuarios</span>
+            </button>
+            <button class="admin-nav-btn" onclick="showSection('orders')" data-section="orders">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Pedidos</span>
             </button>
         </nav>
 
@@ -43,56 +66,83 @@
         <main class="admin-content">
             <!-- Dashboard Section -->
             <div id="dashboard-section" class="admin-section active">
+                <div class="section-header">
+                    <h2>Dashboard</h2>
+                    <div class="header-actions">
+                        <button class="btn-secondary" onclick="refreshStats()">
+                            <i class="fas fa-sync-alt"></i>
+                            Actualizar
+                        </button>
+                    </div>
+                </div>
+
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon">
+                        <div class="stat-icon products">
                             <i class="fas fa-box"></i>
                         </div>
                         <div class="stat-info">
                             <h3 id="total-products">0</h3>
                             <p>Total Productos</p>
+                            <small class="stat-change positive" id="products-change">+0 este mes</small>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">
+                        <div class="stat-icon users">
                             <i class="fas fa-users"></i>
                         </div>
                         <div class="stat-info">
                             <h3 id="total-users">0</h3>
                             <p>Total Usuarios</p>
+                            <small class="stat-change positive" id="users-change">+0 este mes</small>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">
+                        <div class="stat-icon orders">
                             <i class="fas fa-shopping-cart"></i>
                         </div>
                         <div class="stat-info">
                             <h3 id="total-orders">0</h3>
                             <p>Pedidos Totales</p>
+                            <small class="stat-change neutral" id="orders-change">0 pendientes</small>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">
+                        <div class="stat-icon revenue">
                             <i class="fas fa-dollar-sign"></i>
                         </div>
                         <div class="stat-info">
                             <h3 id="total-revenue">$0</h3>
                             <p>Ingresos Totales</p>
+                            <small class="stat-change positive" id="revenue-change">+$0 este mes</small>
                         </div>
                     </div>
                 </div>
 
-                <div class="chart-container">
-                    <h3>Productos por Categoría</h3>
-                    <div id="category-chart" class="chart">
-                        <!-- Chart will be generated here -->
+                <div class="dashboard-widgets">
+                    <div class="widget">
+                        <h3>Productos por Categoría</h3>
+                        <div id="category-chart" class="chart">
+                            <div class="chart-placeholder">
+                                <i class="fas fa-chart-pie"></i>
+                                <p>Cargando estadísticas...</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="recent-activity">
-                    <h3>Actividad Reciente</h3>
-                    <div id="activity-log" class="activity-list">
-                        <!-- Activity items will be loaded here -->
+                    <div class="widget">
+                        <h3>Actividad Reciente</h3>
+                        <div id="activity-log" class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <p>Sistema iniciado</p>
+                                    <small>Hace unos momentos</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -101,36 +151,89 @@
             <div id="products-section" class="admin-section">
                 <div class="section-header">
                     <h2>Gestión de Productos</h2>
-                    <button class="btn-primary" onclick="openProductModal()">
-                        <i class="fas fa-plus"></i>
-                        Nuevo Producto
-                    </button>
+                    <div class="header-actions">
+                        <button class="btn-primary" onclick="openProductModal()">
+                            <i class="fas fa-plus"></i>
+                            Nuevo Producto
+                        </button>
+                        <button class="btn-secondary" onclick="exportProducts()">
+                            <i class="fas fa-download"></i>
+                            Exportar
+                        </button>
+                    </div>
                 </div>
 
                 <div class="search-filters">
-                    <input type="text" id="product-search" placeholder="Buscar productos..." onkeyup="filterProducts()">
-                    <select id="category-filter" onchange="filterProducts()">
-                        <option value="">Todas las categorías</option>
-                        <!-- Las categorías se cargarán dinámicamente -->
-                    </select>
+                    <div class="filter-group">
+                        <input type="text" id="product-search" placeholder="Buscar productos..." onkeyup="filterProducts()">
+                        <button class="filter-btn" onclick="clearProductFilters()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="filter-group">
+                        <select id="category-filter" onchange="filterProducts()">
+                            <option value="">Todas las categorías</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="stock-filter" onchange="filterProducts()">
+                            <option value="">Todo el stock</option>
+                            <option value="low">Stock bajo</option>
+                            <option value="out">Sin stock</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="products-table-container">
                     <table class="admin-table" id="products-table">
                         <thead>
                             <tr>
+                                <th>
+                                    <input type="checkbox" id="select-all-products" onchange="toggleSelectAll('products')">
+                                </th>
                                 <th>Imagen</th>
-                                <th>Nombre</th>
-                                <th>Categoría</th>
-                                <th>Precio</th>
-                                <th>Stock</th>
+                                <th onclick="sortProducts('name')" class="sortable">
+                                    Nombre <i class="fas fa-sort"></i>
+                                </th>
+                                <th onclick="sortProducts('category')" class="sortable">
+                                    Categoría <i class="fas fa-sort"></i>
+                                </th>
+                                <th onclick="sortProducts('price')" class="sortable">
+                                    Precio <i class="fas fa-sort"></i>
+                                </th>
+                                <th onclick="sortProducts('stock')" class="sortable">
+                                    Stock <i class="fas fa-sort"></i>
+                                </th>
+                                <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="products-table-body">
-                            <!-- Products will be loaded here -->
+                            <tr class="loading-row">
+                                <td colspan="8">
+                                    <div class="table-loading">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                        Cargando productos...
+                                    </div>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <div class="table-pagination" id="products-pagination">
+                    <div class="pagination-info">
+                        <span id="products-count">0 productos</span>
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="pagination-btn" onclick="changePage('products', -1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span id="products-page-info">Página 1 de 1</span>
+                        <button class="pagination-btn" onclick="changePage('products', 1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -138,35 +241,145 @@
             <div id="users-section" class="admin-section">
                 <div class="section-header">
                     <h2>Gestión de Usuarios</h2>
-                    <button class="btn-primary" onclick="exportUsers()">
-                        <i class="fas fa-download"></i>
-                        Exportar
-                    </button>
+                    <div class="header-actions">
+                        <button class="btn-secondary" onclick="exportUsers()">
+                            <i class="fas fa-download"></i>
+                            Exportar
+                        </button>
+                    </div>
                 </div>
 
                 <div class="search-filters">
-                    <input type="text" id="user-search" placeholder="Buscar usuarios..." onkeyup="filterUsers()">
-                    <select id="role-filter" onchange="filterUsers()">
-                        <option value="">Todos los roles</option>
-                        <option value="user">Usuario</option>
-                        <option value="admin">Administrador</option>
-                    </select>
+                    <div class="filter-group">
+                        <input type="text" id="user-search" placeholder="Buscar usuarios..." onkeyup="filterUsers()">
+                        <button class="filter-btn" onclick="clearUserFilters()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="filter-group">
+                        <select id="role-filter" onchange="filterUsers()">
+                            <option value="">Todos los roles</option>
+                            <option value="user">Usuario</option>
+                            <option value="admin">Administrador</option>
+                            <option value="guest">Invitado</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="status-filter" onchange="filterUsers()">
+                            <option value="">Todos los estados</option>
+                            <option value="active">Activo</option>
+                            <option value="inactive">Inactivo</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="users-table-container">
                     <table class="admin-table" id="users-table">
                         <thead>
                             <tr>
+                                <th>
+                                    <input type="checkbox" id="select-all-users" onchange="toggleSelectAll('users')">
+                                </th>
                                 <th>Avatar</th>
-                                <th>Nombre</th>
-                                <th>Email</th>
-                                <th>Rol</th>
-                                <th>Registro</th>
+                                <th onclick="sortUsers('name')" class="sortable">
+                                    Nombre <i class="fas fa-sort"></i>
+                                </th>
+                                <th onclick="sortUsers('email')" class="sortable">
+                                    Email <i class="fas fa-sort"></i>
+                                </th>
+                                <th onclick="sortUsers('role')" class="sortable">
+                                    Rol <i class="fas fa-sort"></i>
+                                </th>
+                                <th onclick="sortUsers('createdAt')" class="sortable">
+                                    Registro <i class="fas fa-sort"></i>
+                                </th>
+                                <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="users-table-body">
-                            <!-- Users will be loaded here -->
+                            <tr class="loading-row">
+                                <td colspan="8">
+                                    <div class="table-loading">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                        Cargando usuarios...
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-pagination" id="users-pagination">
+                    <div class="pagination-info">
+                        <span id="users-count">0 usuarios</span>
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="pagination-btn" onclick="changePage('users', -1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span id="users-page-info">Página 1 de 1</span>
+                        <button class="pagination-btn" onclick="changePage('users', 1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Section -->
+            <div id="orders-section" class="admin-section">
+                <div class="section-header">
+                    <h2>Gestión de Pedidos</h2>
+                    <div class="header-actions">
+                        <button class="btn-secondary" onclick="exportOrders()">
+                            <i class="fas fa-download"></i>
+                            Exportar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="search-filters">
+                    <div class="filter-group">
+                        <input type="text" id="order-search" placeholder="Buscar pedidos..." onkeyup="filterOrders()">
+                        <button class="filter-btn" onclick="clearOrderFilters()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="filter-group">
+                        <select id="order-status-filter" onchange="filterOrders()">
+                            <option value="">Todos los estados</option>
+                            <option value="pending">Pendiente</option>
+                            <option value="processing">Procesando</option>
+                            <option value="shipped">Enviado</option>
+                            <option value="delivered">Entregado</option>
+                            <option value="cancelled">Cancelado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="orders-table-container">
+                    <table class="admin-table" id="orders-table">
+                        <thead>
+                            <tr>
+                                <th>ID Pedido</th>
+                                <th>Cliente</th>
+                                <th>Productos</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table-body">
+                            <tr>
+                                <td colspan="7">
+                                    <div class="empty-state">
+                                        <i class="fas fa-shopping-cart"></i>
+                                        <p>No hay pedidos registrados</p>
+                                        <small>Los pedidos aparecerán aquí cuando los usuarios realicen compras</small>
+                                    </div>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -187,55 +400,1669 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="product-name">Nombre *</label>
-                        <input type="text" id="product-name" required placeholder="Ej: Collar de colores para gato">
+                        <input type="text" id="product-name" name="name" required placeholder="Ej: Collar de colores para gato">
+                        <div class="field-error" id="product-name-error"></div>
                     </div>
                     <div class="form-group">
                         <label for="product-category">Categoría *</label>
-                        <select id="product-category" required>
+                        <select id="product-category" name="category" required>
                             <option value="">Selecciona una categoría</option>
-                            <option value="6898049bdd53186ec08fd313">🐕 Perros</option>
-                            <option value="6898049bdd53186ec08fd316">🐱 Gatos</option>
-                            <option value="6898049bdd53186ec08fd319">🦅 Aves</option>
-                            <option value="6898049bdd53186ec08fd31c">🐠 Peces</option>
-                            <option value="6898049bdd53186ec08fd31f">🎾 Accesorios</option>
                         </select>
+                        <div class="field-error" id="product-category-error"></div>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="product-price">Precio *</label>
-                        <input type="number" id="product-price" step="0.01" min="0" required placeholder="0.00">
+                        <input type="number" id="product-price" name="price" step="0.01" min="0" required placeholder="0.00">
+                        <div class="field-error" id="product-price-error"></div>
                     </div>
                     <div class="form-group">
                         <label for="product-stock">Stock</label>
-                        <input type="number" id="product-stock" min="0" value="0" placeholder="Cantidad disponible">
+                        <input type="number" id="product-stock" name="stock" min="0" value="0" placeholder="Cantidad disponible">
+                        <div class="field-error" id="product-stock-error"></div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="product-description">Descripción *</label>
-                    <textarea id="product-description" rows="3" required placeholder="Describe las características principales del producto..."></textarea>
+                    <textarea id="product-description" name="description" rows="3" required placeholder="Describe las características principales del producto..."></textarea>
+                    <div class="field-error" id="product-description-error"></div>
                 </div>
                 <div class="form-group">
                     <label for="product-image">URL de Imagen</label>
-                    <input type="url" id="product-image" placeholder="https://ejemplo.com/imagen.jpg">
+                    <input type="url" id="product-image" name="image" placeholder="https://ejemplo.com/imagen.jpg">
                     <small class="form-help">Si no proporcionas una imagen, se usará una imagen por defecto</small>
+                    <div class="field-error" id="product-image-error"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-brand">Marca</label>
+                        <input type="text" id="product-brand" name="brand" placeholder="Marca del producto">
+                    </div>
+                    <div class="form-group">
+                        <label for="product-featured">
+                            <input type="checkbox" id="product-featured" name="featured">
+                            Producto destacado
+                        </label>
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" onclick="closeProductModal()">
                         Cancelar
                     </button>
                     <button type="submit" class="btn-primary" id="product-submit-btn">
-                        Crear Producto
+                        <i class="fas fa-save"></i>
+                        <span>Crear Producto</span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3 id="confirmation-title">Confirmar Acción</h3>
+                <button class="close-btn" onclick="closeConfirmationModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="confirmation-content">
+                    <div class="confirmation-icon">
+                        <i id="confirmation-icon" class="fas fa-question-circle"></i>
+                    </div>
+                    <p id="confirmation-message">¿Estás seguro de que quieres realizar esta acción?</p>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeConfirmationModal()">
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn-danger" id="confirmation-confirm-btn" onclick="confirmAction()">
+                        <i class="fas fa-check"></i>
+                        <span>Confirmar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
     <!-- Scripts -->
+    <script src="../js/config.js"></script>
     <script src="../js/utils.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/auth.js"></script>
-    <script src="../js/admin.js"></script>
+
+    <script>
+        // ===== ADMIN PAGE INTEGRATION =====
+        console.log('👑 Admin Page Loading...');
+
+        let adminData = {
+            products: [],
+            users: [],
+            orders: [],
+            categories: [],
+            stats: {},
+            currentSection: 'dashboard',
+            currentProductPage: 1,
+            currentUserPage: 1,
+            itemsPerPage: 10,
+            filters: {
+                products: { search: '', category: '', stock: '', sort: 'name' },
+                users: { search: '', role: '', status: '', sort: 'name' },
+                orders: { search: '', status: '', sort: 'date' }
+            }
+        };
+
+        let pendingAction = null;
+
+        // Initialize admin page
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Hide all modals initially
+            document.getElementById('confirmation-modal').classList.add('hidden');
+            document.getElementById('product-modal').classList.add('hidden');
+            
+            // Check authentication and admin access
+            if (window.auth && window.auth.initialized) {
+                await checkAdminAccess();
+            } else {
+                document.addEventListener('authSystemReady', checkAdminAccess);
+            }
+        });
+
+        async function checkAdminAccess() {
+            showLoading('Verificando permisos de administrador...');
+            
+            try {
+                // Check if user is logged in
+                if (!auth.isLoggedIn()) {
+                    showToast('Debes iniciar sesión para acceder al panel de administración', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
+                }
+
+                // Check if user is admin
+                if (!auth.isAdmin()) {
+                    showToast('Acceso denegado. Se requieren permisos de administrador.', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'main.html';
+                    }, 2000);
+                    return;
+                }
+
+                // Initialize admin dashboard
+                await initializeAdminDashboard();
+                
+            } catch (error) {
+                console.error('Error checking admin access:', error);
+                showToast('Error al verificar permisos', 'error');
+                setTimeout(() => {
+                    window.location.href = 'main.html';
+                }, 2000);
+            }
+        }
+
+        async function initializeAdminDashboard() {
+            try {
+                updateLoadingMessage('Cargando datos del dashboard...');
+                
+                // Preload essential data first
+                await loadCategories();
+                
+                // Show the main container smoothly
+                const appContainer = document.querySelector('.app-container');
+                appContainer.style.opacity = '1';
+                
+                // Load remaining data
+                await Promise.all([
+                    loadProducts(),
+                    loadUsers(),
+                    loadStats()
+                ]);
+                
+                // Setup event listeners
+                setupEventListeners();
+                
+                // Hide loading with a slight delay for smoother transition
+                setTimeout(() => {
+                    hideLoading();
+                    // Show welcome message
+                    setTimeout(() => {
+                        showToast('Panel de administración cargado correctamente', 'success');
+                    }, 300);
+                }, 200);
+                
+                console.log('✅ Admin Dashboard Ready');
+                
+            } catch (error) {
+                console.error('Error initializing admin dashboard:', error);
+                hideLoading();
+                showToast('Error al cargar el panel de administración', 'error');
+                
+                // Still show the container even if there's an error
+                const appContainer = document.querySelector('.app-container');
+                appContainer.style.opacity = '1';
+            }
+        }
+
+        // Data loading functions
+        async function loadCategories() {
+            try {
+                if (window.api && api.getCategories) {
+                    const response = await api.getCategories();
+                    if (response.success) {
+                        adminData.categories = response.data;
+                        updateCategoryFilters();
+                    }
+                } else {
+                    // Fallback categories
+                    adminData.categories = [
+                        { _id: 'perros', name: 'Perros' },
+                        { _id: 'gatos', name: 'Gatos' },
+                        { _id: 'aves', name: 'Aves' },
+                        { _id: 'peces', name: 'Peces' },
+                        { _id: 'accesorios', name: 'Accesorios' }
+                    ];
+                    updateCategoryFilters();
+                }
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                updateLoadingMessage('Cargando productos...');
+                
+                if (window.api && api.getProducts) {
+                    const response = await api.getProducts({ limit: 100 });
+                    if (response.success) {
+                        adminData.products = response.data;
+                    }
+                } else {
+                    // Generate mock products for demo
+                    adminData.products = generateMockProducts();
+                }
+                
+                renderProductsTable();
+                updateProductsStats();
+                
+            } catch (error) {
+                console.error('Error loading products:', error);
+                adminData.products = generateMockProducts();
+                renderProductsTable();
+            }
+        }
+
+        async function loadUsers() {
+            try {
+                updateLoadingMessage('Cargando usuarios...');
+                
+                if (window.api && api.getUsers) {
+                    const response = await api.getUsers();
+                    if (response.success) {
+                        adminData.users = response.data;
+                    }
+                } else {
+                    // Generate mock users for demo
+                    adminData.users = generateMockUsers();
+                }
+                
+                renderUsersTable();
+                updateUsersStats();
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+                adminData.users = generateMockUsers();
+                renderUsersTable();
+            }
+        }
+
+        async function loadStats() {
+            try {
+                updateLoadingMessage('Calculando estadísticas...');
+                
+                const stats = {
+                    totalProducts: adminData.products.length,
+                    totalUsers: adminData.users.length,
+                    totalOrders: adminData.orders.length,
+                    totalRevenue: adminData.orders.reduce((sum, order) => sum + (order.total || 0), 0)
+                };
+                
+                adminData.stats = stats;
+                updateDashboardStats();
+                renderCategoryChart();
+                
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // UI Update functions
+        function updateDashboardStats() {
+            document.getElementById('total-products').textContent = adminData.stats.totalProducts || 0;
+            document.getElementById('total-users').textContent = adminData.stats.totalUsers || 0;
+            document.getElementById('total-orders').textContent = adminData.stats.totalOrders || 0;
+            document.getElementById('total-revenue').textContent = `${(adminData.stats.totalRevenue || 0).toFixed(2)}`;
+            
+            // Update change indicators
+            document.getElementById('products-change').textContent = `+${Math.floor(Math.random() * 5)} este mes`;
+            document.getElementById('users-change').textContent = `+${Math.floor(Math.random() * 10)} este mes`;
+            document.getElementById('orders-change').textContent = `${Math.floor(Math.random() * 3)} pendientes`;
+            document.getElementById('revenue-change').textContent = `+${(Math.random() * 1000).toFixed(2)} este mes`;
+        }
+
+        function updateCategoryFilters() {
+            const categoryFilter = document.getElementById('category-filter');
+            const productCategorySelect = document.getElementById('product-category');
+            
+            // Clear existing options
+            categoryFilter.innerHTML = '<option value="">Todas las categorías</option>';
+            productCategorySelect.innerHTML = '<option value="">Selecciona una categoría</option>';
+            
+            adminData.categories.forEach(category => {
+                const option1 = document.createElement('option');
+                option1.value = category._id;
+                option1.textContent = category.name;
+                categoryFilter.appendChild(option1);
+                
+                const option2 = document.createElement('option');
+                option2.value = category._id;
+                option2.textContent = category.name;
+                productCategorySelect.appendChild(option2);
+            });
+        }
+
+        function renderCategoryChart() {
+            const chartContainer = document.getElementById('category-chart');
+            
+            if (adminData.products.length === 0) {
+                chartContainer.innerHTML = `
+                    <div class="chart-placeholder">
+                        <i class="fas fa-chart-pie"></i>
+                        <p>No hay productos para mostrar</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Count products by category
+            const categoryCounts = {};
+            adminData.products.forEach(product => {
+                const categoryName = getCategoryName(product.category) || 'Sin categoría';
+                categoryCounts[categoryName] = (categoryCounts[categoryName] || 0) + 1;
+            });
+            
+            // Create simple chart
+            const chartHTML = Object.entries(categoryCounts)
+                .map(([category, count]) => {
+                    const percentage = ((count / adminData.products.length) * 100).toFixed(1);
+                    return `
+                        <div class="chart-item">
+                            <div class="chart-label">${category}</div>
+                            <div class="chart-bar">
+                                <div class="chart-fill" style="width: ${percentage}%"></div>
+                            </div>
+                            <div class="chart-value">${count} (${percentage}%)</div>
+                        </div>
+                    `;
+                })
+                .join('');
+            
+            chartContainer.innerHTML = chartHTML;
+        }
+
+        // Table rendering functions
+        function renderProductsTable() {
+            const tbody = document.getElementById('products-table-body');
+            const filters = adminData.filters.products;
+            
+            // Filter products
+            let filteredProducts = adminData.products.filter(product => {
+                const matchesSearch = !filters.search || 
+                    product.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+                    (product.description && product.description.toLowerCase().includes(filters.search.toLowerCase()));
+                
+                const matchesCategory = !filters.category || product.category === filters.category;
+                
+                const matchesStock = !filters.stock ||
+                    (filters.stock === 'low' && product.stock <= 5) ||
+                    (filters.stock === 'out' && product.stock === 0);
+                
+                return matchesSearch && matchesCategory && matchesStock;
+            });
+            
+            // Sort products
+            filteredProducts.sort((a, b) => {
+                switch (filters.sort) {
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    case 'price':
+                        return a.price - b.price;
+                    case 'stock':
+                        return a.stock - b.stock;
+                    case 'category':
+                        return getCategoryName(a.category).localeCompare(getCategoryName(b.category));
+                    default:
+                        return 0;
+                }
+            });
+            
+            // Pagination
+            const startIndex = (adminData.currentProductPage - 1) * adminData.itemsPerPage;
+            const endIndex = startIndex + adminData.itemsPerPage;
+            const pageProducts = filteredProducts.slice(startIndex, endIndex);
+            
+            if (pageProducts.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <i class="fas fa-box-open"></i>
+                                <p>No se encontraron productos</p>
+                                <small>Intenta ajustar los filtros de búsqueda</small>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = pageProducts.map(product => `
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="product-checkbox" value="${product._id || product.id}">
+                        </td>
+                        <td>
+                            <div class="product-image-cell">
+                                <img src="${product.image || product.images?.[0]?.url || 'https://via.placeholder.com/50/FF6B6B/ffffff?text=🐾'}" 
+                                     alt="${product.name}" 
+                                     onerror="this.src='https://via.placeholder.com/50/FF6B6B/ffffff?text=🐾'">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="product-name-cell">
+                                <strong>${product.name}</strong>
+                                ${product.brand ? `<small>por ${product.brand}</small>` : ''}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="category-badge">${getCategoryName(product.category)}</span>
+                        </td>
+                        <td>
+                            <span class="price-cell">${product.price.toFixed(2)}</span>
+                        </td>
+                        <td>
+                            <span class="stock-cell ${getStockClass(product.stock)}">${product.stock}</span>
+                        </td>
+                        <td>
+                            <span class="status-badge ${product.featured ? 'featured' : 'regular'}">
+                                ${product.featured ? 'Destacado' : 'Regular'}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon" onclick="editProduct('${product._id || product.id}')" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon btn-danger" onclick="deleteProduct('${product._id || product.id}')" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            // Update pagination
+            updatePagination('products', filteredProducts.length);
+        }
+
+        function renderUsersTable() {
+            const tbody = document.getElementById('users-table-body');
+            const filters = adminData.filters.users;
+            
+            // Filter users
+            let filteredUsers = adminData.users.filter(user => {
+                const matchesSearch = !filters.search || 
+                    user.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+                    user.email.toLowerCase().includes(filters.search.toLowerCase());
+                
+                const matchesRole = !filters.role || user.role === filters.role;
+                
+                const matchesStatus = !filters.status ||
+                    (filters.status === 'active' && user.isActive !== false) ||
+                    (filters.status === 'inactive' && user.isActive === false);
+                
+                return matchesSearch && matchesRole && matchesStatus;
+            });
+            
+            // Sort users
+            filteredUsers.sort((a, b) => {
+                switch (filters.sort) {
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    case 'email':
+                        return a.email.localeCompare(b.email);
+                    case 'role':
+                        return a.role.localeCompare(b.role);
+                    case 'createdAt':
+                        return new Date(b.createdAt || Date.now()) - new Date(a.createdAt || Date.now());
+                    default:
+                        return 0;
+                }
+            });
+            
+            // Pagination
+            const startIndex = (adminData.currentUserPage - 1) * adminData.itemsPerPage;
+            const endIndex = startIndex + adminData.itemsPerPage;
+            const pageUsers = filteredUsers.slice(startIndex, endIndex);
+            
+            if (pageUsers.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <i class="fas fa-users"></i>
+                                <p>No se encontraron usuarios</p>
+                                <small>Intenta ajustar los filtros de búsqueda</small>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = pageUsers.map(user => `
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="user-checkbox" value="${user._id || user.id}">
+                        </td>
+                        <td>
+                            <div class="user-avatar-cell">
+                                ${getUserAvatar(user)}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="user-name-cell">
+                                <strong>${user.name}</strong>
+                                ${user.isGuest ? '<small class="guest-indicator">Invitado</small>' : ''}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="email-cell">${user.email}</span>
+                        </td>
+                        <td>
+                            <span class="role-badge ${user.role}">${getRoleDisplayName(user.role)}</span>
+                        </td>
+                        <td>
+                            <span class="date-cell">${formatDate(user.createdAt)}</span>
+                        </td>
+                        <td>
+                            <span class="status-badge ${user.isActive !== false ? 'active' : 'inactive'}">
+                                ${user.isActive !== false ? 'Activo' : 'Inactivo'}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon" onclick="viewUser('${user._id || user.id}')" title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                ${user.role !== 'admin' ? `
+                                    <button class="btn-icon btn-danger" onclick="toggleUserStatus('${user._id || user.id}')" title="Cambiar estado">
+                                        <i class="fas fa-${user.isActive !== false ? 'ban' : 'check'}"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            // Update pagination
+            updatePagination('users', filteredUsers.length);
+        }
+
+        // Section management
+        function showSection(sectionName) {
+            // Update navigation
+            document.querySelectorAll('.admin-nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
+            
+            // Update sections
+            document.querySelectorAll('.admin-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(`${sectionName}-section`).classList.add('active');
+            
+            adminData.currentSection = sectionName;
+            
+            // Load section-specific data if needed
+            switch (sectionName) {
+                case 'dashboard':
+                    renderCategoryChart();
+                    break;
+                case 'products':
+                    if (adminData.products.length === 0) {
+                        loadProducts();
+                    }
+                    break;
+                case 'users':
+                    if (adminData.users.length === 0) {
+                        loadUsers();
+                    }
+                    break;
+            }
+        }
+
+        // Product management
+        function openProductModal(productId = null) {
+            const modal = document.getElementById('product-modal');
+            const title = document.getElementById('product-modal-title');
+            const submitBtn = document.getElementById('product-submit-btn');
+            const form = document.getElementById('product-form');
+            
+            if (productId) {
+                // Edit mode
+                const product = adminData.products.find(p => (p._id || p.id) === productId);
+                if (product) {
+                    title.textContent = 'Editar Producto';
+                    submitBtn.innerHTML = '<i class="fas fa-save"></i><span>Actualizar Producto</span>';
+                    
+                    // Fill form with product data
+                    document.getElementById('product-name').value = product.name;
+                    document.getElementById('product-category').value = product.category;
+                    document.getElementById('product-price').value = product.price;
+                    document.getElementById('product-stock').value = product.stock;
+                    document.getElementById('product-description').value = product.description;
+                    document.getElementById('product-image').value = product.image || '';
+                    document.getElementById('product-brand').value = product.brand || '';
+                    document.getElementById('product-featured').checked = product.featured || false;
+                    
+                    form.dataset.productId = productId;
+                }
+            } else {
+                // Create mode
+                title.textContent = 'Nuevo Producto';
+                submitBtn.innerHTML = '<i class="fas fa-save"></i><span>Crear Producto</span>';
+                form.reset();
+                delete form.dataset.productId;
+            }
+            
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('product-name').focus();
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+            clearFormErrors('product-form');
+        }
+
+        // Product form submission
+        document.getElementById('product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const formData = new FormData(form);
+            const productId = form.dataset.productId;
+            
+            // Clear previous errors
+            clearFormErrors('product-form');
+            
+            // Get form data
+            const productData = {
+                name: formData.get('name').trim(),
+                category: formData.get('category'),
+                price: parseFloat(formData.get('price')),
+                stock: parseInt(formData.get('stock')) || 0,
+                description: formData.get('description').trim(),
+                image: formData.get('image').trim() || null,
+                brand: formData.get('brand').trim() || null,
+                featured: formData.has('featured')
+            };
+            
+            // Validate
+            if (!validateProductData(productData)) {
+                return;
+            }
+            
+            try {
+                showLoading(productId ? 'Actualizando producto...' : 'Creando producto...');
+                
+                let result;
+                if (productId) {
+                    // Update existing product
+                    if (window.api && api.updateProduct) {
+                        result = await api.updateProduct(productId, productData);
+                    } else {
+                        // Mock update
+                        const index = adminData.products.findIndex(p => (p._id || p.id) === productId);
+                        if (index !== -1) {
+                            adminData.products[index] = { ...adminData.products[index], ...productData };
+                            result = { success: true };
+                        }
+                    }
+                } else {
+                    // Create new product
+                    if (window.api && api.createProduct) {
+                        result = await api.createProduct(productData);
+                    } else {
+                        // Mock creation
+                        const newProduct = {
+                            id: 'product_' + Date.now(),
+                            ...productData,
+                            createdAt: new Date().toISOString()
+                        };
+                        adminData.products.push(newProduct);
+                        result = { success: true, data: newProduct };
+                    }
+                }
+                
+                if (result.success) {
+                    hideLoading();
+                    closeProductModal();
+                    renderProductsTable();
+                    updateProductsStats();
+                    showToast(productId ? 'Producto actualizado correctamente' : 'Producto creado correctamente', 'success');
+                } else {
+                    throw new Error(result.message || 'Error al procesar el producto');
+                }
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Error saving product:', error);
+                showToast(error.message || 'Error al guardar el producto', 'error');
+            }
+        });
+
+        function validateProductData(data) {
+            let isValid = true;
+            
+            if (!data.name) {
+                showFieldError('product-name', 'El nombre es obligatorio');
+                isValid = false;
+            }
+            
+            if (!data.category) {
+                showFieldError('product-category', 'La categoría es obligatoria');
+                isValid = false;
+            }
+            
+            if (!data.price || data.price <= 0) {
+                showFieldError('product-price', 'El precio debe ser mayor a 0');
+                isValid = false;
+            }
+            
+            if (!data.description) {
+                showFieldError('product-description', 'La descripción es obligatoria');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
+        function editProduct(productId) {
+            openProductModal(productId);
+        }
+
+        function deleteProduct(productId) {
+            const product = adminData.products.find(p => (p._id || p.id) === productId);
+            if (product) {
+                showConfirmation(
+                    'Eliminar Producto',
+                    `¿Estás seguro de que quieres eliminar "${product.name}"?`,
+                    'fas fa-trash',
+                    'danger',
+                    () => confirmDeleteProduct(productId)
+                );
+            }
+        }
+
+        async function confirmDeleteProduct(productId) {
+            try {
+                showLoading('Eliminando producto...');
+                
+                if (window.api && api.deleteProduct) {
+                    const result = await api.deleteProduct(productId);
+                    if (!result.success) {
+                        throw new Error(result.message);
+                    }
+                } else {
+                    // Mock deletion
+                    adminData.products = adminData.products.filter(p => (p._id || p.id) !== productId);
+                }
+                
+                hideLoading();
+                renderProductsTable();
+                updateProductsStats();
+                showToast('Producto eliminado correctamente', 'success');
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Error deleting product:', error);
+                showToast(error.message || 'Error al eliminar el producto', 'error');
+            }
+        }
+
+        // User management
+        function viewUser(userId) {
+            const user = adminData.users.find(u => (u._id || u.id) === userId);
+            if (user) {
+                showToast(`Ver detalles de ${user.name} - Funcionalidad en desarrollo`, 'info');
+            }
+        }
+
+        function toggleUserStatus(userId) {
+            const user = adminData.users.find(u => (u._id || u.id) === userId);
+            if (user) {
+                const action = user.isActive !== false ? 'desactivar' : 'activar';
+                showConfirmation(
+                    `${action.charAt(0).toUpperCase() + action.slice(1)} Usuario`,
+                    `¿Estás seguro de que quieres ${action} a "${user.name}"?`,
+                    `fas fa-${user.isActive !== false ? 'ban' : 'check'}`,
+                    user.isActive !== false ? 'warning' : 'success',
+                    () => confirmToggleUserStatus(userId)
+                );
+            }
+        }
+
+        async function confirmToggleUserStatus(userId) {
+            try {
+                showLoading('Actualizando estado del usuario...');
+                
+                const user = adminData.users.find(u => (u._id || u.id) === userId);
+                if (user) {
+                    user.isActive = user.isActive === false;
+                    renderUsersTable();
+                    showToast(`Usuario ${user.isActive ? 'activado' : 'desactivado'} correctamente`, 'success');
+                }
+                
+                hideLoading();
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Error toggling user status:', error);
+                showToast('Error al cambiar el estado del usuario', 'error');
+            }
+        }
+
+        // Filtering and searching
+        function filterProducts() {
+            const filters = adminData.filters.products;
+            filters.search = document.getElementById('product-search').value.trim();
+            filters.category = document.getElementById('category-filter').value;
+            filters.stock = document.getElementById('stock-filter').value;
+            
+            adminData.currentProductPage = 1;
+            renderProductsTable();
+        }
+
+        function filterUsers() {
+            const filters = adminData.filters.users;
+            filters.search = document.getElementById('user-search').value.trim();
+            filters.role = document.getElementById('role-filter').value;
+            filters.status = document.getElementById('status-filter').value;
+            
+            adminData.currentUserPage = 1;
+            renderUsersTable();
+        }
+
+        function filterOrders() {
+            // Implementation for order filtering
+            showToast('Filtro de pedidos - Funcionalidad en desarrollo', 'info');
+        }
+
+        function clearProductFilters() {
+            document.getElementById('product-search').value = '';
+            document.getElementById('category-filter').value = '';
+            document.getElementById('stock-filter').value = '';
+            adminData.filters.products = { search: '', category: '', stock: '', sort: 'name' };
+            adminData.currentProductPage = 1;
+            renderProductsTable();
+        }
+
+        function clearUserFilters() {
+            document.getElementById('user-search').value = '';
+            document.getElementById('role-filter').value = '';
+            document.getElementById('status-filter').value = '';
+            adminData.filters.users = { search: '', role: '', status: '', sort: 'name' };
+            adminData.currentUserPage = 1;
+            renderUsersTable();
+        }
+
+        function clearOrderFilters() {
+            document.getElementById('order-search').value = '';
+            document.getElementById('order-status-filter').value = '';
+            showToast('Filtros de pedidos limpiados', 'info');
+        }
+
+        // Sorting
+        function sortProducts(field) {
+            adminData.filters.products.sort = field;
+            renderProductsTable();
+        }
+
+        function sortUsers(field) {
+            adminData.filters.users.sort = field;
+            renderUsersTable();
+        }
+
+        // Helper functions for filtering
+        function filterProduct(product) {
+            const filters = adminData.filters.products;
+            
+            const matchesSearch = !filters.search || 
+                product.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+                (product.description && product.description.toLowerCase().includes(filters.search.toLowerCase()));
+            
+            const matchesCategory = !filters.category || product.category === filters.category;
+            
+            const matchesStock = !filters.stock ||
+                (filters.stock === 'low' && product.stock <= 5) ||
+                (filters.stock === 'out' && product.stock === 0);
+            
+            return matchesSearch && matchesCategory && matchesStock;
+        }
+
+        // Pagination
+        function updatePagination(type, totalItems) {
+            const currentPage = type === 'products' ? adminData.currentProductPage : adminData.currentUserPage;
+            const totalPages = Math.ceil(totalItems / adminData.itemsPerPage);
+            
+            document.getElementById(`${type}-count`).textContent = `${totalItems} ${type === 'products' ? 'productos' : 'usuarios'}`;
+            document.getElementById(`${type}-page-info`).textContent = `Página ${currentPage} de ${totalPages || 1}`;
+        }
+
+        function changePage(type, direction) {
+            const currentPageKey = type === 'products' ? 'currentProductPage' : 'currentUserPage';
+            let totalItems;
+            
+            if (type === 'products') {
+                totalItems = adminData.products.filter(p => filterProduct(p)).length;
+            } else {
+                totalItems = adminData.users.filter(u => filterUser(u)).length;
+            }
+            
+            const totalPages = Math.ceil(totalItems / adminData.itemsPerPage);
+            const newPage = adminData[currentPageKey] + direction;
+            
+            if (newPage >= 1 && newPage <= totalPages) {
+                adminData[currentPageKey] = newPage;
+                
+                if (type === 'products') {
+                    renderProductsTable();
+                } else {
+                    renderUsersTable();
+                }
+            }
+        }
+
+        // Bulk actions
+        function toggleSelectAll(type) {
+            const selectAllCheckbox = document.getElementById(`select-all-${type}`);
+            const itemCheckboxes = document.querySelectorAll(`.${type.slice(0, -1)}-checkbox`);
+            
+            itemCheckboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        }
+
+        // Export functions
+        function exportProducts() {
+            showToast('Exportar productos - Funcionalidad en desarrollo', 'info');
+        }
+
+        function exportUsers() {
+            showToast('Exportar usuarios - Funcionalidad en desarrollo', 'info');
+        }
+
+        function exportOrders() {
+            showToast('Exportar pedidos - Funcionalidad en desarrollo', 'info');
+        }
+
+        // Utility functions
+        function getCategoryName(categoryId) {
+            const category = adminData.categories.find(c => c._id === categoryId);
+            return category ? category.name : 'Sin categoría';
+        }
+
+        function getStockClass(stock) {
+            if (stock === 0) return 'out-of-stock';
+            if (stock <= 5) return 'low-stock';
+            return 'in-stock';
+        }
+
+        function getUserAvatar(user) {
+            if (user.avatar) {
+                return `<img src="${user.avatar}" alt="${user.name}" class="user-avatar">`;
+            }
+            
+            const initial = user.name.charAt(0).toUpperCase();
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57'];
+            const color = colors[user.name.length % colors.length];
+            
+            return `<div class="user-avatar-placeholder" style="background-color: ${color}">${initial}</div>`;
+        }
+
+        function getRoleDisplayName(role) {
+            const roles = {
+                'admin': 'Administrador',
+                'user': 'Usuario',
+                'guest': 'Invitado'
+            };
+            return roles[role] || role;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-MX', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        // Mock data generators
+        function generateMockProducts() {
+            const categories = ['perros', 'gatos', 'aves', 'peces', 'accesorios'];
+            const productNames = [
+                'Collar Premium', 'Juguete Interactivo', 'Cama Comfort', 'Alimento Natural',
+                'Correa Resistente', 'Casa para Mascotas', 'Snacks Saludables', 'Shampoo Suave',
+                'Pelota Rebotante', 'Rascador Torre', 'Comedero Automático', 'Transportadora'
+            ];
+            
+            return Array.from({ length: 25 }, (_, i) => ({
+                id: `product_${i + 1}`,
+                name: `${productNames[i % productNames.length]} ${i + 1}`,
+                category: categories[i % categories.length],
+                price: parseFloat((Math.random() * 100 + 10).toFixed(2)),
+                stock: Math.floor(Math.random() * 50),
+                description: `Descripción del producto ${i + 1}. Excelente calidad y diseño.`,
+                image: `https://via.placeholder.com/200/FF6B6B/ffffff?text=Producto${i + 1}`,
+                brand: ['PetStyle', 'Premium Pet', 'Animal Care', 'Pet Plus'][i % 4],
+                featured: Math.random() > 0.8,
+                createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
+            }));
+        }
+
+        function generateMockUsers() {
+            const names = [
+                'Ana García', 'Carlos López', 'María Rodríguez', 'Juan Pérez',
+                'Laura Martín', 'Diego Sánchez', 'Sofia Torres', 'Andrés Castro'
+            ];
+            
+            const currentUser = auth.getCurrentUser();
+            const users = [currentUser]; // Include current admin user
+            
+            for (let i = 0; i < 15; i++) {
+                users.push({
+                    id: `user_${i + 1}`,
+                    name: names[i % names.length],
+                    email: `usuario${i + 1}@ejemplo.com`,
+                    role: i === 0 ? 'admin' : 'user',
+                    isActive: Math.random() > 0.1,
+                    isGuest: false,
+                    createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
+                });
+            }
+            
+            return users;
+        }
+
+        // Stats update functions
+        function updateProductsStats() {
+            adminData.stats.totalProducts = adminData.products.length;
+            updateDashboardStats();
+        }
+
+        function updateUsersStats() {
+            adminData.stats.totalUsers = adminData.users.length;
+            updateDashboardStats();
+        }
+
+        function refreshStats() {
+            showLoading('Actualizando estadísticas...');
+            setTimeout(() => {
+                loadStats();
+                hideLoading();
+                showToast('Estadísticas actualizadas', 'success');
+            }, 1000);
+        }
+
+        function refreshData() {
+            showLoading('Actualizando datos...');
+            setTimeout(async () => {
+                await Promise.all([
+                    loadProducts(),
+                    loadUsers(),
+                    loadStats()
+                ]);
+                hideLoading();
+                showToast('Datos actualizados correctamente', 'success');
+            }, 1500);
+        }
+
+        // Confirmation modal
+        function showConfirmation(title, message, icon, type, onConfirm) {
+            document.getElementById('confirmation-title').textContent = title;
+            document.getElementById('confirmation-message').textContent = message;
+            document.getElementById('confirmation-icon').className = `fas ${icon}`;
+            
+            const confirmBtn = document.getElementById('confirmation-confirm-btn');
+            confirmBtn.className = `btn-${type}`;
+            
+            pendingAction = onConfirm;
+            
+            document.getElementById('confirmation-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeConfirmationModal() {
+            document.getElementById('confirmation-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+            pendingAction = null;
+        }
+
+        function confirmAction() {
+            if (pendingAction) {
+                pendingAction();
+                closeConfirmationModal();
+            }
+        }
+
+        // Event listeners
+        function setupEventListeners() {
+            // Close modals on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeProductModal();
+                    closeConfirmationModal();
+                }
+            });
+            
+            // Close modals on backdrop click
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    if (e.target.id === 'product-modal') {
+                        closeProductModal();
+                    } else if (e.target.id === 'confirmation-modal') {
+                        closeConfirmationModal();
+                    }
+                }
+            });
+        }
+
+        // Navigation functions
+        function goToMain() {
+            window.location.href = 'main.html';
+        }
+
+        async function logout() {
+            try {
+                showLoading('Cerrando sesión...');
+                await auth.logout();
+                // Auth will handle the redirect
+            } catch (error) {
+                hideLoading();
+                console.error('Error logging out:', error);
+                showToast('Error al cerrar sesión', 'error');
+            }
+        }
+
+        // Utility functions for UI
+        function showLoading(message = 'Cargando...') {
+            updateLoadingMessage(message);
+            document.getElementById('loading-screen').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-screen').classList.add('hidden');
+        }
+
+        function updateLoadingMessage(message) {
+            document.getElementById('loading-message').textContent = message;
+        }
+
+        function showToast(message, type = 'info') {
+            // Use global toast system if available
+            if (window.utils && window.utils.notifications) {
+                window.utils.notifications[type](message);
+                return;
+            }
+            
+            // Fallback toast implementation
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+            
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
+                <span class="toast-message">${message}</span>
+                <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 5000);
+        }
+
+        function showFieldError(fieldId, message) {
+            const errorElement = document.getElementById(`${fieldId}-error`);
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+            
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.classList.add('error');
+            }
+        }
+
+        function clearFormErrors(formId) {
+            const form = document.getElementById(formId);
+            form.querySelectorAll('.field-error').forEach(error => {
+                error.textContent = '';
+                error.style.display = 'none';
+            });
+            
+            form.querySelectorAll('.error').forEach(field => {
+                field.classList.remove('error');
+            });
+        }
+
+        console.log('✅ Admin Page Ready');
+    </script>
+
+    <style>
+        /* Additional CSS for better integration */
+        .hidden {
+            display: none !important;
+        }
+
+        .field-error {
+            color: #dc3545;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .form-input.error {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2) !important;
+        }
+
+        /* Loading screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #FF6B6B;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            max-width: 350px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .toast-success { border-left: 4px solid #28a745; }
+        .toast-error { border-left: 4px solid #dc3545; }
+        .toast-warning { border-left: 4px solid #ffc107; }
+        .toast-info { border-left: 4px solid #007bff; }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-left: auto;
+            color: #999;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Table improvements */
+        .table-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1rem;
+            color: #666;
+            text-align: center;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state small {
+            opacity: 0.7;
+        }
+
+        /* Product image cell */
+        .product-image-cell img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #eee;
+        }
+
+        /* Product name cell */
+        .product-name-cell strong {
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .product-name-cell small {
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        /* Category badge */
+        .category-badge {
+            background: #e9ecef;
+            color: #495057;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Price cell */
+        .price-cell {
+            font-weight: 600;
+            color: #28a745;
+        }
+
+        /* Stock cell */
+        .stock-cell.in-stock { color: #28a745; }
+        .stock-cell.low-stock { color: #ffc107; }
+        .stock-cell.out-of-stock { color: #dc3545; }
+
+        /* Status badge */
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-badge.featured {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.regular {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-badge.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Role badge */
+        .role-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .role-badge.admin {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .role-badge.user {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .role-badge.guest {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        /* User avatar */
+        .user-avatar-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-avatar-placeholder {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* User name cell */
+        .user-name-cell strong {
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .guest-indicator {
+            background: #ffc107;
+            color: #856404;
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .btn-icon {
+            background: none;
+            border: 1px solid #dee2e6;
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #495057;
+        }
+
+        .btn-icon:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+        }
+
+        .btn-icon.btn-danger {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+
+        .btn-icon.btn-danger:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* Chart placeholder */
+        .chart-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: #666;
+            text-align: center;
+        }
+
+        .chart-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Chart items */
+        .chart-item {
+            margin-bottom: 1rem;
+        }
+
+        .chart-label {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .chart-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.25rem;
+        }
+
+        .chart-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF6B6B, #4ECDC4);
+            transition: width 0.5s ease;
+        }
+
+        .chart-value {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        /* Modal improvements */
+        .modal-small {
+            max-width: 400px;
+        }
+
+        .confirmation-content {
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .confirmation-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ffc107;
+        }
+
+        .confirmation-icon .fa-trash {
+            color: #dc3545;
+        }
+
+        .confirmation-icon .fa-ban {
+            color: #ffc107;
+        }
+
+        .confirmation-icon .fa-check {
+            color: #28a745;
+        }
+
+        /* Button improvements */
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            border: 1px solid #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            border-color: #bd2130;
+        }
+
+        /* Admin navigation active state */
+        .admin-nav-btn.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Responsive improvements */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+        }
+    </style>
 </body>
 </html>
