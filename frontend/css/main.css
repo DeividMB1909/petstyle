@@ -766,3 +766,143 @@ body {
         margin: 0 auto;
     }
 }
+/* Estilos para header con autenticación */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.login-btn, .register-btn, .logout-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.login-btn {
+    background: #667eea;
+    color: white;
+}
+
+.register-btn {
+    background: transparent;
+    color: #667eea;
+    border: 1px solid #667eea;
+}
+
+.logout-btn {
+    background: #ef4444;
+    color: white;
+}
+
+.login-btn:hover {
+    background: #5a6fd8;
+}
+
+.register-btn:hover {
+    background: #667eea;
+    color: white;
+}
+
+.logout-btn:hover {
+    background: #dc2626;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: white;
+}
+
+.user-name {
+    font-weight: 500;
+}
+
+/* Modal de auth */
+.auth-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.auth-modal {
+    background: white;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 90%;
+    overflow: hidden;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.auth-modal-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.close-auth-modal {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #666;
+}
+
+.auth-modal-body {
+    padding: 1.5rem;
+}
+
+.auth-modal-footer {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: #f8f9fa;
+    justify-content: flex-end;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}

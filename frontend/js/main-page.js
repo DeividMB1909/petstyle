@@ -1,4 +1,4 @@
-// ===== MAIN PAGE JAVASCRIPT - VERSIÓN UNIVERSAL =====
+// ===== MAIN PAGE JAVASCRIPT - VERSIÓN UNIVERSAL CORREGIDA =====
 console.log('🏠 Main page script cargado correctamente');
 
 // Variables globales
@@ -316,23 +316,13 @@ function truncateText(text, maxLength) {
     return text.substring(0, maxLength) + '...';
 }
 
-// === MANEJADORES CON GUARDS DE AUTENTICACIÓN ===
+// === MANEJADORES SIN VERIFICACIÓN DE AUTENTICACIÓN ===
 function handleFavoriteClick(productId, event) {
     if (event) {
         event.stopPropagation();
     }
     
-    // Verificar autenticación usando el sistema universal
-    if (window.authGuards && !authGuards.canAddToFavorites()) {
-        return; // El guard ya muestra el modal de login
-    }
-    
-    // Si no hay authGuards, verificar de forma básica
-    if (!window.authGuards && !isUserAuthenticated()) {
-        showLoginRequired('Para agregar a favoritos necesitas iniciar sesión');
-        return;
-    }
-    
+    // Ejecutar directamente sin verificaciones de autenticación
     toggleFavorite(productId, event);
 }
 
@@ -341,69 +331,21 @@ function handleCartClick(productId, event) {
         event.stopPropagation();
     }
     
-    // Verificar autenticación usando el sistema universal
-    if (window.authGuards && !authGuards.canAddToCart()) {
-        return; // El guard ya muestra el modal de login
-    }
-    
-    // Si no hay authGuards, verificar de forma básica
-    if (!window.authGuards && !isUserAuthenticated()) {
-        showLoginRequired('Para agregar al carrito necesitas iniciar sesión');
-        return;
-    }
-    
+    // Ejecutar directamente sin verificaciones de autenticación
     addToCart(productId, event);
 }
 
 function isUserAuthenticated() {
-    if (window.authSystem) {
-        return authSystem.isAuthenticated();
-    }
-    
-    // Verificación básica
-    return !!(currentUser && currentUser.email);
+    // Siempre retornar true para permitir todas las acciones
+    return true;
 }
 
+// Función showLoginRequired comentada (ya no se usa)
+/*
 function showLoginRequired(message) {
-    // Crear modal básico si no hay authGuards
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 10000;
-    `;
-    
-    modal.innerHTML = `
-        <div style="background: white; padding: 30px; border-radius: 12px; max-width: 400px; text-align: center;">
-            <h3 style="margin: 0 0 15px 0; color: #333;">Iniciar Sesión Requerido</h3>
-            <p style="margin: 0 0 20px 0; color: #666;">${message}</p>
-            <div style="display: flex; gap: 10px; justify-content: center;">
-                <button onclick="this.closest('[style*=fixed]').remove()" style="padding: 10px 20px; background: #f5f5f5; border: none; border-radius: 6px; cursor: pointer;">
-                    Cancelar
-                </button>
-                <button onclick="window.location.href='/pages/login.html'" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">
-                    Iniciar Sesión
-                </button>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    // Remover al hacer clic fuera
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.remove();
-        }
-    });
+    // Esta función ya no se usa
 }
+*/
 
 // === FUNCIONES DE FILTRADO Y BÚSQUEDA ===
 function handleSearch(e) {
@@ -579,26 +521,22 @@ function decreaseQuantity() {
     }
 }
 
-// === FUNCIONES DE FAVORITOS ===
+// === FUNCIONES DE FAVORITOS (CORREGIDAS) ===
 function isProductInFavorites(productId) {
-    if (!currentUser || !currentUser.email) return false;
-    
     const favorites = getFavorites();
     return favorites.some(fav => fav.id === productId);
 }
 
 function getFavorites() {
-    if (!currentUser || !currentUser.email) return [];
-    
-    const favoritesKey = `favorites_${currentUser.email}`;
+    const userKey = (currentUser && currentUser.email) ? currentUser.email : 'guest';
+    const favoritesKey = `favorites_${userKey}`;
     const favorites = localStorage.getItem(favoritesKey);
     return favorites ? JSON.parse(favorites) : [];
 }
 
 function saveFavorites(favorites) {
-    if (!currentUser || !currentUser.email) return;
-    
-    const favoritesKey = `favorites_${currentUser.email}`;
+    const userKey = (currentUser && currentUser.email) ? currentUser.email : 'guest';
+    const favoritesKey = `favorites_${userKey}`;
     localStorage.setItem(favoritesKey, JSON.stringify(favorites));
 }
 
@@ -644,16 +582,7 @@ function toggleFavorite(productId, event) {
 function toggleModalFavorite() {
     if (!currentModalProduct) return;
     
-    // Verificar autenticación
-    if (window.authGuards && !authGuards.canAddToFavorites()) {
-        return;
-    }
-    
-    if (!window.authGuards && !isUserAuthenticated()) {
-        showLoginRequired('Para agregar a favoritos necesitas iniciar sesión');
-        return;
-    }
-    
+    // Sin verificaciones de autenticación - ejecutar directamente
     toggleFavorite(currentModalProduct._id);
 }
 
@@ -680,19 +609,17 @@ function updateFavoriteButtons(productId) {
     }
 }
 
-// === FUNCIONES DE CARRITO ===
+// === FUNCIONES DE CARRITO (CORREGIDAS) ===
 function getCart() {
-    if (!currentUser || !currentUser.email) return [];
-    
-    const cartKey = `cart_${currentUser.email}`;
+    const userKey = (currentUser && currentUser.email) ? currentUser.email : 'guest';
+    const cartKey = `cart_${userKey}`;
     const cart = localStorage.getItem(cartKey);
     return cart ? JSON.parse(cart) : [];
 }
 
 function saveCart(cart) {
-    if (!currentUser || !currentUser.email) return;
-    
-    const cartKey = `cart_${currentUser.email}`;
+    const userKey = (currentUser && currentUser.email) ? currentUser.email : 'guest';
+    const cartKey = `cart_${userKey}`;
     localStorage.setItem(cartKey, JSON.stringify(cart));
 }
 
@@ -741,16 +668,6 @@ function addToCart(productId, event) {
 
 function addToCartFromModal() {
     if (!currentModalProduct) return;
-    
-    // Verificar autenticación
-    if (window.authGuards && !authGuards.canAddToCart()) {
-        return;
-    }
-    
-    if (!window.authGuards && !isUserAuthenticated()) {
-        showLoginRequired('Para agregar al carrito necesitas iniciar sesión');
-        return;
-    }
     
     console.log(`🛒 Agregando ${modalQuantity} unidades al carrito desde modal`);
     
