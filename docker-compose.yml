@@ -11,7 +11,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: password123
       MONGO_INITDB_DATABASE: petstyle
     volumes:
-      - mongodb_data:/data/db
+      - ./mongodb_data:/data/db
       - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
     networks:
       - petstyle_network
@@ -70,9 +70,7 @@ services:
     networks:
       - petstyle_network
 
-volumes:
-  mongodb_data:
-    driver: local
+volumes: {}
 
 networks:
   petstyle_network:

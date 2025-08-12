@@ -3,7 +3,7 @@ console.log('🔌 PetStyle API System Loading...');
 
 class PetStyleAPI {
     constructor() {
-        this.baseURL = 'http://localhost:3000';
+        this.baseURL = 'https://petstyle.pagekite.me/';
         this.endpoints = {
             products: '/api/productos',
             categories: '/api/categorias', 
