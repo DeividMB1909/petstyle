@@ -1,0 +1,6689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetStyle - Productos para Mascotas</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Estilos principales -->
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="main-container">
+        
+        <!-- Header elegante -->
+        <header class="header">
+            <div class="logo">
+                PetStyle
+            </div>
+            <div class="user-greeting">
+                Accesorios únicos para tu mascota
+            </div>
+        </header>
+
+        <!-- Barra de búsqueda -->
+        <div class="search-section">
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Buscar productos...">
+            </div>
+        </div>
+
+        <!-- Categorías elegantes -->
+        <div class="categories-section">
+            <h3>Categorías</h3>
+            <div class="categories-scroll">
+                <div class="category-item active" data-category="">
+                    <span class="category-icon">⭐</span>
+                    <span>Todos</span>
+                </div>
+                <div class="category-item" data-category="6898049bdd53186ec08fd313">
+                    <span class="category-icon">🐕</span>
+                    <span>Perros</span>
+                </div>
+                <div class="category-item" data-category="6898049bdd53186ec08fd316">
+                    <span class="category-icon">🐱</span>
+                    <span>Gatos</span>
+                </div>
+                <div class="category-item" data-category="6898049bdd53186ec08fd319">
+                    <span class="category-icon">🦜</span>
+                    <span>Aves</span>
+                </div>
+                <div class="category-item" data-category="6898049bdd53186ec08fd31c">
+                    <span class="category-icon">🐟</span>
+                    <span>Peces</span>
+                </div>
+                <div class="category-item" data-category="6898049bdd53186ec08fd31f">
+                    <span class="category-icon">🎾</span>
+                    <span>Accesorios</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros (ocultos en móvil) -->
+        <div class="filters-section">
+            <div class="sort-container">
+                <select id="sort-select">
+                    <option value="newest">Más recientes</option>
+                    <option value="price-low">Precio: Menor a mayor</option>
+                    <option value="price-high">Precio: Mayor a menor</option>
+                    <option value="name">Nombre A-Z</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Sección de productos premium -->
+        <div class="products-section">
+            <h3 id="products-title">Destacados</h3>
+            <div id="products-grid" class="products-grid">
+                <!-- Los productos se cargarán aquí -->
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <div>Cargando productos...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Espaciador -->
+        <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- Modal de producto premium -->
+    <div id="product-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Detalles del Producto</h2>
+                <button class="close-modal" onclick="closeProductModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="modal-image">
+                    <img id="modal-image" src="" alt="Producto">
+                </div>
+                
+                <div class="modal-info">
+                    <div class="modal-category" id="modal-category"></div>
+                    <h3 id="modal-name"></h3>
+                    <p id="modal-description"></p>
+                    
+                    <div class="modal-details">
+                        <div class="detail-item">
+                            <span class="label">SKU:</span>
+                            <span id="modal-sku"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Stock:</span>
+                            <span id="modal-stock"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-price-section">
+                        <div class="price" id="modal-price"></div>
+                        <div class="quantity-controls">
+                            <button onclick="decreaseQuantity()">-</button>
+                            <span id="modal-quantity">1</span>
+                            <button onclick="increaseQuantity()">+</button>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button class="btn-favorite" id="modal-favorite-btn" onclick="toggleModalFavorite()">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        <button class="btn-cart" onclick="addToCartFromModal()">
+                            <i class="fas fa-shopping-cart"></i>
+                            Agregar al Carrito
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Premium -->
+    <nav class="bottom-nav">
+        <a href="main.html" class="nav-item active">
+            <i class="fas fa-home"></i>
+            <span>Inicio</span>
+        </a>
+        <a href="favorites.html" class="nav-item">
+            <i class="fas fa-heart"></i>
+            <span>Favoritos</span>
+            <div class="notification-badge" id="favorites-count">0</div>
+        </a>
+        <a href="cart.html" class="nav-item">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Carrito</span>
+            <div class="notification-badge" id="cart-count">0</div>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Perfil</span>
+        </a>
+    </nav>
+
+    <!-- Scripts -->
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/main-page.js"></script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Carrito - PetStyle</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Estilos principales -->
+    <link rel="stylesheet" href="../css/cart.css">
+</head>
+<body>
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="cart-container">
+        
+        <!-- Header con gradiente -->
+        <header class="cart-header">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1>Mi Carrito</h1>
+            <button class="delete-all-btn" onclick="showClearCartModal()">
+                <i class="fas fa-trash"></i>
+            </button>
+        </header>
+
+        <!-- Contenido principal -->
+        <div class="cart-content">
+            
+            <!-- Estado vacío -->
+            <div id="empty-cart" class="empty-cart">
+                <div class="empty-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h3>Tu carrito está vacío</h3>
+                <p>Agrega algunos productos para mascotas</p>
+                <button class="explore-btn" onclick="goToProducts()">
+                    Explorar Productos
+                </button>
+            </div>
+
+            <!-- Lista de productos en carrito -->
+            <div id="cart-items" class="cart-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-shopping-cart"></i> Mi Carrito</h2>
+                    <span id="cart-counter" class="counter">0 productos</span>
+                </div>
+                <div id="cart-products-list" class="cart-products-list">
+                    <!-- Los productos se cargarán aquí -->
+                </div>
+            </div>
+
+            <!-- Código de descuento -->
+            <div id="discount-section" class="discount-section">
+                <div class="section-title">
+                    <i class="fas fa-tag"></i>
+                    <span>Código de Descuento</span>
+                </div>
+                <div class="discount-input-container">
+                    <input type="text" id="discount-code" placeholder="Ingresa tu código">
+                    <button class="apply-btn" onclick="applyDiscount()">Aplicar</button>
+                </div>
+                <div id="discount-message" class="discount-message"></div>
+            </div>
+
+            <!-- Opciones de envío -->
+            <div id="shipping-section" class="shipping-section">
+                <div class="section-title">
+                    <i class="fas fa-truck"></i>
+                    <span>Opciones de Envío</span>
+                </div>
+                <div class="shipping-options">
+                    <label class="shipping-option selected">
+                        <input type="radio" name="shipping" value="standard" checked>
+                        <div class="option-content">
+                            <div class="option-header">
+                                <span class="option-name">Envío Estándar</span>
+                                <span class="option-price free">Gratis</span>
+                            </div>
+                            <div class="option-detail">5-7 días hábiles</div>
+                        </div>
+                    </label>
+                    
+                    <label class="shipping-option">
+                        <input type="radio" name="shipping" value="express">
+                        <div class="option-content">
+                            <div class="option-header">
+                                <span class="option-name">Envío Express</span>
+                                <span class="option-price">$5.99</span>
+                            </div>
+                            <div class="option-detail">2-3 días hábiles</div>
+                        </div>
+                    </label>
+                    
+                    <label class="shipping-option">
+                        <input type="radio" name="shipping" value="priority">
+                        <div class="option-content">
+                            <div class="option-header">
+                                <span class="option-name">Envío Prioritario</span>
+                                <span class="option-price">$12.99</span>
+                            </div>
+                            <div class="option-detail">1-2 días hábiles</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Método de pago -->
+            <div id="payment-section" class="payment-section">
+                <div class="section-title">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Método de Pago</span>
+                </div>
+                <div class="payment-options">
+                    <label class="payment-option selected">
+                        <input type="radio" name="payment" value="card" checked>
+                        <div class="option-content">
+                            <div class="payment-icon">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <div class="payment-info">
+                                <span class="payment-name">Tarjeta de Crédito/Débito</span>
+                                <span class="payment-detail">Visa, Mastercard, American Express</span>
+                            </div>
+                        </div>
+                    </label>
+                    
+                    <label class="payment-option">
+                        <input type="radio" name="payment" value="paypal">
+                        <div class="option-content">
+                            <div class="payment-icon">
+                                <i class="fab fa-paypal"></i>
+                            </div>
+                            <div class="payment-info">
+                                <span class="payment-name">PayPal</span>
+                                <span class="payment-detail">Pago seguro con tu cuenta PayPal o tarjeta</span>
+                            </div>
+                        </div>
+                    </label>
+                    
+                    <label class="payment-option">
+                        <input type="radio" name="payment" value="transfer">
+                        <div class="option-content">
+                            <div class="payment-icon">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <div class="payment-info">
+                                <span class="payment-name">Transferencia Bancaria</span>
+                                <span class="payment-detail">SPEI - Transferencia electrónica inmediata</span>
+                            </div>
+                        </div>
+                    </label>
+                    
+                    <label class="payment-option">
+                        <input type="radio" name="payment" value="oxxo">
+                        <div class="option-content">
+                            <div class="payment-icon">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            <div class="payment-info">
+                                <span class="payment-name">OXXO</span>
+                                <span class="payment-detail">Paga en efectivo en cualquier tienda OXXO</span>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+                
+                <!-- Formulario de tarjeta -->
+                <div id="card-form" class="card-form">
+                    <div class="form-group">
+                        <label>Número de Tarjeta</label>
+                        <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Vencimiento</label>
+                            <input type="text" id="card-expiry" placeholder="MM/AA" maxlength="5">
+                        </div>
+                        <div class="form-group">
+                            <label>CVV</label>
+                            <input type="text" id="card-cvv" placeholder="123" maxlength="4">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre del Titular</label>
+                        <input type="text" id="card-name" placeholder="Nombre completo">
+                    </div>
+                </div>
+                
+                <!-- Formulario de PayPal -->
+                <div id="paypal-form" class="paypal-form" style="display: none;">
+                    <div class="form-group">
+                        <label>Email de PayPal</label>
+                        <input type="email" id="paypal-email" placeholder="tu-email@ejemplo.com">
+                    </div>
+                    <div class="paypal-note">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Serás redirigido a PayPal para completar el pago de forma segura.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen del pedido -->
+            <div id="order-summary" class="order-summary">
+                <div class="section-title">
+                    <i class="fas fa-receipt"></i>
+                    <span>Resumen del Pedido</span>
+                </div>
+                <div class="summary-content">
+                    <div class="summary-row">
+                        <span>Subtotal (<span id="summary-items">0 productos</span>)</span>
+                        <span id="summary-subtotal">$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Envío</span>
+                        <span id="summary-shipping" class="free">Gratis</span>
+                    </div>
+                    <div class="summary-row discount-row" id="discount-row" style="display: none;">
+                        <span>Descuento</span>
+                        <span id="summary-discount">-$0.00</span>
+                    </div>
+                    <div class="summary-divider"></div>
+                    <div class="summary-total">
+                        <span>Total</span>
+                        <span id="summary-total">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón de finalizar compra -->
+            <div id="checkout-section" class="checkout-section">
+                <button class="checkout-btn" onclick="processCheckout()">
+                    <i class="fas fa-shopping-bag"></i>
+                    Finalizar Compra
+                </button>
+            </div>
+
+            <!-- Espaciador -->
+            <div class="bottom-spacer"></div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación de limpieza -->
+    <div id="clear-cart-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fas fa-trash"></i>
+            </div>
+            <h3>¿Vaciar carrito?</h3>
+            <p>Se eliminarán todos los productos de tu carrito</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeClearCartModal()">Cancelar</button>
+                <button class="btn-confirm" onclick="confirmClearCart()">Vaciar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de pedido realizado -->
+    <div id="order-success-modal" class="modal-overlay">
+        <div class="modal-content success">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>¡Pedido Realizado!</h3>
+            <p>Tu pedido ha sido procesado exitosamente. Recibirás un email de confirmación en breve.</p>
+            <div class="order-number">
+                <strong>#PET-<span id="order-id"></span></strong>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="continueShoppingFromSuccess()">Seguir Comprando</button>
+                <button class="btn-primary" onclick="trackOrderFromSuccess()">Rastrear Pedido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="main.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Inicio</span>
+        </a>
+        <a href="favorites.html" class="nav-item">
+            <i class="fas fa-heart"></i>
+            <span>Favoritos</span>
+            <div class="notification-badge" id="nav-favorites-count">0</div>
+        </a>
+        <a href="cart.html" class="nav-item active">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Carrito</span>
+            <div class="notification-badge" id="nav-cart-count">0</div>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Perfil</span>
+        </a>
+    </nav>
+
+    <!-- Scripts -->
+    <script src="../js/api.js"></script>
+    <script src="../js/cart.js"></script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Favoritos - PetStyle</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Estilos principales -->
+    <link rel="stylesheet" href="../css/favorites.css">
+</head>
+<body>
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="favorites-container">
+        
+        <!-- Header con gradiente -->
+        <header class="favorites-header">
+            <h1>Mis Favoritos</h1>
+        </header>
+
+        <!-- Sección principal -->
+        <div class="favorites-content">
+            <div class="section-header">
+                <h2><i class="fas fa-heart"></i> Mis Favoritos</h2>
+                <span id="favorites-counter" class="counter">0 productos</span>
+            </div>
+
+            <!-- Estado vacío -->
+            <div id="empty-state" class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-heart-broken"></i>
+                </div>
+                <h3>No tienes favoritos aún</h3>
+                <p>Explora nuestros productos y guarda los que más te gusten tocando el corazón</p>
+                <button class="explore-btn" onclick="goToProducts()">
+                    Explorar Productos
+                </button>
+            </div>
+
+            <!-- Lista de favoritos -->
+            <div id="favorites-list" class="favorites-list">
+                <!-- Los productos favoritos se cargarán aquí -->
+            </div>
+        </div>
+
+        <!-- Espaciador para el bottom nav -->
+        <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="main.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Inicio</span>
+        </a>
+        <a href="favorites.html" class="nav-item active">
+            <i class="fas fa-heart"></i>
+            <span>Favoritos</span>
+            <div class="notification-badge" id="nav-favorites-count">0</div>
+        </a>
+        <a href="cart.html" class="nav-item">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Carrito</span>
+            <div class="notification-badge" id="nav-cart-count">0</div>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Perfil</span>
+        </a>
+    </nav>
+
+    <!-- Modal de confirmación para remover favorito -->
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fas fa-heart-broken"></i>
+            </div>
+            <h3>¿Remover de favoritos?</h3>
+            <p>Este producto se eliminará de tu lista de favoritos</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeConfirmModal()">Cancelar</button>
+                <button class="btn-confirm" onclick="confirmRemoveFavorite()">Remover</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/api.js"></script>
+    <script src="../js/favorites.js"></script>
+</body>
+</html>
+
+// ===== MAIN PAGE JAVASCRIPT - VERSIÓN UNIVERSAL CORREGIDA =====
+console.log('🏠 Main page script cargado correctamente');
+
+// Variables globales
+let allProducts = [];
+let filteredProducts = [];
+let currentCategory = '';
+let currentSort = 'newest';
+let currentUser = null;
+let currentModalProduct = null;
+let modalQuantity = 1;
+
+// Mapeo de categorías ObjectId a nombres
+const categoryMap = {
+    '6898049bdd53186ec08fd313': 'Perros',
+    '6898049bdd53186ec08fd316': 'Gatos', 
+    '6898049bdd53186ec08fd319': 'Aves',
+    '6898049bdd53186ec08fd31c': 'Peces',
+    '6898049bdd53186ec08fd31f': 'Accesorios'
+};
+
+// === INICIALIZACIÓN ===
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Inicializando main page...');
+    
+    // Esperar a que el auth system esté listo
+    if (window.authSystem && window.authSystem.isInitialized) {
+        initializePage();
+    } else {
+        window.addEventListener('authSystemReady', initializePage);
+        
+        // Fallback si no carga el auth system en 2 segundos
+        setTimeout(() => {
+            if (!window.authSystem) {
+                console.warn('⚠️ AuthSystem no disponible, usando modo básico...');
+                initializeBasicPage();
+            }
+        }, 2000);
+    }
+});
+
+// === INICIALIZACIÓN PRINCIPAL ===
+async function initializePage() {
+    try {
+        console.log('✅ Auth system disponible');
+        
+        // Obtener usuario actual del sistema universal
+        currentUser = authSystem.getUser();
+        updateUserGreeting();
+        
+        // Configurar event listeners
+        setupEventListeners();
+        
+        // Cargar productos
+        await loadProducts();
+        
+        // Actualizar contadores
+        updateNavigationCounts();
+        
+        console.log('✅ Main page inicializada correctamente');
+    } catch (error) {
+        console.error('❌ Error inicializando main page:', error);
+        showError('Error cargando la página');
+    }
+}
+
+// === INICIALIZACIÓN BÁSICA (FALLBACK) ===
+async function initializeBasicPage() {
+    try {
+        console.log('⚙️ Inicializando modo básico...');
+        
+        // Obtener usuario de forma básica
+        currentUser = getCurrentUserBasic();
+        updateUserGreeting();
+        
+        setupEventListeners();
+        await loadProducts();
+        updateNavigationCounts();
+        
+        console.log('✅ Main page inicializada en modo básico');
+    } catch (error) {
+        console.error('❌ Error en inicialización básica:', error);
+    }
+}
+
+// === OBTENER USUARIO ===
+function getCurrentUserBasic() {
+    try {
+        const userData = localStorage.getItem('currentUser') || 
+                        sessionStorage.getItem('currentUser');
+        if (userData) {
+            return JSON.parse(userData);
+        }
+    } catch (error) {
+        console.error('Error obteniendo usuario básico:', error);
+    }
+    return null;
+}
+
+// === ACTUALIZAR SALUDO DEL USUARIO ===
+function updateUserGreeting() {
+    const userNameElement = document.getElementById('user-name');
+    if (userNameElement) {
+        if (currentUser) {
+            userNameElement.textContent = currentUser.name || 'Usuario';
+        } else {
+            userNameElement.textContent = 'Invitado';
+        }
+    }
+}
+
+// === CONFIGURAR EVENT LISTENERS ===
+function setupEventListeners() {
+    // Búsqueda con debounce
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => handleSearch(e), 300);
+        });
+    }
+
+    // Ordenamiento
+    const sortSelect = document.getElementById('sort-select');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', handleSort);
+    }
+
+    // Categorías
+    const categoryItems = document.querySelectorAll('.category-item');
+    categoryItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const category = item.dataset.category;
+            handleCategoryFilter(category);
+            
+            // Actualizar visual
+            categoryItems.forEach(cat => cat.classList.remove('active'));
+            item.classList.add('active');
+        });
+    });
+
+    // Modal
+    const modal = document.getElementById('product-modal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeProductModal();
+            }
+        });
+    }
+
+    console.log('✅ Event listeners configurados');
+}
+
+// === CARGAR PRODUCTOS ===
+async function loadProducts() {
+    try {
+        console.log('📦 Cargando productos...');
+        
+        // Mostrar loading
+        showLoading();
+        
+        // Obtener productos de la API
+        const products = await api.getAllProducts();
+        console.log('📦 Productos obtenidos:', products);
+        
+        allProducts = products || [];
+        filteredProducts = [...allProducts];
+        
+        // Renderizar productos
+        renderProducts();
+        
+        console.log(`✅ ${allProducts.length} productos cargados`);
+    } catch (error) {
+        console.error('❌ Error cargando productos:', error);
+        showErrorMessage();
+    }
+}
+
+function showLoading() {
+    const grid = document.getElementById('products-grid');
+    if (grid) {
+        grid.innerHTML = `
+            <div class="loading" style="grid-column: 1 / -1; text-align: center; color: white; padding: 40px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <div>Cargando productos...</div>
+            </div>
+        `;
+    }
+}
+
+function showErrorMessage() {
+    const grid = document.getElementById('products-grid');
+    if (grid) {
+        grid.innerHTML = `
+            <div class="error-message" style="grid-column: 1 / -1; text-align: center; color: white; padding: 40px;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px;"></i>
+                <h3>Error cargando productos</h3>
+                <p>Por favor, intenta recargar la página</p>
+                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                    Recargar
+                </button>
+            </div>
+        `;
+    }
+}
+
+function showError(message) {
+    console.error('Error:', message);
+}
+
+// === RENDERIZAR PRODUCTOS ===
+function renderProducts() {
+    const grid = document.getElementById('products-grid');
+    const title = document.getElementById('products-title');
+    
+    if (!grid) return;
+    
+    // Actualizar título
+    if (title) {
+        const categoryName = currentCategory ? categoryMap[currentCategory] || 'Categoría' : 'Todos los Productos';
+        title.textContent = `${categoryName} (${filteredProducts.length})`;
+    }
+    
+    // Limpiar grid
+    grid.innerHTML = '';
+    
+    if (filteredProducts.length === 0) {
+        grid.innerHTML = `
+            <div class="no-products" style="grid-column: 1 / -1; text-align: center; color: white; padding: 40px;">
+                <i class="fas fa-search" style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;"></i>
+                <h3>No se encontraron productos</h3>
+                <p>Intenta cambiar los filtros de búsqueda</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Renderizar cada producto
+    filteredProducts.forEach(product => {
+        const productCard = createProductCard(product);
+        grid.appendChild(productCard);
+    });
+    
+    console.log(`✅ ${filteredProducts.length} productos renderizados`);
+}
+
+function createProductCard(product) {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.dataset.productId = product._id;
+    
+    // Procesar datos del producto
+    const name = product.name || product.nombre || 'Producto sin nombre';
+    const price = product.price || product.precio || 0;
+    const description = product.description || product.descripcion || '';
+    const stock = product.stock || 0;
+    const category = getCategoryName(product.category || product.categoria);
+    
+    // Procesar imagen
+    let imageUrl = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=200&h=200&fit=crop';
+    
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+        imageUrl = product.images[0].url || product.images[0];
+    } else if (product.image) {
+        imageUrl = product.image;
+    }
+    
+    // Verificar si está en favoritos
+    const isFavorite = isProductInFavorites(product._id);
+    
+    // Crear HTML del card
+    card.innerHTML = `
+        <div class="product-image">
+            <img src="${imageUrl}" alt="${name}" onerror="this.src='https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=200&h=200&fit=crop'">
+            <button class="favorite-btn ${isFavorite ? 'active' : ''}" onclick="handleFavoriteClick('${product._id}', event)">
+                <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
+            </button>
+        </div>
+        <div class="product-info">
+            <div class="product-category">${category}</div>
+            <div class="product-name">${name}</div>
+            <div class="product-description">${truncateText(description, 45)}</div>
+            <div class="product-footer">
+                <div class="product-price">$${price.toFixed(2)}</div>
+                <button class="add-to-cart-btn ${stock <= 0 ? 'disabled' : ''}" 
+                        onclick="handleCartClick('${product._id}', event)" 
+                        ${stock <= 0 ? 'disabled' : ''}>
+                    ${stock <= 0 ? 'Agotado' : 'Agregar'}
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Agregar event listener para abrir modal
+    card.addEventListener('click', (e) => {
+        // Verificar si el clic fue en un botón
+        if (e.target.closest('.favorite-btn') || e.target.closest('.add-to-cart-btn')) {
+            return;
+        }
+        openProductModal(product._id);
+    });
+    
+    return card;
+}
+
+function getCategoryName(categoryId) {
+    if (!categoryId) return 'Sin categoría';
+    return categoryMap[categoryId] || categoryId;
+}
+
+function truncateText(text, maxLength) {
+    if (!text) return '';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+}
+
+// === MANEJADORES SIN VERIFICACIÓN DE AUTENTICACIÓN ===
+function handleFavoriteClick(productId, event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    
+    // Ejecutar directamente sin verificaciones de autenticación
+    toggleFavorite(productId, event);
+}
+
+function handleCartClick(productId, event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    
+    // Ejecutar directamente sin verificaciones de autenticación
+    addToCart(productId, event);
+}
+
+function isUserAuthenticated() {
+    // Siempre retornar true para permitir todas las acciones
+    return true;
+}
+
+// Función showLoginRequired comentada (ya no se usa)
+/*
+function showLoginRequired(message) {
+    // Esta función ya no se usa
+}
+*/
+
+// === FUNCIONES DE FILTRADO Y BÚSQUEDA ===
+function handleSearch(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    console.log('🔍 Buscando:', searchTerm);
+    
+    filteredProducts = allProducts.filter(product => {
+        const name = (product.name || product.nombre || '').toLowerCase();
+        const description = (product.description || product.descripcion || '').toLowerCase();
+        const category = getCategoryName(product.category || product.categoria).toLowerCase();
+        
+        return name.includes(searchTerm) || 
+               description.includes(searchTerm) || 
+               category.includes(searchTerm);
+    });
+    
+    // Aplicar filtro de categoría si está activo
+    if (currentCategory) {
+        filteredProducts = filteredProducts.filter(product => 
+            product.category === currentCategory || product.categoria === currentCategory
+        );
+    }
+    
+    renderProducts();
+}
+
+function handleCategoryFilter(categoryId) {
+    console.log('🏷️ Filtrando por categoría:', categoryId);
+    currentCategory = categoryId;
+    
+    if (!categoryId) {
+        filteredProducts = [...allProducts];
+    } else {
+        filteredProducts = allProducts.filter(product => 
+            product.category === categoryId || product.categoria === categoryId
+        );
+    }
+    
+    // Aplicar ordenamiento actual
+    sortProducts(currentSort);
+    renderProducts();
+}
+
+function handleSort(e) {
+    const sortType = e.target.value;
+    console.log('📊 Ordenando por:', sortType);
+    currentSort = sortType;
+    sortProducts(sortType);
+    renderProducts();
+}
+
+function sortProducts(sortType) {
+    switch (sortType) {
+        case 'price-low':
+            filteredProducts.sort((a, b) => (a.price || a.precio || 0) - (b.price || b.precio || 0));
+            break;
+        case 'price-high':
+            filteredProducts.sort((a, b) => (b.price || b.precio || 0) - (a.price || a.precio || 0));
+            break;
+        case 'name':
+            filteredProducts.sort((a, b) => {
+                const nameA = (a.name || a.nombre || '').toLowerCase();
+                const nameB = (b.name || b.nombre || '').toLowerCase();
+                return nameA.localeCompare(nameB);
+            });
+            break;
+        case 'newest':
+        default:
+            filteredProducts.sort((a, b) => new Date(b.createdAt || b.fechaCreacion || 0) - new Date(a.createdAt || a.fechaCreacion || 0));
+            break;
+    }
+}
+
+// === FUNCIONES DEL MODAL ===
+function openProductModal(productId) {
+    console.log('🎯 Abriendo modal para producto:', productId);
+    
+    const product = allProducts.find(p => p._id === productId);
+    if (!product) {
+        console.error('❌ Producto no encontrado:', productId);
+        return;
+    }
+    
+    currentModalProduct = product;
+    modalQuantity = 1;
+    
+    populateModal(product);
+    
+    const modal = document.getElementById('product-modal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeProductModal() {
+    console.log('❌ Cerrando modal');
+    const modal = document.getElementById('product-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+    currentModalProduct = null;
+    modalQuantity = 1;
+}
+
+function populateModal(product) {
+    // Datos básicos
+    const name = product.name || product.nombre || 'Producto sin nombre';
+    const price = product.price || product.precio || 0;
+    const description = product.description || product.descripcion || 'Sin descripción';
+    const stock = product.stock || 0;
+    const sku = product.sku || 'N/A';
+    const category = getCategoryName(product.category || product.categoria);
+    
+    // Imagen
+    let imageUrl = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=400&fit=crop';
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+        imageUrl = product.images[0].url || product.images[0];
+    } else if (product.image) {
+        imageUrl = product.image;
+    }
+    
+    // Actualizar elementos del modal
+    const elements = {
+        'modal-title': 'Detalles del Producto',
+        'modal-name': name,
+        'modal-description': description,
+        'modal-category': category,
+        'modal-price': `$${price.toFixed(2)}`,
+        'modal-sku': sku,
+        'modal-stock': `${stock} disponibles`,
+        'modal-quantity': modalQuantity
+    };
+    
+    Object.entries(elements).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+        }
+    });
+    
+    // Actualizar imagen
+    const modalImage = document.getElementById('modal-image');
+    if (modalImage) {
+        modalImage.src = imageUrl;
+        modalImage.alt = name;
+    }
+    
+    // Actualizar botón de favoritos
+    const favoriteBtn = document.getElementById('modal-favorite-btn');
+    if (favoriteBtn) {
+        const isFavorite = isProductInFavorites(product._id);
+        favoriteBtn.className = `btn-favorite ${isFavorite ? 'active' : ''}`;
+        favoriteBtn.innerHTML = `<i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>`;
+    }
+    
+    console.log('✅ Modal poblado con producto:', name);
+}
+
+// === FUNCIONES DE CANTIDAD EN MODAL ===
+function increaseQuantity() {
+    if (currentModalProduct && modalQuantity < (currentModalProduct.stock || 0)) {
+        modalQuantity++;
+        document.getElementById('modal-quantity').textContent = modalQuantity;
+    }
+}
+
+function decreaseQuantity() {
+    if (modalQuantity > 1) {
+        modalQuantity--;
+        document.getElementById('modal-quantity').textContent = modalQuantity;
+    }
+}
+
+// === FUNCIONES DE FAVORITOS (CORREGIDAS) ===
+function isProductInFavorites(productId) {
+    const favorites = getFavorites();
+    return favorites.some(fav => fav.id === productId);
+}
+
+function getFavorites() {
+    const userKey = (currentUser && currentUser.email) ? currentUser.email : 'guest';
+    const favoritesKey = `favorites_${userKey}`;
+    const favorites = localStorage.getItem(favoritesKey);
+    return favorites ? JSON.parse(favorites) : [];
+}
+
+function saveFavorites(favorites) {
+    const userKey = (currentUser && currentUser.email) ? currentUser.email : 'guest';
+    const favoritesKey = `favorites_${userKey}`;
+    localStorage.setItem(favoritesKey, JSON.stringify(favorites));
+}
+
+function toggleFavorite(productId, event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    
+    console.log('❤️ Toggle favorito:', productId);
+    
+    const product = allProducts.find(p => p._id === productId);
+    if (!product) return;
+    
+    let favorites = getFavorites();
+    const existingIndex = favorites.findIndex(fav => fav.id === productId);
+    
+    if (existingIndex > -1) {
+        // Remover de favoritos
+        favorites.splice(existingIndex, 1);
+        console.log('💔 Removido de favoritos');
+        showNotification('Removido de favoritos', 'info');
+    } else {
+        // Agregar a favoritos
+        favorites.push({
+            id: productId,
+            name: product.name || product.nombre,
+            price: product.price || product.precio,
+            image: getProductImage(product),
+            category: getCategoryName(product.category || product.categoria),
+            addedAt: new Date().toISOString()
+        });
+        console.log('💖 Agregado a favoritos');
+        showNotification('Agregado a favoritos', 'success');
+    }
+    
+    saveFavorites(favorites);
+    updateNavigationCounts();
+    
+    // Actualizar UI
+    updateFavoriteButtons(productId);
+}
+
+function toggleModalFavorite() {
+    if (!currentModalProduct) return;
+    
+    // Sin verificaciones de autenticación - ejecutar directamente
+    toggleFavorite(currentModalProduct._id);
+}
+
+function updateFavoriteButtons(productId) {
+    const isFavorite = isProductInFavorites(productId);
+    
+    // Actualizar botón en card
+    const card = document.querySelector(`[data-product-id="${productId}"]`);
+    if (card) {
+        const btn = card.querySelector('.favorite-btn');
+        if (btn) {
+            btn.className = `favorite-btn ${isFavorite ? 'active' : ''}`;
+            btn.innerHTML = `<i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>`;
+        }
+    }
+    
+    // Actualizar botón en modal si está abierto
+    if (currentModalProduct && currentModalProduct._id === productId) {
+        const modalBtn = document.getElementById('modal-favorite-btn');
+        if (modalBtn) {
+            modalBtn.className = `btn-favorite ${isFavorite ? 'active' : ''}`;
+            modalBtn.innerHTML = `<i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>`;
+        }
+    }
+}
+
+// === FUNCIONES DE CARRITO (CORREGIDAS) ===
+function getCart() {
+    const userKey = (currentUser && currentUser.email) ? currentUser.email : 'guest';
+    const cartKey = `cart_${userKey}`;
+    const cart = localStorage.getItem(cartKey);
+    return cart ? JSON.parse(cart) : [];
+}
+
+function saveCart(cart) {
+    const userKey = (currentUser && currentUser.email) ? currentUser.email : 'guest';
+    const cartKey = `cart_${userKey}`;
+    localStorage.setItem(cartKey, JSON.stringify(cart));
+}
+
+function addToCart(productId, event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    
+    console.log('🛒 Agregando al carrito:', productId);
+    
+    const product = allProducts.find(p => p._id === productId);
+    if (!product) return;
+    
+    if ((product.stock || 0) <= 0) {
+        showNotification('Producto agotado', 'warning');
+        return;
+    }
+    
+    let cart = getCart();
+    const existingItem = cart.find(item => item.id === productId);
+    
+    if (existingItem) {
+        existingItem.quantity += 1;
+        existingItem.subtotal = existingItem.quantity * existingItem.price;
+    } else {
+        cart.push({
+            id: productId,
+            name: product.name || product.nombre,
+            price: product.price || product.precio,
+            quantity: 1,
+            subtotal: product.price || product.precio,
+            image: getProductImage(product),
+            category: getCategoryName(product.category || product.categoria),
+            addedAt: new Date().toISOString()
+        });
+    }
+    
+    saveCart(cart);
+    updateNavigationCounts();
+    
+    // Feedback visual
+    showNotification('Producto agregado al carrito', 'success');
+    
+    console.log('✅ Producto agregado al carrito');
+}
+
+function addToCartFromModal() {
+    if (!currentModalProduct) return;
+    
+    console.log(`🛒 Agregando ${modalQuantity} unidades al carrito desde modal`);
+    
+    if ((currentModalProduct.stock || 0) <= 0) {
+        showNotification('Producto agotado', 'warning');
+        return;
+    }
+    
+    let cart = getCart();
+    const existingItem = cart.find(item => item.id === currentModalProduct._id);
+    
+    if (existingItem) {
+        existingItem.quantity += modalQuantity;
+        existingItem.subtotal = existingItem.quantity * existingItem.price;
+    } else {
+        cart.push({
+            id: currentModalProduct._id,
+            name: currentModalProduct.name || currentModalProduct.nombre,
+            price: currentModalProduct.price || currentModalProduct.precio,
+            quantity: modalQuantity,
+            subtotal: (currentModalProduct.price || currentModalProduct.precio) * modalQuantity,
+            image: getProductImage(currentModalProduct),
+            category: getCategoryName(currentModalProduct.category || currentModalProduct.categoria),
+            addedAt: new Date().toISOString()
+        });
+    }
+    
+    saveCart(cart);
+    updateNavigationCounts();
+    
+    // Feedback y cerrar modal
+    showNotification(`${modalQuantity} producto(s) agregado(s) al carrito`, 'success');
+    closeProductModal();
+}
+
+function getProductImage(product) {
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+        return product.images[0].url || product.images[0];
+    }
+    return product.image || 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=200&h=200&fit=crop';
+}
+
+// === SISTEMA DE NOTIFICACIONES ===
+function showNotification(message, type = 'info') {
+    // Crear notificación
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${getNotificationColor(type)};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 350px;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+    `;
+    
+    notification.innerHTML = `
+        <i class="fas ${getNotificationIcon(type)}"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Mostrar con animación
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Ocultar después de 3 segundos
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+function getNotificationColor(type) {
+    const colors = {
+        success: '#10b981',
+        error: '#ef4444',
+        warning: '#f59e0b',
+        info: '#3b82f6'
+    };
+    return colors[type] || colors.info;
+}
+
+function getNotificationIcon(type) {
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
+    return icons[type] || icons.info;
+}
+
+// === ACTUALIZAR CONTADORES DE NAVEGACIÓN ===
+function updateNavigationCounts() {
+    const favorites = getFavorites();
+    const cart = getCart();
+    
+    // Actualizar contador de favoritos
+    const favoritesCount = document.getElementById('favorites-count');
+    if (favoritesCount) {
+        favoritesCount.textContent = favorites.length;
+        favoritesCount.style.display = favorites.length > 0 ? 'flex' : 'none';
+    }
+    
+    // Actualizar contador de carrito
+    const cartCount = document.getElementById('cart-count');
+    if (cartCount) {
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        cartCount.textContent = totalItems;
+        cartCount.style.display = totalItems > 0 ? 'flex' : 'none';
+    }
+}
+
+// === FUNCIONES GLOBALES PARA EL HTML ===
+window.increaseQuantity = increaseQuantity;
+window.decreaseQuantity = decreaseQuantity;
+window.toggleModalFavorite = toggleModalFavorite;
+window.addToCartFromModal = addToCartFromModal;
+window.closeProductModal = closeProductModal;
+
+// === FUNCIONES DE DEBUGGING ===
+window.testModal = function() {
+    console.log('🧪 Probando modal...');
+    if (allProducts.length > 0) {
+        openProductModal(allProducts[0]._id);
+    } else {
+        console.log('❌ No hay productos para probar');
+    }
+};
+
+window.debugProducts = function() {
+    console.log('🔍 Debug productos:');
+    console.log('Total productos:', allProducts.length);
+    console.log('Productos filtrados:', filteredProducts.length);
+    console.log('Categoría actual:', currentCategory);
+    console.log('Usuario actual:', currentUser);
+    console.log('Auth system disponible:', !!window.authSystem);
+    console.log('Auth guards disponible:', !!window.authGuards);
+};
+
+window.debugUser = function() {
+    console.log('👤 Debug usuario:');
+    console.log('Usuario actual:', currentUser);
+    console.log('Autenticado:', isUserAuthenticated());
+    console.log('Favoritos:', getFavorites().length);
+    console.log('Carrito:', getCart().length);
+};
+
+console.log('✅ Main page universal completamente cargado');
+
+
+// ===== CART PAGE JAVASCRIPT - VERSIÓN CORREGIDA =====
+console.log('🛒 Cart page script cargado correctamente');
+
+let currentUser = null;
+let cartItems = [];
+let shippingCost = 0;
+let discountAmount = 0;
+let appliedDiscount = null;
+
+// Mapeo de categorías ObjectId a nombres
+const categoryMap = {
+    '6898049bdd53186ec08fd313': 'Perros',
+    '6898049bdd53186ec08fd316': 'Gatos',
+    '6898049bdd53186ec08fd314': 'Aves',
+    '6898049bdd53186ec08fd315': 'Peces',
+    '6898049bdd53186ec08fd317': 'Roedores'
+};
+
+// Códigos de descuento disponibles
+const discountCodes = {
+    'PETSTYLE10': { discount: 0.10, minAmount: 50000, description: '10% de descuento' },
+    'PRIMERA20': { discount: 0.20, minAmount: 30000, description: '20% de descuento primera compra' },
+    'ENVIOGRATIS': { discount: 'free_shipping', minAmount: 25000, description: 'Envío gratis' }
+};
+
+// ===== FUNCIONES DE PERSISTENCIA =====
+function getUserKey() {
+    return (currentUser && currentUser.email) ? currentUser.email : 'guest';
+}
+
+function loadCartItems() {
+    try {
+        const userKey = getUserKey();
+        const cartKey = `cart_${userKey}`;
+        const storedCart = localStorage.getItem(cartKey);
+        cartItems = storedCart ? JSON.parse(storedCart) : [];
+        console.log(`📦 Carrito cargado para ${userKey}:`, cartItems.length);
+        return cartItems;
+    } catch (error) {
+        console.error('Error cargando carrito:', error);
+        cartItems = [];
+        return [];
+    }
+}
+
+function saveCartItems() {
+    try {
+        const userKey = getUserKey();
+        const cartKey = `cart_${userKey}`;
+        localStorage.setItem(cartKey, JSON.stringify(cartItems));
+        console.log(`💾 Carrito guardado para ${userKey}:`, cartItems.length);
+        updateNavCounters();
+    } catch (error) {
+        console.error('Error guardando carrito:', error);
+    }
+}
+
+function getFavorites() {
+    try {
+        const userKey = getUserKey();
+        const favoritesKey = `favorites_${userKey}`;
+        const favorites = localStorage.getItem(favoritesKey);
+        return favorites ? JSON.parse(favorites) : [];
+    } catch (error) {
+        console.error('Error cargando favoritos:', error);
+        return [];
+    }
+}
+
+function saveFavorites(favorites) {
+    try {
+        const userKey = getUserKey();
+        const favoritesKey = `favorites_${userKey}`;
+        localStorage.setItem(favoritesKey, JSON.stringify(favorites));
+        updateNavCounters();
+    } catch (error) {
+        console.error('Error guardando favoritos:', error);
+    }
+}
+
+// ===== FUNCIONES DE VISUALIZACIÓN =====
+function updateNavCounters() {
+    // Actualizar contador de carrito
+    const cartCountElement = document.getElementById('nav-cart-count');
+    if (cartCountElement) {
+        const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+        cartCountElement.textContent = cartCount;
+        cartCountElement.style.display = cartCount > 0 ? 'flex' : 'none';
+    }
+
+    // Actualizar contador de favoritos
+    const favCountElement = document.getElementById('nav-favorites-count');
+    if (favCountElement) {
+        const favorites = getFavorites();
+        const favCount = favorites.length;
+        favCountElement.textContent = favCount;
+        favCountElement.style.display = favCount > 0 ? 'flex' : 'none';
+    }
+}
+
+function updateCartCounter() {
+    const counter = document.getElementById('cart-counter');
+    if (counter) {
+        const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+        counter.textContent = `${totalItems} producto${totalItems !== 1 ? 's' : ''}`;
+    }
+}
+
+function showEmptyState() {
+    const emptyState = document.getElementById('empty-state');
+    const cartContent = document.getElementById('cart-content');
+    
+    if (emptyState && cartContent) {
+        emptyState.style.display = 'block';
+        cartContent.style.display = 'none';
+    }
+}
+
+function hideEmptyState() {
+    const emptyState = document.getElementById('empty-state');
+    const cartContent = document.getElementById('cart-content');
+    
+    if (emptyState && cartContent) {
+        emptyState.style.display = 'none';
+        cartContent.style.display = 'block';
+    }
+}
+
+async function displayCartItems() {
+    console.log('🎨 Mostrando items del carrito:', cartItems.length);
+    
+    if (cartItems.length === 0) {
+        showEmptyState();
+        updateCartCounter();
+        updateTotalPrice();
+        return;
+    }
+
+    hideEmptyState();
+
+    try {
+        // Obtener productos desde API para datos actualizados
+        const products = await fetchAllProducts();
+        
+        const cartList = document.getElementById('cart-items-list');
+        if (!cartList) {
+            console.error('No se encontró el contenedor cart-items-list');
+            return;
+        }
+
+        const cartItemsHTML = cartItems.map(item => {
+            // Buscar producto actualizado desde API
+            const product = products.find(p => p._id === item.productId);
+            const currentPrice = product ? product.price : item.price;
+            const isOnSale = product && product.original_price && product.original_price > product.price;
+            
+            const imageUrl = item.image && item.image.startsWith('http') 
+                ? item.image 
+                : `../images/products/${item.image || 'placeholder.jpg'}`;
+
+            // Verificar si está en favoritos
+            const favorites = getFavorites();
+            const isFavorite = favorites.includes(item.productId);
+
+            return `
+                <div class="cart-item" data-product-id="${item.productId}">
+                    <div class="item-image">
+                        <img src="${imageUrl}" 
+                             alt="${item.name}" 
+                             onerror="this.src='../images/products/placeholder.jpg'">
+                        ${isOnSale ? '<div class="sale-badge">OFERTA</div>' : ''}
+                    </div>
+                    
+                    <div class="item-details">
+                        <div class="item-header">
+                            <h3 class="item-name">${item.name}</h3>
+                            <button class="favorite-btn ${isFavorite ? 'favorited' : ''}" 
+                                    onclick="toggleFavoriteFromCart('${item.productId}')">
+                                <i class="fa${isFavorite ? 's' : 'r'} fa-heart"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="item-price">
+                            <span class="current-price">$${Number(currentPrice).toLocaleString()}</span>
+                            ${isOnSale ? 
+                                `<span class="original-price">$${Number(product.original_price).toLocaleString()}</span>` 
+                                : ''}
+                        </div>
+                        
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="updateQuantity('${item.productId}', ${item.quantity - 1})">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="quantity">${item.quantity}</span>
+                            <button class="quantity-btn" onclick="updateQuantity('${item.productId}', ${item.quantity + 1})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="item-total">
+                            <span class="total-price">$${(Number(currentPrice) * item.quantity).toLocaleString()}</span>
+                        </div>
+                        
+                        <button class="remove-item-btn" onclick="removeFromCart('${item.productId}')">
+                            <i class="fas fa-trash"></i>
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        cartList.innerHTML = cartItemsHTML;
+        updateCartCounter();
+        updateTotalPrice();
+
+    } catch (error) {
+        console.error('Error mostrando items del carrito:', error);
+        const cartList = document.getElementById('cart-items-list');
+        if (cartList) {
+            cartList.innerHTML = `
+                <div class="error-message">
+                    <p>Error cargando el carrito. Intenta recargar la página.</p>
+                </div>
+            `;
+        }
+    }
+}
+
+// ===== FUNCIONES DE CARRITO =====
+function updateQuantity(productId, newQuantity) {
+    if (newQuantity <= 0) {
+        removeFromCart(productId);
+        return;
+    }
+
+    if (newQuantity > 99) {
+        showNotification('Cantidad máxima: 99 unidades', 'warning');
+        return;
+    }
+
+    const item = cartItems.find(item => item.productId === productId);
+    if (item) {
+        const oldQuantity = item.quantity;
+        item.quantity = newQuantity;
+        
+        saveCartItems();
+        
+        // Actualizar solo el item específico en el DOM
+        updateCartItemDisplay(productId);
+        updateTotalPrice();
+        
+        showNotification(
+            `Cantidad ${newQuantity > oldQuantity ? 'aumentada' : 'reducida'}: ${item.name}`, 
+            'success'
+        );
+    }
+}
+
+function updateCartItemDisplay(productId) {
+    const cartItemElement = document.querySelector(`[data-product-id="${productId}"]`);
+    const item = cartItems.find(item => item.productId === productId);
+    
+    if (cartItemElement && item) {
+        const quantityElement = cartItemElement.querySelector('.quantity');
+        const totalElement = cartItemElement.querySelector('.total-price');
+        
+        if (quantityElement) quantityElement.textContent = item.quantity;
+        if (totalElement) {
+            const total = Number(item.price) * item.quantity;
+            totalElement.textContent = `$${total.toLocaleString()}`;
+        }
+    }
+}
+
+function removeFromCart(productId) {
+    const item = cartItems.find(item => item.productId === productId);
+    if (!item) return;
+
+    cartItems = cartItems.filter(item => item.productId !== productId);
+    saveCartItems();
+    displayCartItems();
+    
+    showNotification(`Eliminado del carrito: ${item.name}`, 'success');
+}
+
+function clearCart() {
+    cartItems = [];
+    saveCartItems();
+    displayCartItems();
+    showNotification('Carrito vaciado', 'success');
+}
+
+async function toggleFavoriteFromCart(productId) {
+    try {
+        let favorites = getFavorites();
+        const isFavorite = favorites.includes(productId);
+        
+        if (isFavorite) {
+            favorites = favorites.filter(id => id !== productId);
+            showNotification('Removido de favoritos', 'success');
+        } else {
+            favorites.push(productId);
+            showNotification('Agregado a favoritos', 'success');
+        }
+        
+        saveFavorites(favorites);
+        
+        // Actualizar icono
+        const heartButton = document.querySelector(`[data-product-id="${productId}"] .favorite-btn`);
+        const heartIcon = heartButton?.querySelector('i');
+        
+        if (heartIcon) {
+            if (isFavorite) {
+                heartIcon.className = 'far fa-heart';
+                heartButton.classList.remove('favorited');
+            } else {
+                heartIcon.className = 'fas fa-heart';
+                heartButton.classList.add('favorited');
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error toggling favorite:', error);
+        showNotification('Error al actualizar favoritos', 'error');
+    }
+}
+
+// ===== FUNCIONES DE PRECIO Y DESCUENTOS =====
+function calculateSubtotal() {
+    return cartItems.reduce((total, item) => {
+        return total + (Number(item.price) * item.quantity);
+    }, 0);
+}
+
+function calculateShipping(subtotal) {
+    // Envío gratis para compras mayores a $50.000
+    if (subtotal >= 50000 || (appliedDiscount && appliedDiscount.discount === 'free_shipping')) {
+        return 0;
+    }
+    // Envío estándar $5.000
+    return 5000;
+}
+
+function applyDiscount(code) {
+    const discount = discountCodes[code.toUpperCase()];
+    if (!discount) {
+        showNotification('Código de descuento no válido', 'error');
+        return false;
+    }
+
+    const subtotal = calculateSubtotal();
+    if (subtotal < discount.minAmount) {
+        showNotification(`Compra mínima requerida: $${discount.minAmount.toLocaleString()}`, 'warning');
+        return false;
+    }
+
+    appliedDiscount = { code: code.toUpperCase(), ...discount };
+    
+    if (discount.discount === 'free_shipping') {
+        discountAmount = 0;
+        shippingCost = 0;
+    } else {
+        discountAmount = Math.floor(subtotal * discount.discount);
+        shippingCost = calculateShipping(subtotal);
+    }
+
+    updateTotalPrice();
+    updateDiscountDisplay();
+    showNotification(`Código aplicado: ${discount.description}`, 'success');
+    
+    // Limpiar el campo de código
+    const discountInput = document.getElementById('discount-code');
+    if (discountInput) discountInput.value = '';
+    
+    return true;
+}
+
+function removeDiscount() {
+    appliedDiscount = null;
+    discountAmount = 0;
+    shippingCost = calculateShipping(calculateSubtotal());
+    updateTotalPrice();
+    updateDiscountDisplay();
+    showNotification('Descuento removido', 'success');
+}
+
+function updateTotalPrice() {
+    const subtotal = calculateSubtotal();
+    shippingCost = calculateShipping(subtotal);
+    const total = subtotal - discountAmount + shippingCost;
+
+    // Actualizar elementos del DOM
+    const subtotalElement = document.getElementById('subtotal-amount');
+    const shippingElement = document.getElementById('shipping-amount');
+    const discountElement = document.getElementById('discount-amount');
+    const totalElement = document.getElementById('total-amount');
+
+    if (subtotalElement) subtotalElement.textContent = `${subtotal.toLocaleString()}`;
+    if (shippingElement) {
+        shippingElement.textContent = shippingCost === 0 ? 'GRATIS' : `${shippingCost.toLocaleString()}`;
+    }
+    if (discountElement) {
+        discountElement.textContent = discountAmount > 0 ? `-${discountAmount.toLocaleString()}` : '$0';
+    }
+    if (totalElement) totalElement.textContent = `${total.toLocaleString()}`;
+}
+
+function updateDiscountDisplay() {
+    const discountSection = document.querySelector('.discount-applied');
+    const discountInput = document.querySelector('.discount-input');
+
+    if (appliedDiscount) {
+        if (discountSection) {
+            discountSection.style.display = 'flex';
+            const discountText = discountSection.querySelector('.discount-text');
+            if (discountText) {
+                discountText.textContent = `${appliedDiscount.code} - ${appliedDiscount.description}`;
+            }
+        }
+        if (discountInput) {
+            discountInput.style.display = 'none';
+        }
+    } else {
+        if (discountSection) discountSection.style.display = 'none';
+        if (discountInput) discountInput.style.display = 'flex';
+    }
+}
+
+// ===== FUNCIONES DE COMPRA =====
+function proceedToCheckout() {
+    if (cartItems.length === 0) {
+        showNotification('El carrito está vacío', 'warning');
+        return;
+    }
+
+    const total = calculateSubtotal() - discountAmount + shippingCost;
+    
+    // Crear datos de la compra
+    const purchaseData = {
+        items: cartItems,
+        subtotal: calculateSubtotal(),
+        discount: {
+            code: appliedDiscount?.code || null,
+            amount: discountAmount
+        },
+        shipping: shippingCost,
+        total: total,
+        timestamp: new Date().toISOString(),
+        user: currentUser || { email: 'guest' }
+    };
+
+    // Guardar datos de compra temporalmente
+    sessionStorage.setItem('pendingPurchase', JSON.stringify(purchaseData));
+    
+    showNotification('Procesando compra...', 'success');
+    
+    // Simular proceso de compra
+    setTimeout(() => {
+        completePurchase();
+    }, 2000);
+}
+
+function completePurchase() {
+    // Limpiar carrito
+    clearCart();
+    
+    // Mostrar mensaje de éxito
+    showPurchaseSuccess();
+    
+    // Limpiar datos temporales
+    sessionStorage.removeItem('pendingPurchase');
+}
+
+function showPurchaseSuccess() {
+    const modal = document.createElement('div');
+    modal.className = 'purchase-success-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>¡Compra Exitosa!</h3>
+            <p>Tu pedido ha sido procesado correctamente</p>
+            <div class="modal-actions">
+                <button class="btn-primary" onclick="closePurchaseModal()">
+                    Continuar Comprando
+                </button>
+            </div>
+        </div>
+    `;
+    
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+    
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+}
+
+function closePurchaseModal() {
+    const modal = document.querySelector('.purchase-success-modal');
+    if (modal) {
+        modal.remove();
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// ===== FUNCIONES DE API =====
+async function fetchAllProducts() {
+    try {
+        const response = await fetch('http://localhost:3000/api/products');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data.products || [];
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        // Fallback: intentar cargar productos desde localStorage como backup
+        const backupProducts = localStorage.getItem('backup_products');
+        return backupProducts ? JSON.parse(backupProducts) : [];
+    }
+}
+
+// ===== FUNCIONES DE NAVEGACIÓN =====
+function goToProducts() {
+    window.location.href = 'main.html';
+}
+
+// ===== FUNCIONES DE NOTIFICACIÓN =====
+function showNotification(message, type = 'info') {
+    // Crear o reutilizar contenedor de notificaciones
+    let container = document.getElementById('notification-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notification-container';
+        container.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            pointer-events: none;
+        `;
+        document.body.appendChild(container);
+    }
+
+    // Crear notificación
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.style.cssText = `
+        background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : type === 'warning' ? '#FF9800' : '#2196F3'};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        transform: translateX(300px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        pointer-events: auto;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    `;
+    notification.textContent = message;
+    container.appendChild(notification);
+
+    // Mostrar notificación
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+        notification.style.opacity = '1';
+    }, 10);
+
+    // Ocultar y eliminar notificación
+    setTimeout(() => {
+        notification.style.transform = 'translateX(300px)';
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// ===== FUNCIONES DE AUTENTICACIÓN =====
+function loadUserSession() {
+    try {
+        const userData = localStorage.getItem('currentUser');
+        if (userData) {
+            currentUser = JSON.parse(userData);
+            console.log('👤 Usuario cargado:', currentUser.email || 'guest');
+        } else {
+            currentUser = null;
+            console.log('👤 Usuario invitado');
+        }
+    } catch (error) {
+        console.error('Error cargando sesión:', error);
+        currentUser = null;
+    }
+}
+
+// ===== EVENT HANDLERS =====
+function handleDiscountCode() {
+    const discountInput = document.getElementById('discount-code');
+    const code = discountInput?.value.trim();
+    
+    if (!code) {
+        showNotification('Ingresa un código de descuento', 'warning');
+        return;
+    }
+    
+    applyDiscount(code);
+}
+
+// ===== INICIALIZACIÓN =====
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('🚀 Inicializando página de carrito');
+    
+    try {
+        // Cargar sesión de usuario
+        loadUserSession();
+        
+        // Cargar items del carrito
+        loadCartItems();
+        
+        // Mostrar items del carrito
+        await displayCartItems();
+        
+        // Actualizar contadores
+        updateNavCounters();
+        
+        // Configurar event listeners para descuentos
+        const applyDiscountBtn = document.getElementById('apply-discount');
+        if (applyDiscountBtn) {
+            applyDiscountBtn.addEventListener('click', handleDiscountCode);
+        }
+        
+        const discountInput = document.getElementById('discount-code');
+        if (discountInput) {
+            discountInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleDiscountCode();
+                }
+            });
+        }
+        
+        console.log('✅ Página de carrito inicializada correctamente');
+        
+    } catch (error) {
+        console.error('❌ Error inicializando página de carrito:', error);
+    }
+});
+
+// ===== EVENT LISTENERS =====
+// Detectar cambios de localStorage (sincronización entre pestañas)
+window.addEventListener('storage', function(e) {
+    if (e.key && (e.key.includes('cart_') || e.key.includes('favorites_'))) {
+        console.log('🔄 Detectado cambio en storage, recargando...');
+        loadCartItems();
+        displayCartItems();
+        updateNavCounters();
+    }
+});
+
+console.log('🛒 Cart page script inicializado completamente');// ===== FAVORITES PAGE JAVASCRIPT - ARCHIVO LIMPIO =====
+let currentUser = null;
+let favorites = [];
+let productToRemove = null;
+
+// Mapeo de categorías ObjectId a nombres
+const categoryMap = {
+    '6898049bdd53186ec08fd313': 'Perros',
+    '6898049bdd53186ec08fd316': 'Gatos', 
+    '6898049bdd53186ec08fd319': 'Aves',
+    '6898049bdd53186ec08fd31c': 'Peces',
+    '6898049bdd53186ec08fd31f': 'Accesorios'
+};
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('❤️ Inicializando página de favoritos...');
+    initializeFavoritesPage();
+});
+
+function initializeFavoritesPage() {
+    try {
+        console.log('🚀 Iniciando inicialización...');
+        
+        // Obtener usuario actual PRIMERO
+        currentUser = getCurrentUser();
+        console.log('👤 Usuario actual obtenido:', currentUser);
+        
+        // Solo continuar si tenemos un usuario válido
+        if (!currentUser || !currentUser.email) {
+            console.log('❌ No hay usuario válido, mostrando estado vacío');
+            showEmptyState();
+            return;
+        }
+        
+        // Cargar favoritos
+        loadFavorites();
+        
+        // Actualizar contadores de navegación
+        updateNavigationCounts();
+        
+        console.log('✅ Página de favoritos inicializada correctamente');
+    } catch (error) {
+        console.error('❌ Error inicializando favoritos:', error);
+        showEmptyState();
+    }
+}
+
+function getCurrentUser() {
+    console.log('👤 === OBTENIENDO USUARIO ACTUAL ===');
+    
+    // Método 1: localStorage.currentUser
+    let userData = localStorage.getItem('currentUser');
+    console.log('📦 Método 1 - localStorage.currentUser:', userData);
+    
+    if (userData) {
+        try {
+            const user = JSON.parse(userData);
+            if (user && user.email) {
+                console.log('✅ Usuario válido desde localStorage.currentUser:', user);
+                return user;
+            }
+        } catch (error) {
+            console.error('❌ Error parsing currentUser:', error);
+        }
+    }
+    
+    // Método 2: sessionStorage.currentUser
+    userData = sessionStorage.getItem('currentUser');
+    console.log('📦 Método 2 - sessionStorage.currentUser:', userData);
+    
+    if (userData) {
+        try {
+            const user = JSON.parse(userData);
+            if (user && user.email) {
+                console.log('✅ Usuario válido desde sessionStorage.currentUser:', user);
+                return user;
+            }
+        } catch (error) {
+            console.error('❌ Error parsing sessionStorage currentUser:', error);
+        }
+    }
+    
+    // Método 3: userEmail y userName separados
+    const userEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail');
+    const userName = localStorage.getItem('userName') || sessionStorage.getItem('userName');
+    console.log('📧 Método 3 - userEmail:', userEmail);
+    console.log('👤 Método 3 - userName:', userName);
+    
+    if (userEmail && userName) {
+        const user = { name: userName, email: userEmail };
+        console.log('✅ Usuario construido desde email/name separados:', user);
+        return user;
+    }
+    
+    // Método 4: Buscar en todas las claves
+    console.log('🔍 Método 4 - Buscando en todas las claves de localStorage:');
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+        console.log(`- ${key}: ${value?.substring(0, 100)}...`);
+        
+        // Buscar claves que contengan información de usuario
+        if (key && (key.includes('user') || key.includes('email') || key.includes('login'))) {
+            console.log(`  🎯 Clave potencial de usuario: ${key}`);
+        }
+    }
+    
+    // Si no encontramos nada, crear usuario de prueba
+    console.log('⚠️ No se encontró usuario válido, usando usuario de prueba');
+    const testUser = { name: 'Usuario Prueba', email: 'test@petstyle.com' };
+    console.log('🧪 Usuario de prueba creado:', testUser);
+    return testUser;
+}
+
+function loadFavorites() {
+    console.log('📋 Cargando favoritos...');
+    
+    if (!currentUser || !currentUser.email) {
+        console.log('❌ No hay usuario válido');
+        showEmptyState();
+        return;
+    }
+    
+    const favoritesKey = `favorites_${currentUser.email}`;
+    console.log('🔑 Buscando favoritos con clave:', favoritesKey);
+    
+    const favoritesData = localStorage.getItem(favoritesKey);
+    console.log('📦 Datos de favoritos encontrados:', favoritesData);
+    
+    favorites = favoritesData ? JSON.parse(favoritesData) : [];
+    console.log(`📦 Favoritos cargados: ${favorites.length} productos`);
+    
+    // Debug: mostrar contenido de favoritos
+    if (favorites.length > 0) {
+        console.log('❤️ Productos en favoritos:');
+        favorites.forEach((fav, index) => {
+            console.log(`${index + 1}. ${fav.name} - ID: ${fav.id}`);
+        });
+    } else {
+        console.log('💔 No hay productos en favoritos');
+        
+        // Debug: verificar si hay favoritos con diferentes claves
+        console.log('🔍 Verificando otras posibles claves de favoritos...');
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('favorites_')) {
+                const data = localStorage.getItem(key);
+                console.log(`- ${key}: ${JSON.parse(data).length} items`);
+            }
+        }
+    }
+    
+    updateFavoritesCounter();
+    renderFavorites();
+}
+
+function updateFavoritesCounter() {
+    const counter = document.getElementById('favorites-counter');
+    if (counter) {
+        const count = favorites.length;
+        counter.textContent = count === 1 ? '1 producto' : `${count} productos`;
+    }
+}
+
+function renderFavorites() {
+    const emptyState = document.getElementById('empty-state');
+    const favoritesList = document.getElementById('favorites-list');
+    
+    if (favorites.length === 0) {
+        showEmptyState();
+        return;
+    }
+    
+    // Ocultar estado vacío y mostrar lista
+    if (emptyState) emptyState.style.display = 'none';
+    if (favoritesList) {
+        favoritesList.style.display = 'block';
+        favoritesList.className = 'favorites-list show';
+    }
+    
+    // Limpiar lista
+    favoritesList.innerHTML = '';
+    
+    // Renderizar cada favorito
+    favorites.forEach(favorite => {
+        const favoriteCard = createFavoriteCard(favorite);
+        favoritesList.appendChild(favoriteCard);
+    });
+    
+    console.log(`✅ ${favorites.length} favoritos renderizados`);
+}
+
+function createFavoriteCard(favorite) {
+    const card = document.createElement('div');
+    card.className = 'favorite-card';
+    card.dataset.favoriteId = favorite.id;
+    
+    // Procesar datos
+    const name = favorite.name || 'Producto sin nombre';
+    const price = favorite.price || 0;
+    const image = favorite.image || 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=200&h=200&fit=crop';
+    const category = getCategoryName(favorite.category) || 'General';
+    
+    card.innerHTML = `
+        <div class="favorite-card-content">
+            <div class="favorite-image">
+                <img src="${image}" alt="${name}" onerror="this.src='https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=200&h=200&fit=crop'">
+            </div>
+            <div class="favorite-info">
+                <div class="favorite-header">
+                    <div class="favorite-name">${name}</div>
+                    <button class="remove-favorite-btn" onclick="showRemoveConfirmation('${favorite.id}')">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                </div>
+                <div class="favorite-category">${category}</div>
+                <div class="favorite-footer">
+                    <div class="favorite-price">$${price.toFixed(2)}</div>
+                    <button class="add-to-cart-btn" onclick="addToCartFromFavorites('${favorite.id}')">
+                        <i class="fas fa-shopping-cart"></i>
+                        Agregar
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return card;
+}
+
+function getCategoryName(categoryId) {
+    if (!categoryId) return 'General';
+    return categoryMap[categoryId] || categoryId;
+}
+
+function showEmptyState() {
+    const emptyState = document.getElementById('empty-state');
+    const favoritesList = document.getElementById('favorites-list');
+    
+    if (emptyState) emptyState.style.display = 'flex';
+    if (favoritesList) favoritesList.style.display = 'none';
+}
+
+// Funciones de acciones
+function showRemoveConfirmation(productId) {
+    console.log('❤️ Mostrando confirmación para remover:', productId);
+    productToRemove = productId;
+    
+    const modal = document.getElementById('confirm-modal');
+    if (modal) {
+        modal.classList.add('active');
+    }
+}
+
+function closeConfirmModal() {
+    const modal = document.getElementById('confirm-modal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+    productToRemove = null;
+}
+
+function confirmRemoveFavorite() {
+    if (!productToRemove) return;
+    
+    console.log('💔 Removiendo de favoritos:', productToRemove);
+    
+    // Encontrar y remover el producto
+    const index = favorites.findIndex(fav => fav.id === productToRemove);
+    if (index > -1) {
+        const removedProduct = favorites.splice(index, 1)[0];
+        console.log('✅ Producto removido:', removedProduct.name);
+        
+        // Guardar favoritos actualizados
+        saveFavorites();
+        
+        // Actualizar UI
+        updateFavoritesCounter();
+        renderFavorites();
+        updateNavigationCounts();
+        
+        // Mostrar notificación
+        showNotification('Removido de favoritos', 'remove');
+    }
+    
+    // Cerrar modal
+    closeConfirmModal();
+}
+
+function addToCartFromFavorites(productId) {
+    console.log('🛒 Agregando al carrito desde favoritos:', productId);
+    
+    if (!currentUser || !currentUser.email) {
+        showNotification('Debes iniciar sesión', 'error');
+        return;
+    }
+    
+    // Encontrar el producto en favoritos
+    const favorite = favorites.find(fav => fav.id === productId);
+    if (!favorite) {
+        showNotification('Producto no encontrado', 'error');
+        return;
+    }
+    
+    // Obtener carrito actual
+    let cart = getCart();
+    
+    // Verificar si el producto ya está en el carrito
+    const existingItem = cart.find(item => item.id === productId);
+    
+    if (existingItem) {
+        existingItem.quantity += 1;
+        existingItem.subtotal = existingItem.quantity * existingItem.price;
+        showNotification('Cantidad actualizada en el carrito', 'success');
+    } else {
+        cart.push({
+            id: productId,
+            name: favorite.name,
+            price: favorite.price,
+            quantity: 1,
+            subtotal: favorite.price,
+            image: favorite.image,
+            addedAt: new Date().toISOString()
+        });
+        showNotification('Agregado al carrito', 'success');
+    }
+    
+    // Guardar carrito
+    saveCart(cart);
+    
+    // Actualizar contadores
+    updateNavigationCounts();
+}
+
+// Funciones de persistencia
+function saveFavorites() {
+    if (!currentUser || !currentUser.email) return;
+    
+    const favoritesKey = `favorites_${currentUser.email}`;
+    localStorage.setItem(favoritesKey, JSON.stringify(favorites));
+    console.log('💾 Favoritos guardados:', favorites.length);
+}
+
+function getCart() {
+    if (!currentUser || !currentUser.email) return [];
+    
+    const cartKey = `cart_${currentUser.email}`;
+    const cart = localStorage.getItem(cartKey);
+    return cart ? JSON.parse(cart) : [];
+}
+
+function saveCart(cart) {
+    if (!currentUser || !currentUser.email) return;
+    
+    const cartKey = `cart_${currentUser.email}`;
+    localStorage.setItem(cartKey, JSON.stringify(cart));
+    console.log('💾 Carrito guardado:', cart.length, 'items');
+}
+
+// Actualizar contadores de navegación
+function updateNavigationCounts() {
+    const favoritesFromStorage = getCurrentFavorites();
+    const cart = getCart();
+    
+    // Actualizar contador de favoritos
+    const favoritesCount = document.getElementById('nav-favorites-count');
+    if (favoritesCount) {
+        favoritesCount.textContent = favoritesFromStorage.length;
+        favoritesCount.className = `notification-badge ${favoritesFromStorage.length > 0 ? 'show' : ''}`;
+    }
+    
+    // Actualizar contador de carrito
+    const cartCount = document.getElementById('nav-cart-count');
+    if (cartCount) {
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        cartCount.textContent = totalItems;
+        cartCount.className = `notification-badge ${totalItems > 0 ? 'show' : ''}`;
+    }
+}
+
+function getCurrentFavorites() {
+    if (!currentUser || !currentUser.email) return [];
+    
+    const favoritesKey = `favorites_${currentUser.email}`;
+    const favoritesData = localStorage.getItem(favoritesKey);
+    return favoritesData ? JSON.parse(favoritesData) : [];
+}
+
+// Funciones de navegación
+function goBack() {
+    if (window.history.length > 1) {
+        window.history.back();
+    } else {
+        window.location.href = 'main.html';
+    }
+}
+
+function goToProducts() {
+    window.location.href = 'main.html';
+}
+
+// Función de notificaciones
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#4CAF50' : type === 'remove' ? '#FF9800' : '#f44336'};
+        color: white;
+        padding: 16px 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        z-index: 10000;
+        font-weight: 500;
+        animation: slideInRight 0.3s ease;
+        max-width: 280px;
+        font-size: 14px;
+    `;
+    
+    const icon = type === 'success' ? '✅' : type === 'remove' ? '💔' : '❌';
+    notification.innerHTML = `${icon} ${message}`;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Event listeners
+window.addEventListener('storage', function(e) {
+    if (e.key === 'currentUser' || e.key === 'userEmail' || e.key === 'userName') {
+        console.log('🔔 Detectado cambio de usuario en favoritos, recargando...');
+        setTimeout(() => {
+            location.reload();
+        }, 100);
+    }
+});
+
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('confirm-modal');
+    if (e.target === modal) {
+        closeConfirmModal();
+    }
+});
+
+// Funciones globales para debugging
+window.debugFavorites = function() {
+    console.log('🔍 Debug favoritos:');
+    console.log('- Usuario actual:', currentUser);
+    console.log('- Email del usuario:', currentUser ? currentUser.email : 'No hay usuario');
+    console.log('- Favoritos en memoria:', favorites);
+    console.log('- Longitud de favoritos:', favorites ? favorites.length : 0);
+    
+    if (currentUser && currentUser.email) {
+        const favKey = `favorites_${currentUser.email}`;
+        const cartKey = `cart_${currentUser.email}`;
+        console.log('- Clave de favoritos:', favKey);
+        console.log('- Favoritos en localStorage:', localStorage.getItem(favKey));
+        console.log('- Carrito en localStorage:', localStorage.getItem(cartKey));
+    } else {
+        console.log('❌ No se puede acceder a localStorage sin usuario válido');
+    }
+    
+    console.log('📦 Todas las claves de favoritos en localStorage:');
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('favorites_')) {
+            const data = localStorage.getItem(key);
+            const count = data ? JSON.parse(data).length : 0;
+            console.log(`  - ${key}: ${count} productos`);
+        }
+    }
+};
+
+window.showUserInfo = function() {
+    console.log('👤 Información del usuario:');
+    console.log('- currentUser:', currentUser);
+    console.log('- localStorage.currentUser:', localStorage.getItem('currentUser'));
+    console.log('- sessionStorage.currentUser:', sessionStorage.getItem('currentUser'));
+    console.log('- localStorage.userEmail:', localStorage.getItem('userEmail'));
+    console.log('- localStorage.userName:', localStorage.getItem('userName'));
+};
+
+window.testFavoriteData = function() {
+    console.log('🧪 Agregando producto de prueba...');
+    
+    if (!currentUser || !currentUser.email) {
+        console.log('❌ No hay usuario válido para agregar producto de prueba');
+        return;
+    }
+    
+    const testFavorite = {
+        id: 'test-product-' + Date.now(),
+        name: 'Producto de Prueba',
+        price: 25.99,
+        image: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=200&h=200&fit=crop',
+        category: '6898049bdd53186ec08fd313',
+        addedAt: new Date().toISOString()
+    };
+    
+    const favKey = `favorites_${currentUser.email}`;
+    const currentFavs = JSON.parse(localStorage.getItem(favKey) || '[]');
+    currentFavs.push(testFavorite);
+    localStorage.setItem(favKey, JSON.stringify(currentFavs));
+    
+    console.log('✅ Producto de prueba agregado:', testFavorite);
+    loadFavorites();
+};
+
+// Añadir estilos de animación
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+    .favorite-card {
+        animation: fadeInUp 0.3s ease;
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+`;
+document.head.appendChild(style);
+
+console.log('❤️ Favorites page script cargado correctamente');
+
+
+// ===== API SERVICE - FINAL CORRECTED VERSION =====
+
+const api = {
+    baseURL: 'http://localhost:3000',
+    detectedEndpoints: {},
+    
+    // Auto-detect your backend endpoints
+    async detectEndpoints() {
+        console.log('🔍 Auto-detecting your backend endpoints...');
+        
+        const possibleRoutes = [
+            '/api/productos',    // ✅ ESPAÑOL PRIMERO (lo que configuraste en server.js)
+            '/api/products',     
+            '/productos',
+            '/products',
+            '/api/producto',
+            '/producto',
+            '/petstyle/productos',
+            '/petstyle/products'
+        ];
+        
+        for (const route of possibleRoutes) {
+            try {
+                console.log(`Testing: ${this.baseURL}${route}`);
+                const response = await fetch(`${this.baseURL}${route}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (Array.isArray(data) || (data.products && Array.isArray(data.products)) || (data.data && Array.isArray(data.data))) {
+                        this.detectedEndpoints.productos = route;
+                        console.log(`✅ Found products endpoint: ${route}`);
+                        
+                        const productCount = Array.isArray(data) ? data.length : 
+                                           data.products ? data.products.length : 
+                                           data.data ? data.data.length : 0;
+                        console.log(`📦 Found ${productCount} products`);
+                        return route;
+                    }
+                }
+            } catch (error) {
+                console.log(`❌ Failed: ${route} - ${error.message}`);
+            }
+        }
+        
+        console.log('❌ No valid endpoints found');
+        return null;
+    },
+    
+    // ================================
+    // PRODUCTOS - LECTURA (USUARIOS)
+    // ================================
+    
+    // Get all products with auto-detection
+    async getAllProducts() {
+        try {
+            console.log('📦 Fetching all products...');
+            
+            // If we haven't detected endpoints yet, do it now
+            if (!this.detectedEndpoints.productos) {
+                await this.detectEndpoints();
+            }
+            
+            // If we found an endpoint, use it
+            if (this.detectedEndpoints.productos) {
+                const response = await fetch(`${this.baseURL}${this.detectedEndpoints.productos}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('🔍 Raw API response:', data);
+                    
+                    // Handle different response formats from your backend
+                    let products = [];
+                    
+                    if (Array.isArray(data)) {
+                        products = data;
+                    } else if (data.products && Array.isArray(data.products)) {
+                        products = data.products;
+                    } else if (data.data && Array.isArray(data.data)) {
+                        products = data.data;
+                    } else if (data.result && Array.isArray(data.result)) {
+                        products = data.result;
+                    } else if (data.items && Array.isArray(data.items)) {
+                        products = data.items;
+                    } else {
+                        console.log('⚠️ Unknown response format, using empty array');
+                        products = [];
+                    }
+                    
+                    console.log(`📦 Processed products: ${products.length}`);
+                    return products;
+                }
+            }
+            
+            throw new Error('No valid products endpoint found');
+            
+        } catch (error) {
+            console.error('❌ Error fetching products:', error);
+            
+            // Return empty array instead of throwing for better UX
+            return [];
+        }
+    },
+    
+    // Alias for compatibility
+    async getProducts() {
+        return this.getAllProducts();
+    },
+    
+    // Get single product
+    async getProduct(id) {
+        try {
+            console.log('🔍 Fetching product:', id);
+            
+            if (!this.detectedEndpoints.productos) {
+                await this.detectEndpoints();
+            }
+            
+            if (this.detectedEndpoints.productos) {
+                const response = await fetch(`${this.baseURL}${this.detectedEndpoints.productos}/${id}`);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('✅ Product fetched:', result);
+                    return result;
+                }
+            }
+            
+            throw new Error('Product not found');
+            
+        } catch (error) {
+            console.error('❌ Error fetching product:', error);
+            throw error;
+        }
+    },
+    
+    // ================================
+    // PRODUCTOS - ADMIN (CRUD)
+    // ================================
+    
+    async createProduct(productData) {
+        try {
+            console.log('📝 Creating product:', productData);
+            
+            // Ensure we have the endpoint
+            if (!this.detectedEndpoints.productos) {
+                await this.detectEndpoints();
+            }
+            
+            const endpoint = this.detectedEndpoints.productos || '/api/productos';
+            const token = localStorage.getItem('petstyle_token');
+            
+            console.log('🔗 Using endpoint:', `${this.baseURL}${endpoint}`);
+            console.log('🔑 Using token:', token ? `${token.substring(0, 20)}...` : 'NO TOKEN');
+            
+            const response = await fetch(`${this.baseURL}${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                },
+                body: JSON.stringify(productData)
+            });
+
+            console.log('📡 Response status:', response.status);
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('❌ Create product error:', response.status, errorData);
+                
+                try {
+                    const jsonError = JSON.parse(errorData);
+                    throw new Error(jsonError.message || `HTTP ${response.status}`);
+                } catch (parseError) {
+                    throw new Error(`Error ${response.status}: ${errorData || 'Unknown error'}`);
+                }
+            }
+
+            const result = await response.json();
+            console.log('✅ Product created successfully:', result);
+            return result;
+            
+        } catch (error) {
+            console.error('❌ Error creating product:', error);
+            throw error;
+        }
+    },
+
+    async updateProduct(id, productData) {
+        try {
+            console.log('📝 Updating product:', id, productData);
+            
+            if (!this.detectedEndpoints.productos) {
+                await this.detectEndpoints();
+            }
+            
+            const endpoint = this.detectedEndpoints.productos || '/api/productos';
+            const token = localStorage.getItem('petstyle_token');
+            
+            console.log('🔗 Using endpoint:', `${this.baseURL}${endpoint}/${id}`);
+            
+            const response = await fetch(`${this.baseURL}${endpoint}/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                },
+                body: JSON.stringify(productData)
+            });
+
+            console.log('📡 Response status:', response.status);
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('❌ Update product error:', response.status, errorData);
+                
+                try {
+                    const jsonError = JSON.parse(errorData);
+                    throw new Error(jsonError.message || `HTTP ${response.status}`);
+                } catch (parseError) {
+                    throw new Error(`Error ${response.status}: ${errorData || 'Unknown error'}`);
+                }
+            }
+
+            const result = await response.json();
+            console.log('✅ Product updated successfully:', result);
+            return result;
+            
+        } catch (error) {
+            console.error('❌ Error updating product:', error);
+            throw error;
+        }
+    },
+
+    async deleteProduct(id) {
+        try {
+            console.log('🗑️ Deleting product:', id);
+            
+            if (!this.detectedEndpoints.productos) {
+                await this.detectEndpoints();
+            }
+            
+            const endpoint = this.detectedEndpoints.productos || '/api/productos';
+            const token = localStorage.getItem('petstyle_token');
+            
+            console.log('🔗 Using endpoint:', `${this.baseURL}${endpoint}/${id}`);
+            
+            const response = await fetch(`${this.baseURL}${endpoint}/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                }
+            });
+
+            console.log('📡 Response status:', response.status);
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('❌ Delete product error:', response.status, errorData);
+                
+                try {
+                    const jsonError = JSON.parse(errorData);
+                    throw new Error(jsonError.message || `HTTP ${response.status}`);
+                } catch (parseError) {
+                    throw new Error(`Error ${response.status}: ${errorData || 'Unknown error'}`);
+                }
+            }
+
+            const result = await response.json();
+            console.log('✅ Product deleted successfully:', result);
+            return result;
+            
+        } catch (error) {
+            console.error('❌ Error deleting product:', error);
+            throw error;
+        }
+    },
+    
+    // ================================
+    // CATEGORÍAS
+    // ================================
+    
+    async getAllCategories() {
+        try {
+            console.log('🔍 Fetching categories...');
+            
+            const routes = ['/api/categorias', '/api/categories', '/categorias', '/categories'];
+            const token = localStorage.getItem('petstyle_token');
+            
+            for (const route of routes) {
+                try {
+                    const response = await fetch(`${this.baseURL}${route}`, {
+                        headers: {
+                            ...(token && { 'Authorization': `Bearer ${token}` })
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('📂 Categories found at:', route);
+                        
+                        // Handle different formats
+                        if (Array.isArray(data)) {
+                            return data;
+                        } else if (data.categories && Array.isArray(data.categories)) {
+                            return data.categories;
+                        } else if (data.data && Array.isArray(data.data)) {
+                            return data.data;
+                        }
+                    }
+                } catch (error) {
+                    // Continue trying other routes
+                    console.log(`❌ Failed route ${route}:`, error.message);
+                }
+            }
+            
+            // Fallback categories compatible with your admin
+            console.log('📂 Using fallback categories');
+            return [
+                { _id: 'alimentacion', name: 'Alimentación', nombre: 'Alimentación' },
+                { _id: 'juguetes', name: 'Juguetes', nombre: 'Juguetes' },
+                { _id: 'accesorios', name: 'Accesorios', nombre: 'Accesorios' },
+                { _id: 'cuidado', name: 'Cuidado', nombre: 'Cuidado' },
+                { _id: 'salud', name: 'Salud', nombre: 'Salud' }
+            ];
+            
+        } catch (error) {
+            console.error('❌ Error fetching categories:', error);
+            // Return fallback
+            return [
+                { _id: 'alimentacion', name: 'Alimentación', nombre: 'Alimentación' },
+                { _id: 'juguetes', name: 'Juguetes', nombre: 'Juguetes' },
+                { _id: 'accesorios', name: 'Accesorios', nombre: 'Accesorios' },
+                { _id: 'cuidado', name: 'Cuidado', nombre: 'Cuidado' },
+                { _id: 'salud', name: 'Salud', nombre: 'Salud' }
+            ];
+        }
+    },
+
+    async createCategory(categoryData) {
+        try {
+            console.log('📂 Creating category:', categoryData);
+            
+            const token = localStorage.getItem('petstyle_token');
+            const response = await fetch(`${this.baseURL}/api/categorias`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                },
+                body: JSON.stringify(categoryData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('✅ Category created:', result);
+            return result;
+        } catch (error) {
+            console.error('❌ Error creating category:', error);
+            throw error;
+        }
+    },
+    
+    // ================================
+    // USUARIOS - PARA ADMIN
+    // ================================
+    
+    async getAllUsers() {
+        try {
+            console.log('👥 Fetching users...');
+            
+            const routes = ['/api/usuarios', '/api/users', '/usuarios', '/users'];
+            const token = localStorage.getItem('petstyle_token');
+            
+            for (const route of routes) {
+                try {
+                    const response = await fetch(`${this.baseURL}${route}`, {
+                        headers: {
+                            ...(token && { 'Authorization': `Bearer ${token}` })
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('👥 Users found at:', route);
+                        
+                        if (Array.isArray(data)) {
+                            return data;
+                        } else if (data.users && Array.isArray(data.users)) {
+                            return data.users;
+                        } else if (data.data && Array.isArray(data.data)) {
+                            return data.data;
+                        }
+                    }
+                } catch (error) {
+                    // Continue trying other routes
+                    console.log(`❌ Failed route ${route}:`, error.message);
+                }
+            }
+            
+            return [];
+            
+        } catch (error) {
+            console.error('❌ Error fetching users:', error);
+            return [];
+        }
+    },
+
+    async deleteUser(id) {
+        try {
+            console.log('🗑️ Deleting user:', id);
+            
+            const token = localStorage.getItem('petstyle_token');
+            const response = await fetch(`${this.baseURL}/api/usuarios/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('✅ User deleted:', result);
+            return result;
+        } catch (error) {
+            console.error('❌ Error deleting user:', error);
+            throw error;
+        }
+    },
+
+    // ================================
+    // ESTADÍSTICAS - PARA ADMIN
+    // ================================
+    
+    async getStats() {
+        try {
+            console.log('📊 Calculating stats...');
+            
+            // Get data in parallel
+            const [products, users, categories] = await Promise.all([
+                this.getAllProducts().catch(() => []),
+                this.getAllUsers().catch(() => []),
+                this.getAllCategories().catch(() => [])
+            ]);
+
+            const stats = {
+                totalProducts: products.length || 0,
+                totalUsers: users.length || 0,
+                totalCategories: categories.length || 0,
+                totalRevenue: Math.floor(Math.random() * 50000) + 10000, // Mock data
+                totalOrders: Math.floor(Math.random() * 200) + 50,       // Mock data
+                activeUsers: users.filter(user => user.active !== false).length || 0
+            };
+
+            console.log('📊 Stats calculated:', stats);
+            return stats;
+            
+        } catch (error) {
+            console.error('❌ Error calculating stats:', error);
+            return {
+                totalProducts: 0,
+                totalUsers: 0,
+                totalCategories: 0,
+                totalRevenue: 0,
+                totalOrders: 0,
+                activeUsers: 0
+            };
+        }
+    },
+    
+    // ================================
+    // DIAGNÓSTICO Y DEBUGGING (MANUAL)
+    // ================================
+    
+    // Test all possible backend configurations
+    async fullDiagnostic() {
+        console.log('🏥 Running full backend diagnostic...');
+        
+        // Test different ports
+        const ports = [3000, 3001, 5000, 8000, 4000];
+        const routes = ['/api/productos', '/api/products', '/productos', '/products'];
+        
+        for (const port of ports) {
+            console.log(`\n🔌 Testing port ${port}:`);
+            
+            for (const route of routes) {
+                try {
+                    const url = `http://localhost:${port}${route}`;
+                    const response = await fetch(url);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log(`✅ SUCCESS: ${url}`);
+                        console.log(`📊 Response type: ${Array.isArray(data) ? 'Array' : 'Object'}`);
+                        console.log(`📦 Items found: ${Array.isArray(data) ? data.length : 'Unknown'}`);
+                        
+                        // Update baseURL if we found a working one
+                        if (port !== 3000) {
+                            this.baseURL = `http://localhost:${port}`;
+                            console.log(`🔄 Updated baseURL to: ${this.baseURL}`);
+                        }
+                        
+                        this.detectedEndpoints.productos = route;
+                        return { port, route, url, data: Array.isArray(data) ? data : data.products || [] };
+                    }
+                } catch (error) {
+                    console.log(`❌ ${port}${route}: ${error.message}`);
+                }
+            }
+        }
+        
+        console.log('❌ No working backend found on any port/route combination');
+        return null;
+    },
+    
+    // Show your backend info (MANUAL - call when needed)
+    async showBackendInfo() {
+        console.log('\n📋 BACKEND DIAGNOSTIC REPORT');
+        console.log('='.repeat(50));
+        
+        const result = await this.fullDiagnostic();
+        
+        if (result) {
+            console.log(`✅ Working backend found!`);
+            console.log(`🌐 URL: ${result.url}`);
+            console.log(`📦 Products found: ${result.data.length}`);
+            if (result.data.length > 0) {
+                console.log(`🏷️ Sample product:`, result.data[0]);
+            }
+        } else {
+            console.log(`❌ No working backend found`);
+            console.log(`💡 Make sure your backend is running with: npm run dev`);
+            console.log(`💡 Verify your server.js has: app.use('/api/productos', productRoutes);`);
+        }
+        
+        return result;
+    },
+    
+    // ================================
+    // COMPATIBILITY FUNCTIONS
+    // ================================
+    
+    // Legacy function names for compatibility
+    getProduct: function(id) { return this.getProduct(id); },
+    addProduct: function(data) { return this.createProduct(data); },
+    editProduct: function(id, data) { return this.updateProduct(id, data); },
+    removeProduct: function(id) { return this.deleteProduct(id); }
+};
+
+// Export for global use
+window.api = api;
+
+// Auto-initialize endpoint detection (only once)
+if (typeof window !== 'undefined') {
+    // Only auto-detect if not already done
+    if (!api.detectedEndpoints.productos) {
+        // Wait a bit before auto-detecting to avoid conflicts with page load
+        setTimeout(() => {
+            api.detectEndpoints().catch(error => {
+                console.log('⚠️ Auto-detection failed, will detect on first API call');
+            });
+        }, 1000);
+    }
+}
+
+
+// ===== AUTHENTICATION SYSTEM - REAL DATABASE ONLY =====
+
+// Get current user from localStorage
+function getCurrentUser() {
+    try {
+        const user = localStorage.getItem('petstyle_user');
+        return user ? JSON.parse(user) : null;
+    } catch (error) {
+        console.error('Error getting current user:', error);
+        return null;
+    }
+}
+
+// Set current user in localStorage
+function setCurrentUser(user) {
+    try {
+        if (user) {
+            localStorage.setItem('petstyle_user', JSON.stringify(user));
+        } else {
+            localStorage.removeItem('petstyle_user');
+        }
+        return true;
+    } catch (error) {
+        console.error('Error setting current user:', error);
+        return false;
+    }
+}
+
+// Get current token from localStorage
+function getCurrentToken() {
+    try {
+        return localStorage.getItem('petstyle_token');
+    } catch (error) {
+        console.error('Error getting token:', error);
+        return null;
+    }
+}
+
+// Set token in localStorage
+function setCurrentToken(token) {
+    try {
+        if (token) {
+            localStorage.setItem('petstyle_token', token);
+        } else {
+            localStorage.removeItem('petstyle_token');
+        }
+        return true;
+    } catch (error) {
+        console.error('Error setting token:', error);
+        return false;
+    }
+}
+
+// Login function - FIXED to save token correctly
+async function login(email, password) {
+    try {
+        console.log('🔐 Attempting login for:', email);
+        
+        if (!email || !password) {
+            throw new Error('Email y contraseña son obligatorios');
+        }
+        
+        if (!isValidEmail(email)) {
+            throw new Error('Email no válido');
+        }
+        
+        // Try API login
+        const response = await fetch('http://localhost:3000/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password })
+        });
+        
+        console.log('📡 API response status:', response.status);
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log('✅ API login response:', data);
+            
+            // Handle different response formats from your API
+            if (data.success || data.message === "Login exitoso" || response.status === 200) {
+                // Extract user data
+                let userData = data.user || data.data || data;
+                
+                // If we don't have user data but login was successful, create basic user object
+                if (!userData.email && data.message === "Login exitoso") {
+                    userData = {
+                        email: email,
+                        name: userData.name || "Usuario",
+                        role: userData.role || "user",
+                        _id: userData._id || Date.now().toString()
+                    };
+                }
+                
+                console.log('👤 User data to save:', userData);
+                console.log('🔑 Token to save:', data.token);
+                
+                // Save user data
+                setCurrentUser(userData);
+                
+                // Save token if available
+                if (data.token) {
+                    setCurrentToken(data.token);
+                    console.log('✅ Token saved successfully');
+                } else {
+                    console.log('⚠️ No token received from server');
+                }
+                
+                // Verify data was saved
+                console.log('🔍 Verification - User saved:', !!getCurrentUser());
+                console.log('🔍 Verification - Token saved:', !!getCurrentToken());
+                
+                showToast('Inicio de sesión exitoso', 'success');
+                
+                // Redirect based on user role
+                redirectBasedOnRole(userData);
+                
+                return { success: true, user: userData, token: data.token };
+            } else {
+                throw new Error(data.message || 'Respuesta inválida del servidor');
+            }
+        } else {
+            const errorData = await response.json();
+            console.log('❌ API login failed:', errorData);
+            throw new Error(errorData.message || 'Credenciales incorrectas');
+        }
+        
+    } catch (error) {
+        console.error('Login error:', error);
+        
+        // Handle specific error messages
+        let message = error.message;
+        if (error.message.includes('fetch')) {
+            message = 'No se pudo conectar con el servidor. Verifica que esté funcionando.';
+        } else if (error.message.includes('NetworkError')) {
+            message = 'Error de conexión. Verifica tu internet.';
+        }
+        
+        showToast(message, 'error');
+        return { success: false, message };
+    }
+}
+
+// Redirect user based on their role from database
+function redirectBasedOnRole(user) {
+    console.log('🔄 Redirecting user based on role:', user);
+    console.log('👤 User role/type:', user.role, user.userType);
+    
+    // Check if user is admin based on multiple criteria
+    const isUserAdmin = isAdmin(user);
+    
+    console.log('🔍 Admin check result:', isUserAdmin);
+    
+    setTimeout(() => {
+        if (isUserAdmin) {
+            console.log('👑 Admin detected - redirecting to admin panel');
+            showToast('Bienvenido, Administrador', 'success');
+            window.location.href = 'admin.html';
+        } else {
+            console.log('👤 Regular user - redirecting to main');
+            showToast(`Bienvenido, ${user.name || user.nombre}`, 'success');
+            window.location.href = 'main.html';
+        }
+    }, 1000);
+}
+
+// Register function - ONLY with real API
+async function register(userData) {
+    try {
+        // Validate required fields
+        const requiredFields = ['name', 'email', 'password'];
+        for (const field of requiredFields) {
+            if (!userData[field]) {
+                throw new Error(`El campo ${field} es obligatorio`);
+            }
+        }
+        
+        // Validate email
+        if (!isValidEmail(userData.email)) {
+            throw new Error('El email no es válido');
+        }
+        
+        // Validate password
+        const passwordValidation = validatePassword(userData.password);
+        if (!passwordValidation.isValid) {
+            throw new Error(passwordValidation.errors[0]);
+        }
+        
+        // Prepare data for API
+        const registerData = {
+            name: userData.name,
+            email: userData.email,
+            password: userData.password,
+            phone: userData.phone || '',
+            address: userData.address || {}
+        };
+        
+        // Try API registration
+        const response = await fetch('http://localhost:3000/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(registerData)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            setCurrentUser(data.user);
+            
+            // Save token if provided
+            if (data.token) {
+                setCurrentToken(data.token);
+            }
+            
+            showToast('Registro exitoso', 'success');
+            
+            // New users are always regular users, redirect to main
+            setTimeout(() => {
+                window.location.href = 'main.html';
+            }, 1500);
+            
+            return { success: true, user: data.user };
+        } else {
+            throw new Error(data.message || 'Error en el registro');
+        }
+        
+    } catch (error) {
+        console.error('Registration error:', error);
+        
+        // Handle specific error cases
+        let message = error.message;
+        if (error.message.includes('duplicate') || error.message.includes('exists') || error.message.includes('E11000')) {
+            message = 'Este email ya está registrado';
+        } else if (error.message.includes('validation')) {
+            message = 'Datos de registro inválidos';
+        }
+        
+        showToast(message, 'error');
+        return { success: false, message };
+    }
+}
+
+// Check if user is admin - Updated for your backend response
+function isAdmin(user = null) {
+    const currentUser = user || getCurrentUser();
+    if (!currentUser) return false;
+    
+    console.log('🔍 Checking admin status for user:', currentUser);
+    
+    // Check multiple conditions for admin based on your database structure
+    const adminConditions = [
+        // From your backend response structure
+        currentUser.role === 'admin',
+        currentUser.userType === 'admin',
+        currentUser.isAdmin === true,
+        
+        // Additional checks
+        currentUser.role === 'administrador',
+        currentUser.role === 'administrator',
+        currentUser.role === 'superadmin',
+        
+        // If user has admin email patterns
+        currentUser.email?.includes('admin'),
+        
+        // Check collection or source
+        currentUser.collection === 'administradors',
+        currentUser.fromAdminCollection === true
+    ];
+    
+    const isUserAdmin = adminConditions.some(condition => condition === true);
+    console.log('🎯 Admin conditions check:', { 
+        conditions: adminConditions.map((c, i) => `${i}: ${c}`), 
+        result: isUserAdmin 
+    });
+    
+    return isUserAdmin;
+}
+
+// Check if user is logged in
+function isLoggedIn() {
+    return getCurrentUser() !== null;
+}
+
+// Require authentication
+function requireAuth(redirectUrl = 'login.html') {
+    if (!isLoggedIn()) {
+        showToast('Debes iniciar sesión para acceder a esta página', 'warning');
+        setTimeout(() => {
+            window.location.href = redirectUrl;
+        }, 1500);
+        return false;
+    }
+    return true;
+}
+
+// Require admin privileges
+function requireAdmin(redirectUrl = 'main.html') {
+    if (!requireAuth()) return false;
+    
+    if (!isAdmin()) {
+        showToast('Acceso denegado. Se requieren permisos de administrador.', 'error');
+        setTimeout(() => {
+            window.location.href = redirectUrl;
+        }, 1500);
+        return false;
+    }
+    return true;
+}
+
+// Logout function
+function logout() {
+    try {
+        // Clear user data
+        const user = getCurrentUser();
+        setCurrentUser(null);
+        setCurrentToken(null);
+        
+        // Clear user-specific data
+        if (user) {
+            localStorage.removeItem(`favorites_${user.email}`);
+            localStorage.removeItem(`cart_${user.email}`);
+        }
+        
+        // Clear any other PetStyle data
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+            if (key.startsWith('petstyle_') || key.startsWith('cart_') || key.startsWith('favorites_')) {
+                localStorage.removeItem(key);
+            }
+        });
+        
+        showToast('Sesión cerrada correctamente', 'success');
+        
+        // Redirect to login page
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1000);
+        
+        return true;
+    } catch (error) {
+        console.error('Logout error:', error);
+        showToast('Error al cerrar sesión', 'error');
+        return false;
+    }
+}
+
+// Validate email
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+// Validate password
+function validatePassword(password) {
+    const errors = [];
+    
+    if (password.length < 6) {
+        errors.push('La contraseña debe tener al menos 6 caracteres');
+    }
+    
+    return {
+        isValid: errors.length === 0,
+        errors: errors,
+        strength: getPasswordStrength(password)
+    };
+}
+
+function getPasswordStrength(password) {
+    let strength = 0;
+    
+    if (password.length >= 6) strength += 1;
+    if (password.length >= 8) strength += 1;
+    if (/[A-Z]/.test(password)) strength += 1;
+    if (/[a-z]/.test(password)) strength += 1;
+    if (/\d/.test(password)) strength += 1;
+    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+    
+    if (strength <= 2) return 'weak';
+    if (strength <= 4) return 'medium';
+    return 'strong';
+}
+
+// Session management
+function initializeAuth() {
+    const user = getCurrentUser();
+    const token = getCurrentToken();
+    
+    if (user) {
+        console.log('👤 User session found:', user.name || user.nombre);
+        console.log('🔑 User data:', user);
+        console.log('🎫 Token available:', !!token);
+        console.log('👑 Is admin:', isAdmin(user));
+    }
+}
+
+// Initialize auth system
+document.addEventListener('DOMContentLoaded', initializeAuth);
+
+// Export auth functions for global use
+window.auth = {
+    getCurrentUser,
+    getCurrentToken,
+    setCurrentUser,
+    setCurrentToken,
+    login,
+    register,
+    logout,
+    isAdmin,
+    isLoggedIn,
+    requireAuth,
+    requireAdmin,
+    redirectBasedOnRole
+};
+
+
+// ===== UTILITY FUNCTIONS FOR PETSTYLE =====
+
+// ================================
+// LOCAL STORAGE HELPERS
+// ================================
+
+function getLocalStorage(key, defaultValue = null) {
+    try {
+        const item = localStorage.getItem(key);
+        if (item === null) return defaultValue;
+        return JSON.parse(item);
+    } catch (error) {
+        console.error(`Error reading localStorage key "${key}":`, error);
+        return defaultValue;
+    }
+}
+
+function setLocalStorage(key, value) {
+    try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+    } catch (error) {
+        console.error(`Error setting localStorage key "${key}":`, error);
+        return false;
+    }
+}
+
+function removeLocalStorage(key) {
+    try {
+        localStorage.removeItem(key);
+        return true;
+    } catch (error) {
+        console.error(`Error removing localStorage key "${key}":`, error);
+        return false;
+    }
+}
+
+// ================================
+// TOAST NOTIFICATIONS
+// ================================
+
+function showToast(message, type = 'info', duration = 3000) {
+    // Remove existing toasts
+    const existingToasts = document.querySelectorAll('.toast');
+    existingToasts.forEach(toast => toast.remove());
+    
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    
+    // Add to document
+    document.body.appendChild(toast);
+    
+    // Auto remove
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.style.animation = 'slideOut 0.3s ease forwards';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 300);
+        }
+    }, duration);
+    
+    console.log(`📢 Toast (${type}): ${message}`);
+}
+
+// ================================
+// DATE/TIME HELPERS
+// ================================
+
+function formatDate(date, options = {}) {
+    if (!date) return '';
+    
+    const defaultOptions = {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    };
+    
+    const formatOptions = { ...defaultOptions, ...options };
+    
+    try {
+        const dateObj = date instanceof Date ? date : new Date(date);
+        return dateObj.toLocaleDateString('es-ES', formatOptions);
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return date.toString();
+    }
+}
+
+function formatTime(date) {
+    if (!date) return '';
+    
+    try {
+        const dateObj = date instanceof Date ? date : new Date(date);
+        return dateObj.toLocaleTimeString('es-ES', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch (error) {
+        console.error('Error formatting time:', error);
+        return date.toString();
+    }
+}
+
+function timeAgo(date) {
+    if (!date) return '';
+    
+    try {
+        const dateObj = date instanceof Date ? date : new Date(date);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - dateObj) / 1000);
+        
+        if (diffInSeconds < 60) return 'Hace un momento';
+        if (diffInSeconds < 3600) return `Hace ${Math.floor(diffInSeconds / 60)} minutos`;
+        if (diffInSeconds < 86400) return `Hace ${Math.floor(diffInSeconds / 3600)} horas`;
+        if (diffInSeconds < 604800) return `Hace ${Math.floor(diffInSeconds / 86400)} días`;
+        
+        return formatDate(dateObj);
+    } catch (error) {
+        console.error('Error calculating time ago:', error);
+        return '';
+    }
+}
+
+// ================================
+// STRING HELPERS
+// ================================
+
+function truncateText(text, maxLength = 100, suffix = '...') {
+    if (!text || text.length <= maxLength) return text;
+    return text.substring(0, maxLength - suffix.length) + suffix;
+}
+
+function capitalizeFirst(text) {
+    if (!text) return '';
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+}
+
+function capitalizeWords(text) {
+    if (!text) return '';
+    return text.split(' ')
+        .map(word => capitalizeFirst(word))
+        .join(' ');
+}
+
+function slugify(text) {
+    if (!text) return '';
+    return text
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
+// ================================
+// NUMBER HELPERS
+// ================================
+
+function formatPrice(price, currency = 'MXN') {
+    if (price === null || price === undefined) return '';
+    
+    try {
+        return new Intl.NumberFormat('es-MX', {
+            style: 'currency',
+            currency: currency,
+            minimumFractionDigits: 2
+        }).format(price);
+    } catch (error) {
+        console.error('Error formatting price:', error);
+        return `$${price.toFixed(2)}`;
+    }
+}
+
+function formatNumber(number, options = {}) {
+    if (number === null || number === undefined) return '';
+    
+    try {
+        return new Intl.NumberFormat('es-MX', options).format(number);
+    } catch (error) {
+        console.error('Error formatting number:', error);
+        return number.toString();
+    }
+}
+
+function calculateDiscount(originalPrice, discountedPrice) {
+    if (!originalPrice || !discountedPrice || originalPrice <= discountedPrice) return 0;
+    return Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
+}
+
+// ================================
+// VALIDATION HELPERS
+// ================================
+
+function isValidEmail(email) {
+    if (!email) return false;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+function isValidPhone(phone) {
+    if (!phone) return false;
+    const phoneRegex = /^[0-9]{10}$/;
+    return phoneRegex.test(phone.replace(/\D/g, ''));
+}
+
+function isValidPassword(password) {
+    if (!password) return false;
+    return password.length >= 6;
+}
+
+function validateRequired(value, fieldName = 'Campo') {
+    if (!value || value.toString().trim() === '') {
+        return `${fieldName} es obligatorio`;
+    }
+    return null;
+}
+
+// ================================
+// DOM HELPERS
+// ================================
+
+function createElement(tag, className = '', textContent = '') {
+    const element = document.createElement(tag);
+    if (className) element.className = className;
+    if (textContent) element.textContent = textContent;
+    return element;
+}
+
+function removeAllChildren(element) {
+    if (element) {
+        while (element.firstChild) {
+            element.removeChild(element.firstChild);
+        }
+    }
+}
+
+function toggleClass(element, className) {
+    if (element) {
+        element.classList.toggle(className);
+    }
+}
+
+function fadeIn(element, duration = 300) {
+    if (!element) return;
+    
+    element.style.opacity = '0';
+    element.style.display = 'block';
+    
+    const fadeInterval = setInterval(() => {
+        const opacity = parseFloat(element.style.opacity);
+        if (opacity < 1) {
+            element.style.opacity = (opacity + 0.1).toString();
+        } else {
+            clearInterval(fadeInterval);
+        }
+    }, duration / 10);
+}
+
+function fadeOut(element, duration = 300) {
+    if (!element) return;
+    
+    const fadeInterval = setInterval(() => {
+        const opacity = parseFloat(element.style.opacity);
+        if (opacity > 0) {
+            element.style.opacity = (opacity - 0.1).toString();
+        } else {
+            clearInterval(fadeInterval);
+            element.style.display = 'none';
+        }
+    }, duration / 10);
+}
+
+// ================================
+// ARRAY HELPERS
+// ================================
+
+function removeDuplicates(array, key = null) {
+    if (!Array.isArray(array)) return [];
+    
+    if (key) {
+        const seen = new Set();
+        return array.filter(item => {
+            const value = item[key];
+            if (seen.has(value)) return false;
+            seen.add(value);
+            return true;
+        });
+    }
+    
+    return [...new Set(array)];
+}
+
+function sortBy(array, key, direction = 'asc') {
+    if (!Array.isArray(array)) return [];
+    
+    return [...array].sort((a, b) => {
+        const aValue = a[key];
+        const bValue = b[key];
+        
+        if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+}
+
+function groupBy(array, key) {
+    if (!Array.isArray(array)) return {};
+    
+    return array.reduce((groups, item) => {
+        const group = item[key];
+        if (!groups[group]) groups[group] = [];
+        groups[group].push(item);
+        return groups;
+    }, {});
+}
+
+// ================================
+// URL HELPERS
+// ================================
+
+function getUrlParameter(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
+
+function updateUrlParameter(key, value) {
+    const url = new URL(window.location);
+    url.searchParams.set(key, value);
+    window.history.replaceState({}, '', url);
+}
+
+function removeUrlParameter(key) {
+    const url = new URL(window.location);
+    url.searchParams.delete(key);
+    window.history.replaceState({}, '', url);
+}
+
+// ================================
+// DEBOUNCE/THROTTLE
+// ================================
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
+
+// ================================
+// DEVICE DETECTION
+// ================================
+
+function isMobile() {
+    return window.innerWidth <= 768;
+}
+
+function isTablet() {
+    return window.innerWidth > 768 && window.innerWidth <= 1024;
+}
+
+function isDesktop() {
+    return window.innerWidth > 1024;
+}
+
+function isTouchDevice() {
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+}
+
+// ================================
+// RANDOM HELPERS
+// ================================
+
+function randomId(length = 8) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
+function randomColor() {
+    const colors = [
+        '#667eea', '#764ba2', '#f093fb', '#f5576c',
+        '#4facfe', '#00f2fe', '#43e97b', '#38f9d7',
+        '#ffecd2', '#fcb69f', '#a8edea', '#fed6e3'
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
+// ================================
+// LOADING STATES
+// ================================
+
+function showLoading(text = 'Cargando...') {
+    const existingLoader = document.querySelector('.global-loader');
+    if (existingLoader) existingLoader.remove();
+    
+    const loader = createElement('div', 'global-loader');
+    loader.innerHTML = `
+        <div style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        ">
+            <div style="
+                background: white;
+                padding: 2rem;
+                border-radius: 10px;
+                text-align: center;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            ">
+                <div style="
+                    width: 40px;
+                    height: 40px;
+                    border: 4px solid #e2e8f0;
+                    border-top: 4px solid #667eea;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                    margin: 0 auto 1rem;
+                "></div>
+                <p style="color: #6b7280; margin: 0;">${text}</p>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(loader);
+}
+
+function hideLoading() {
+    const loader = document.querySelector('.global-loader');
+    if (loader) loader.remove();
+}
+
+// ================================
+// ERROR HANDLING
+// ================================
+
+function handleError(error, context = 'Application') {
+    console.error(`${context} Error:`, error);
+    
+    let message = 'Ha ocurrido un error inesperado';
+    
+    if (error.message) {
+        if (error.message.includes('network') || error.message.includes('fetch')) {
+            message = 'Error de conexión. Verifica tu internet.';
+        } else if (error.message.includes('404')) {
+            message = 'Recurso no encontrado.';
+        } else if (error.message.includes('500')) {
+            message = 'Error del servidor. Intenta más tarde.';
+        } else {
+            message = error.message;
+        }
+    }
+    
+    showToast(message, 'error');
+    return message;
+}
+
+// ================================
+// PERFORMANCE HELPERS
+// ================================
+
+function measureTime(label) {
+    console.time(label);
+    return () => console.timeEnd(label);
+}
+
+function lazy(fn) {
+    let result;
+    let hasRun = false;
+    
+    return function(...args) {
+        if (!hasRun) {
+            result = fn.apply(this, args);
+            hasRun = true;
+        }
+        return result;
+    };
+}
+
+// ================================
+// EXPORT ALL FUNCTIONS
+// ================================
+
+// Make functions globally available
+window.utils = {
+    // Storage
+    getLocalStorage,
+    setLocalStorage,
+    removeLocalStorage,
+    
+    // UI
+    showToast,
+    showLoading,
+    hideLoading,
+    
+    // Date/Time
+    formatDate,
+    formatTime,
+    timeAgo,
+    
+    // Strings
+    truncateText,
+    capitalizeFirst,
+    capitalizeWords,
+    slugify,
+    
+    // Numbers
+    formatPrice,
+    formatNumber,
+    calculateDiscount,
+    
+    // Validation
+    isValidEmail,
+    isValidPhone,
+    isValidPassword,
+    validateRequired,
+    
+    // DOM
+    createElement,
+    removeAllChildren,
+    toggleClass,
+    fadeIn,
+    fadeOut,
+    
+    // Arrays
+    removeDuplicates,
+    sortBy,
+    groupBy,
+    
+    // URL
+    getUrlParameter,
+    updateUrlParameter,
+    removeUrlParameter,
+    
+    // Performance
+    debounce,
+    throttle,
+    measureTime,
+    lazy,
+    
+    // Device
+    isMobile,
+    isTablet,
+    isDesktop,
+    isTouchDevice,
+    
+    // Random
+    randomId,
+    randomColor,
+    
+    // Error handling
+    handleError
+};
+
+// Also make individual functions available globally for compatibility
+Object.assign(window, window.utils);
+
+console.log('✅ Utils loaded successfully');
+
+
+// frontend/js/config.js
+const CONFIG = {
+    // URLs de API según el entorno
+    API_BASE_URL: (() => {
+        // Detectar si estamos en Cordova
+        if (window.cordova || window.PhoneGap || window.phonegap) {
+            // En Cordova, usar la IP de tu computadora en la red local
+            return 'http://192.168.1.100:3000/api'; // Cambia esta IP por la tuya
+        }
+        
+        // Si es desarrollo local con archivo
+        if (window.location.protocol === 'file:') {
+            return 'http://localhost:3000/api';
+        }
+        
+        // Si es servidor web local
+        if (window.location.hostname === 'localhost' || 
+            window.location.hostname === '127.0.0.1') {
+            return 'http://localhost:3000/api';
+        }
+        
+        // Producción
+        return '/api';
+    })(),
+    
+    // Claves para localStorage
+    STORAGE_KEYS: {
+        TOKEN: 'petstyle_auth_token',
+        USER: 'petstyle_user_data',
+        CART: 'petstyle_cart',
+        FAVORITES: 'petstyle_favorites'
+    },
+    
+    // Configuración de la app
+    APP: {
+        NAME: 'PetStyle',
+        VERSION: '1.0.0',
+        TIMEOUT: 10000, // 10 segundos
+        RETRY_ATTEMPTS: 3
+    },
+    
+    // Configuración para Cordova
+    CORDOVA: {
+        READY: false,
+        DEVICE_INFO: null
+    }
+};
+
+// Función para obtener la IP local de la red
+CONFIG.getLocalIP = function() {
+    // Esta es la IP que debes cambiar por la de tu computadora
+    // Para obtenerla, ejecuta: ipconfig (Windows) o ifconfig (Mac/Linux)
+    return '192.168.1.100'; // CAMBIAR ESTA IP
+};
+
+// Función para detectar el entorno
+CONFIG.getEnvironment = function() {
+    if (window.cordova) return 'cordova';
+    if (window.location.protocol === 'file:') return 'file';
+    if (window.location.hostname === 'localhost') return 'development';
+    return 'production';
+};
+
+// Función para verificar conectividad
+CONFIG.checkConnectivity = async function() {
+    try {
+        const response = await fetch(`${this.API_BASE_URL.replace('/api', '')}/health`, {
+            method: 'GET',
+            timeout: 5000
+        });
+        return response.ok;
+    } catch (error) {
+        console.error('Connectivity check failed:', error);
+        return false;
+    }
+};
+
+// Event listener para cuando Cordova esté listo
+document.addEventListener('deviceready', function() {
+    CONFIG.CORDOVA.READY = true;
+    CONFIG.CORDOVA.DEVICE_INFO = window.device || null;
+    
+    console.log('🚀 Cordova Ready!');
+    console.log('📱 Device:', CONFIG.CORDOVA.DEVICE_INFO);
+    console.log('🌐 API URL:', CONFIG.API_BASE_URL);
+    
+    // Disparar evento personalizado
+    document.dispatchEvent(new CustomEvent('cordovaReady', {
+        detail: { config: CONFIG }
+    }));
+}, false);
+
+// Para debugging
+if (window.location.hostname === 'localhost') {
+    window.CONFIG = CONFIG;
+    console.log('🐾 PetStyle Config loaded:', CONFIG);
+}
+
+// Export para uso con modules (si es necesario)
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = CONFIG;
+}
+
+
+/* ===== DISEÑO MÓVIL PREMIUM - BASADO EN REFERENCIA ===== */
+
+/* Reset completo */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Contenedor principal */
+.main-container {
+    min-height: 100vh;
+    padding-bottom: 80px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Header elegante */
+.header {
+    background: transparent;
+    padding: 20px 20px 0;
+    text-align: center;
+    color: white;
+}
+
+.logo {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+
+.logo i {
+    display: none;
+}
+
+.user-greeting {
+    font-size: 16px;
+    font-weight: 300;
+    opacity: 0.9;
+    margin-bottom: 20px;
+}
+
+/* Búsqueda moderna */
+.search-section {
+    padding: 0 20px 25px;
+}
+
+.search-bar {
+    position: relative;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 16px 20px;
+    border: none;
+    border-radius: 25px;
+    background: rgba(255, 255, 255, 0.95);
+    font-size: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.search-bar input:focus {
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.search-bar i {
+    display: none;
+}
+
+/* Categorías horizontales elegantes */
+.categories-section {
+    padding: 0 20px 30px;
+}
+
+.categories-section h3 {
+    color: white;
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    letter-spacing: -0.3px;
+}
+
+.categories-scroll {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.categories-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.category-item {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 12px 20px;
+    border-radius: 25px;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.category-item.active,
+.category-item:hover {
+    background: rgba(255, 255, 255, 0.95);
+    color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.category-icon {
+    display: inline;
+    margin-right: 6px;
+}
+
+/* Filtros ocultos en móvil */
+.filters-section {
+    display: none;
+}
+
+/* Sección de productos */
+.products-section {
+    background: #f8f9fa;
+    border-radius: 30px 30px 0 0;
+    padding: 30px 20px 20px;
+    min-height: 60vh;
+    position: relative;
+}
+
+.products-section::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+}
+
+.products-section h3 {
+    color: #333;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.products-section h3::before {
+    content: '⭐';
+    font-size: 20px;
+}
+
+/* Grid de productos premium */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 10px;
+}
+
+/* Cards de productos premium */
+.product-card {
+    background: white;
+    border-radius: 20px;
+    padding: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.product-card:hover::before {
+    opacity: 1;
+}
+
+/* Imagen del producto */
+.product-image {
+    position: relative;
+    width: 100%;
+    height: 140px;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    background: #f5f5f5;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.08);
+}
+
+/* Botón de favoritos moderno */
+.favorite-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: none;
+    border-radius: 12px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.favorite-btn:hover {
+    background: white;
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.favorite-btn.active {
+    background: #ff6b6b;
+    color: white;
+}
+
+.favorite-btn i {
+    font-size: 14px;
+}
+
+/* Información del producto */
+.product-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.product-category {
+    font-size: 11px;
+    color: #667eea;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.product-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.3;
+    margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.product-description {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.4;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Footer del producto */
+.product-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 8px;
+}
+
+.product-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.add-to-cart-btn {
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.add-to-cart-btn:hover {
+    background: #5a6fd8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.add-to-cart-btn.disabled {
+    background: #ddd;
+    color: #999;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Rating estrellas */
+.product-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.stars {
+    display: flex;
+    gap: 1px;
+}
+
+.star {
+    color: #ffd700;
+    font-size: 12px;
+}
+
+.rating-number {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Estados de carga */
+.loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: #667eea;
+    grid-column: 1 / -1;
+}
+
+.loading i {
+    font-size: 32px;
+    margin-bottom: 16px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.no-products {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+    grid-column: 1 / -1;
+}
+
+.no-products i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.no-products h3 {
+    font-size: 20px;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+/* Modal premium */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+    padding: 0;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 25px 25px 0 0;
+    width: 100%;
+    max-width: 500px;
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+    position: relative;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.modal-content::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+}
+
+.modal-header {
+    padding: 25px 20px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: center;
+    position: relative;
+}
+
+.modal-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.close-modal {
+    position: absolute;
+    right: 20px;
+    top: 25px;
+    background: #f5f5f5;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.close-modal:hover {
+    background: #eee;
+    transform: scale(1.05);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-image {
+    width: 100%;
+    height: 250px;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    background: #f5f5f5;
+}
+
+.modal-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.modal-category {
+    font-size: 12px;
+    color: #667eea;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+.modal-info h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 12px;
+    line-height: 1.3;
+}
+
+.modal-info p {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    font-size: 15px;
+}
+
+.modal-details {
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.detail-item:last-child {
+    margin-bottom: 0;
+}
+
+.detail-item .label {
+    font-weight: 600;
+    color: #333;
+}
+
+.modal-price-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 20px;
+    color: white;
+}
+
+.modal-price-section .price {
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 8px 12px;
+}
+
+.quantity-controls button {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.quantity-controls button:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.quantity-controls span {
+    font-size: 18px;
+    font-weight: bold;
+    min-width: 24px;
+    text-align: center;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-favorite {
+    background: none;
+    border: 2px solid #ff6b6b;
+    color: #ff6b6b;
+    border-radius: 16px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 0 0 56px;
+}
+
+.btn-favorite.active {
+    background: #ff6b6b;
+    color: white;
+}
+
+.btn-cart {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 14px 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-cart:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Bottom Navigation - Exacto como la referencia */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 200;
+    border-top: 1px solid #f0f0f0;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #999;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 8px 12px;
+    border-radius: 12px;
+    min-width: 50px;
+}
+
+.nav-item i {
+    font-size: 22px;
+    margin-bottom: 4px;
+    transition: all 0.3s ease;
+}
+
+.nav-item.active {
+    color: #667eea;
+}
+
+.nav-item.active i {
+    transform: scale(1.1);
+}
+
+.nav-item:hover {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+/* Badge de notificaciones */
+.notification-badge {
+    position: absolute;
+    top: 2px;
+    right: 8px;
+    background: #ff6b6b;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: scale(0);
+    transition: transform 0.3s ease;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(255, 107, 107, 0.3);
+}
+
+.notification-badge.show {
+    transform: scale(1);
+}
+
+/* Espaciador */
+.bottom-spacer {
+    height: calc(80px + env(safe-area-inset-bottom));
+}
+
+/* Responsive */
+@media (min-width: 480px) {
+    .products-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    
+    .modal-overlay {
+        align-items: center;
+        padding: 20px;
+    }
+    
+    .modal-content {
+        border-radius: 25px;
+        max-width: 450px;
+        max-height: 90vh;
+    }
+}
+
+@media (min-width: 768px) {
+    .products-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .main-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+}
+/* Estilos para header con autenticación */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.login-btn, .register-btn, .logout-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.login-btn {
+    background: #667eea;
+    color: white;
+}
+
+.register-btn {
+    background: transparent;
+    color: #667eea;
+    border: 1px solid #667eea;
+}
+
+.logout-btn {
+    background: #ef4444;
+    color: white;
+}
+
+.login-btn:hover {
+    background: #5a6fd8;
+}
+
+.register-btn:hover {
+    background: #667eea;
+    color: white;
+}
+
+.logout-btn:hover {
+    background: #dc2626;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: white;
+}
+
+.user-name {
+    font-weight: 500;
+}
+
+/* Modal de auth */
+.auth-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.auth-modal {
+    background: white;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 90%;
+    overflow: hidden;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.auth-modal-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.close-auth-modal {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #666;
+}
+
+.auth-modal-body {
+    padding: 1.5rem;
+}
+
+.auth-modal-footer {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: #f8f9fa;
+    justify-content: flex-end;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+
+/* ===== CART CSS - ESTILO MERCADOLIBRE ===== */
+
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: #f8f9fa;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Contenedor principal */
+.cart-container {
+    min-height: 100vh;
+    padding-bottom: 80px;
+    background: #f8f9fa;
+}
+
+/* Header con gradiente */
+.cart-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 15px 20px 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    position: relative;
+}
+
+.back-btn, .delete-all-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.back-btn:hover, .delete-all-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.cart-header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    flex: 1;
+}
+
+/* Contenido principal */
+.cart-content {
+    background: white;
+    border-radius: 25px 25px 0 0;
+    margin-top: -15px;
+    min-height: calc(100vh - 120px);
+    position: relative;
+    z-index: 1;
+}
+
+.cart-content::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+}
+
+/* Estado vacío */
+.empty-cart {
+    text-align: center;
+    padding: 80px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.empty-icon i {
+    font-size: 32px;
+    color: white;
+}
+
+.empty-cart h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.empty-cart p {
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 25px;
+    max-width: 280px;
+}
+
+.explore-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 15px;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.explore-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Secciones generales */
+.cart-section, .discount-section, .shipping-section, .payment-section, .order-summary {
+    padding: 20px;
+    margin-bottom: 10px;
+    background: white;
+    border-bottom: 8px solid #f8f9fa;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-top: 15px;
+}
+
+.section-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.counter {
+    font-size: 14px;
+    color: #666;
+    background: #f0f0f0;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+/* Lista de productos */
+.cart-products-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.cart-product-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 15px;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.cart-product-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.product-content {
+    display: flex;
+    gap: 15px;
+}
+
+.product-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #f5f5f5;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.product-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.product-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.3;
+    flex: 1;
+    margin-right: 10px;
+}
+
+.remove-product-btn {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.remove-product-btn:hover {
+    background: rgba(231, 76, 60, 0.1);
+}
+
+.product-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.product-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 4px 8px;
+    background: #f8f9fa;
+}
+
+.quantity-btn {
+    background: none;
+    border: none;
+    color: #667eea;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.quantity-btn:hover {
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.quantity-btn:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+.quantity-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Código de descuento */
+.discount-input-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.discount-input-container input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.discount-input-container input:focus {
+    border-color: #667eea;
+}
+
+.apply-btn {
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.apply-btn:hover {
+    background: #5a6fd8;
+}
+
+.discount-message {
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 8px;
+    display: none;
+}
+
+.discount-message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    display: block;
+}
+
+.discount-message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    display: block;
+}
+
+/* Opciones de envío */
+.shipping-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.shipping-option {
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: block;
+}
+
+.shipping-option:hover {
+    border-color: #667eea;
+}
+
+.shipping-option.selected {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.shipping-option input {
+    display: none;
+}
+
+.option-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.option-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.option-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.option-price {
+    font-weight: 700;
+    color: #333;
+    font-size: 14px;
+}
+
+.option-price.free {
+    color: #28a745;
+}
+
+.option-detail {
+    color: #666;
+    font-size: 12px;
+}
+
+/* Opciones de pago */
+.payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.payment-option {
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: block;
+}
+
+.payment-option:hover {
+    border-color: #667eea;
+}
+
+.payment-option.selected {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.payment-option input {
+    display: none;
+}
+
+.payment-option .option-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.payment-icon {
+    width: 40px;
+    height: 40px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #667eea;
+}
+
+.payment-info {
+    flex: 1;
+}
+
+.payment-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.payment-detail {
+    color: #666;
+    font-size: 12px;
+}
+
+/* Formularios de pago */
+.card-form, .paypal-form {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 15px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus {
+    border-color: #667eea;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.paypal-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff3cd;
+    color: #856404;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-top: 10px;
+}
+
+/* Resumen del pedido */
+.summary-content {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.summary-row:last-child {
+    margin-bottom: 0;
+}
+
+.summary-row span:first-child {
+    color: #666;
+}
+
+.summary-row span:last-child {
+    color: #333;
+    font-weight: 500;
+}
+
+.summary-row .free {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.discount-row span:last-child {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.summary-divider {
+    height: 1px;
+    background: #e0e0e0;
+    margin: 16px 0;
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    padding-top: 8px;
+}
+
+/* Botón de checkout */
+.checkout-section {
+    padding: 20px;
+    background: white;
+}
+
+.checkout-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.checkout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.checkout-btn:disabled {
+    background: #ddd;
+    color: #999;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Modales */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 30px 25px;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+    animation: modalSlideIn 0.3s ease;
+}
+
+.modal-content.success {
+    max-width: 380px;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.modal-icon i {
+    font-size: 24px;
+    color: white;
+}
+
+.success-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    animation: successPulse 0.6s ease;
+}
+
+.success-icon i {
+    font-size: 32px;
+    color: white;
+}
+
+@keyframes successPulse {
+    0% { transform: scale(0.8); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.modal-content h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.modal-content p {
+    color: #666;
+    line-height: 1.4;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.order-number {
+    background: #f8f9fa;
+    border: 2px dashed #667eea;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 20px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+    color: #667eea;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-cancel, .btn-confirm, .btn-primary, .btn-secondary {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-cancel, .btn-secondary {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.btn-cancel:hover, .btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+.btn-confirm {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+}
+
+.btn-confirm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 200;
+    border-top: 1px solid #f0f0f0;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #999;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 8px 12px;
+    border-radius: 12px;
+    min-width: 50px;
+}
+
+.nav-item i {
+    font-size: 22px;
+    margin-bottom: 4px;
+    transition: all 0.3s ease;
+}
+
+.nav-item.active {
+    color: #667eea;
+}
+
+.nav-item.active i {
+    transform: scale(1.1);
+}
+
+.nav-item:hover {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+/* Badge de notificaciones */
+.notification-badge {
+    position: absolute;
+    top: 2px;
+    right: 8px;
+    background: #ff6b6b;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: scale(0);
+    transition: transform 0.3s ease;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(255, 107, 107, 0.3);
+}
+
+.notification-badge.show {
+    transform: scale(1);
+}
+
+/* Espaciador */
+.bottom-spacer {
+    height: calc(80px + env(safe-area-inset-bottom));
+}
+
+/* Estados ocultos */
+.cart-section.hidden,
+.discount-section.hidden,
+.shipping-section.hidden,
+.payment-section.hidden,
+.order-summary.hidden,
+.checkout-section.hidden {
+    display: none;
+}
+
+/* Animaciones de entrada */
+.cart-product-card {
+    animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (min-width: 480px) {
+    .cart-content {
+        max-width: 500px;
+        margin: -15px auto 0;
+    }
+    
+    .cart-product-card {
+        max-width: 460px;
+    }
+    
+    .modal-content {
+        max-width: 400px;
+    }
+    
+    .modal-content.success {
+        max-width: 450px;
+    }
+}
+
+@media (min-width: 768px) {
+    .cart-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .form-row {
+        gap: 20px;
+    }
+    
+    .shipping-options,
+    .payment-options {
+        gap: 15px;
+    }
+}
+
+/* Efectos de hover mejorados */
+.shipping-option:hover .option-name,
+.payment-option:hover .payment-name {
+    color: #667eea;
+}
+
+.quantity-controls:hover {
+    border-color: #667eea;
+}
+
+/* Estados de validación */
+.form-group input.error {
+    border-color: #e74c3c;
+    background: rgba(231, 76, 60, 0.05);
+}
+
+.form-group input.success {
+    border-color: #28a745;
+    background: rgba(40, 167, 69, 0.05);
+}
+
+/* Loading states */
+.checkout-btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.checkout-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+
+/* ===== FAVORITOS CSS - DISEÑO PREMIUM ===== */
+
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: #f8f9fa;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Contenedor principal */
+.favorites-container {
+    min-height: 100vh;
+    padding-bottom: 80px;
+    background: #f8f9fa;
+}
+
+/* Header con gradiente */
+.favorites-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 15px 20px 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    position: relative;
+}
+
+.favorites-header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Contenido principal */
+.favorites-content {
+    padding: 25px 20px;
+    background: white;
+    border-radius: 25px 25px 0 0;
+    margin-top: -15px;
+    min-height: calc(100vh - 120px);
+    position: relative;
+    z-index: 1;
+}
+
+.favorites-content::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+}
+
+/* Header de sección */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-top: 15px;
+}
+
+.section-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-header h2 i {
+    color: #e74c3c;
+    font-size: 20px;
+}
+
+.counter {
+    font-size: 14px;
+    color: #666;
+    background: #f0f0f0;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+/* Estado vacío */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+}
+
+.empty-icon i {
+    font-size: 32px;
+    color: white;
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 25px;
+    max-width: 280px;
+}
+
+.explore-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 15px;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.explore-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Lista de favoritos */
+.favorites-list {
+    display: none;
+}
+
+.favorites-list.show {
+    display: block;
+}
+
+/* Card de producto favorito */
+.favorite-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #f0f0f0;
+}
+
+.favorite-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.favorite-card-content {
+    display: flex;
+    gap: 16px;
+}
+
+/* Imagen del producto */
+.favorite-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #f5f5f5;
+}
+
+.favorite-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Información del producto */
+.favorite-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.favorite-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.favorite-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.3;
+    flex: 1;
+    margin-right: 8px;
+}
+
+.remove-favorite-btn {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.remove-favorite-btn:hover {
+    background: rgba(231, 76, 60, 0.1);
+    transform: scale(1.1);
+}
+
+.favorite-category {
+    font-size: 12px;
+    color: #667eea;
+    font-weight: 500;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.favorite-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.favorite-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.add-to-cart-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.add-to-cart-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.add-to-cart-btn:disabled {
+    background: #ddd;
+    color: #999;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Modal de confirmación */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 30px 25px;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.modal-icon i {
+    font-size: 24px;
+    color: white;
+}
+
+.modal-content h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.modal-content p {
+    color: #666;
+    line-height: 1.4;
+    margin-bottom: 25px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-cancel, .btn-confirm {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel {
+    background: #f0f0f0;
+    color: #666;
+    border: none;
+}
+
+.btn-cancel:hover {
+    background: #e0e0e0;
+}
+
+.btn-confirm {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    border: none;
+}
+
+.btn-confirm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 200;
+    border-top: 1px solid #f0f0f0;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #999;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 8px 12px;
+    border-radius: 12px;
+    min-width: 50px;
+}
+
+.nav-item i {
+    font-size: 22px;
+    margin-bottom: 4px;
+    transition: all 0.3s ease;
+}
+
+.nav-item.active {
+    color: #667eea;
+}
+
+.nav-item.active i {
+    transform: scale(1.1);
+}
+
+.nav-item:hover {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+/* Badge de notificaciones */
+.notification-badge {
+    position: absolute;
+    top: 2px;
+    right: 8px;
+    background: #ff6b6b;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: scale(0);
+    transition: transform 0.3s ease;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(255, 107, 107, 0.3);
+}
+
+.notification-badge.show {
+    transform: scale(1);
+}
+
+/* Espaciador */
+.bottom-spacer {
+    height: calc(80px + env(safe-area-inset-bottom));
+}
+
+/* Responsive */
+@media (min-width: 480px) {
+    .favorites-content {
+        max-width: 500px;
+        margin: -15px auto 0;
+    }
+    
+    .favorite-card {
+        max-width: 460px;
+    }
+}
+
+@media (min-width: 768px) {
+    .favorites-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+}
