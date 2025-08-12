@@ -1,589 +1,672 @@
-// ===== UTILITY FUNCTIONS FOR PETSTYLE =====
+// ===== PETSTYLE UTILITIES SYSTEM - INTEGRATED =====
+console.log('🔧 PetStyle Utils System Loading...');
 
 // ================================
-// LOCAL STORAGE HELPERS
+// STORAGE MANAGEMENT SYSTEM
 // ================================
 
-function getLocalStorage(key, defaultValue = null) {
-    try {
-        const item = localStorage.getItem(key);
-        if (item === null) return defaultValue;
-        return JSON.parse(item);
-    } catch (error) {
-        console.error(`Error reading localStorage key "${key}":`, error);
-        return defaultValue;
+class PetStyleStorage {
+    constructor() {
+        this.KEYS = {
+            USER: 'petstyle_user',
+            TOKEN: 'petstyle_token',
+            CART: 'petstyle_cart',
+            FAVORITES: 'petstyle_favorites'
+        };
+    }
+
+    // Get current user
+    getCurrentUser() {
+        try {
+            const userData = localStorage.getItem(this.KEYS.USER);
+            return userData ? JSON.parse(userData) : null;
+        } catch (error) {
+            console.error('Error getting current user:', error);
+            return null;
+        }
+    }
+
+    // Get user-specific key for data isolation
+    getUserKey(dataType) {
+        const user = this.getCurrentUser();
+        const userIdentifier = user?.email || user?._id || 'guest';
+        return `${dataType}_${userIdentifier}`;
+    }
+
+    // ================================
+    // FAVORITES MANAGEMENT
+    // ================================
+
+    getFavorites() {
+        try {
+            const favoritesKey = this.getUserKey('favorites');
+            const favorites = localStorage.getItem(favoritesKey);
+            return favorites ? JSON.parse(favorites) : [];
+        } catch (error) {
+            console.error('Error getting favorites:', error);
+            return [];
+        }
+    }
+
+    saveFavorites(favorites) {
+        try {
+            const favoritesKey = this.getUserKey('favorites');
+            localStorage.setItem(favoritesKey, JSON.stringify(favorites));
+            this.updateCounters();
+            return true;
+        } catch (error) {
+            console.error('Error saving favorites:', error);
+            return false;
+        }
+    }
+
+    addToFavorites(product) {
+        try {
+            const favorites = this.getFavorites();
+            
+            // Check if already in favorites
+            if (favorites.some(fav => fav.id === product._id)) {
+                return { success: false, message: 'Ya está en favoritos' };
+            }
+
+            const favoriteItem = {
+                id: product._id,
+                name: product.name || product.nombre,
+                price: product.price || product.precio,
+                image: this.getProductImage(product),
+                category: product.category || product.categoria,
+                addedAt: new Date().toISOString()
+            };
+
+            favorites.push(favoriteItem);
+            this.saveFavorites(favorites);
+
+            console.log('💖 Added to favorites:', product.name);
+            return { success: true, message: 'Agregado a favoritos' };
+            
+        } catch (error) {
+            console.error('Error adding to favorites:', error);
+            return { success: false, message: 'Error al agregar a favoritos' };
+        }
+    }
+
+    removeFromFavorites(productId) {
+        try {
+            let favorites = this.getFavorites();
+            const originalLength = favorites.length;
+            
+            favorites = favorites.filter(fav => fav.id !== productId);
+            
+            if (favorites.length < originalLength) {
+                this.saveFavorites(favorites);
+                console.log('💔 Removed from favorites:', productId);
+                return { success: true, message: 'Removido de favoritos' };
+            }
+            
+            return { success: false, message: 'No encontrado en favoritos' };
+            
+        } catch (error) {
+            console.error('Error removing from favorites:', error);
+            return { success: false, message: 'Error al remover de favoritos' };
+        }
+    }
+
+    toggleFavorite(product) {
+        const favorites = this.getFavorites();
+        const isInFavorites = favorites.some(fav => fav.id === product._id);
+        
+        if (isInFavorites) {
+            return this.removeFromFavorites(product._id);
+        } else {
+            return this.addToFavorites(product);
+        }
+    }
+
+    isInFavorites(productId) {
+        const favorites = this.getFavorites();
+        return favorites.some(fav => fav.id === productId);
+    }
+
+    // ================================
+    // CART MANAGEMENT
+    // ================================
+
+    getCart() {
+        try {
+            const cartKey = this.getUserKey('cart');
+            const cart = localStorage.getItem(cartKey);
+            return cart ? JSON.parse(cart) : [];
+        } catch (error) {
+            console.error('Error getting cart:', error);
+            return [];
+        }
+    }
+
+    saveCart(cartItems) {
+        try {
+            const cartKey = this.getUserKey('cart');
+            localStorage.setItem(cartKey, JSON.stringify(cartItems));
+            this.updateCounters();
+            return true;
+        } catch (error) {
+            console.error('Error saving cart:', error);
+            return false;
+        }
+    }
+
+    addToCart(product, quantity = 1) {
+        try {
+            const cart = this.getCart();
+            
+            // Check stock availability
+            if (!product.stock || product.stock <= 0) {
+                return { success: false, message: 'Producto sin stock' };
+            }
+
+            const existingItem = cart.find(item => item.productId === product._id);
+
+            if (existingItem) {
+                // Update quantity if product already in cart
+                const newQuantity = existingItem.quantity + quantity;
+                
+                if (newQuantity > product.stock) {
+                    return { success: false, message: 'Stock insuficiente' };
+                }
+                
+                existingItem.quantity = newQuantity;
+                existingItem.subtotal = existingItem.price * newQuantity;
+                existingItem.updatedAt = new Date().toISOString();
+            } else {
+                // Add new item to cart
+                const cartItem = {
+                    productId: product._id,
+                    name: product.name || product.nombre,
+                    price: product.price || product.precio,
+                    quantity: quantity,
+                    subtotal: (product.price || product.precio) * quantity,
+                    image: this.getProductImage(product),
+                    category: product.category || product.categoria,
+                    addedAt: new Date().toISOString()
+                };
+                
+                cart.push(cartItem);
+            }
+
+            this.saveCart(cart);
+            console.log('🛒 Added to cart:', product.name);
+            return { success: true, message: 'Agregado al carrito' };
+            
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            return { success: false, message: 'Error al agregar al carrito' };
+        }
+    }
+
+    updateCartQuantity(productId, newQuantity) {
+        try {
+            const cart = this.getCart();
+            const item = cart.find(item => item.productId === productId);
+            
+            if (!item) {
+                return { success: false, message: 'Producto no encontrado en el carrito' };
+            }
+
+            if (newQuantity <= 0) {
+                return this.removeFromCart(productId);
+            }
+
+            item.quantity = newQuantity;
+            item.subtotal = item.price * newQuantity;
+            item.updatedAt = new Date().toISOString();
+            
+            this.saveCart(cart);
+            return { success: true, message: 'Cantidad actualizada' };
+            
+        } catch (error) {
+            console.error('Error updating cart quantity:', error);
+            return { success: false, message: 'Error al actualizar cantidad' };
+        }
+    }
+
+    removeFromCart(productId) {
+        try {
+            let cart = this.getCart();
+            const originalLength = cart.length;
+            
+            cart = cart.filter(item => item.productId !== productId);
+            
+            if (cart.length < originalLength) {
+                this.saveCart(cart);
+                console.log('🗑️ Removed from cart:', productId);
+                return { success: true, message: 'Removido del carrito' };
+            }
+            
+            return { success: false, message: 'No encontrado en el carrito' };
+            
+        } catch (error) {
+            console.error('Error removing from cart:', error);
+            return { success: false, message: 'Error al remover del carrito' };
+        }
+    }
+
+    clearCart() {
+        try {
+            this.saveCart([]);
+            console.log('🧹 Cart cleared');
+            return { success: true, message: 'Carrito vaciado' };
+        } catch (error) {
+            console.error('Error clearing cart:', error);
+            return { success: false, message: 'Error al vaciar carrito' };
+        }
+    }
+
+    getCartTotals() {
+        const cart = this.getCart();
+        
+        const subtotal = cart.reduce((total, item) => total + (item.subtotal || 0), 0);
+        const itemCount = cart.reduce((total, item) => total + (item.quantity || 0), 0);
+        const shipping = subtotal >= 50000 ? 0 : 5000; // Free shipping over $50,000
+        const total = subtotal + shipping;
+
+        return {
+            subtotal,
+            shipping,
+            total,
+            itemCount,
+            isEmpty: cart.length === 0
+        };
+    }
+
+    // ================================
+    // COUNTER UPDATES
+    // ================================
+
+    updateCounters() {
+        const favorites = this.getFavorites();
+        const cart = this.getCart();
+        
+        // Update favorites counters
+        const favCounters = document.querySelectorAll('[id*="favorites-count"], [id*="nav-favorites"]');
+        favCounters.forEach(counter => {
+            counter.textContent = favorites.length;
+            counter.style.display = favorites.length > 0 ? 'flex' : 'none';
+        });
+
+        // Update cart counters
+        const cartCounters = document.querySelectorAll('[id*="cart-count"], [id*="nav-cart"]');
+        const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+        
+        cartCounters.forEach(counter => {
+            counter.textContent = totalItems;
+            counter.style.display = totalItems > 0 ? 'flex' : 'none';
+        });
+
+        console.log(`🔄 Counters updated - Favorites: ${favorites.length}, Cart: ${totalItems}`);
+    }
+
+    // ================================
+    // UTILITY HELPERS
+    // ================================
+
+    getProductImage(product) {
+        if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+            return product.images[0].url || product.images[0];
+        }
+        if (product.image) {
+            return product.image;
+        }
+        return 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=200&h=200&fit=crop';
+    }
+
+    formatPrice(price) {
+        return new Intl.NumberFormat('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            minimumFractionDigits: 0
+        }).format(price);
+    }
+
+    formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString('es-CO', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
     }
 }
 
-function setLocalStorage(key, value) {
-    try {
-        localStorage.setItem(key, JSON.stringify(value));
-        return true;
-    } catch (error) {
-        console.error(`Error setting localStorage key "${key}":`, error);
-        return false;
-    }
-}
-
-function removeLocalStorage(key) {
-    try {
-        localStorage.removeItem(key);
-        return true;
-    } catch (error) {
-        console.error(`Error removing localStorage key "${key}":`, error);
-        return false;
-    }
-}
-
 // ================================
-// TOAST NOTIFICATIONS
+// NOTIFICATION SYSTEM
 // ================================
 
-function showToast(message, type = 'info', duration = 3000) {
-    // Remove existing toasts
-    const existingToasts = document.querySelectorAll('.toast');
-    existingToasts.forEach(toast => toast.remove());
-    
-    // Create toast element
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    
-    // Add to document
-    document.body.appendChild(toast);
-    
-    // Auto remove
-    setTimeout(() => {
-        if (toast.parentNode) {
-            toast.style.animation = 'slideOut 0.3s ease forwards';
+class PetStyleNotifications {
+    constructor() {
+        this.container = null;
+        this.createContainer();
+    }
+
+    createContainer() {
+        if (!document.getElementById('toast-container')) {
+            this.container = document.createElement('div');
+            this.container.id = 'toast-container';
+            this.container.className = 'toast-container';
+            this.container.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10000;
+                pointer-events: none;
+                max-width: 400px;
+            `;
+            document.body.appendChild(this.container);
+        } else {
+            this.container = document.getElementById('toast-container');
+        }
+    }
+
+    show(message, type = 'info', duration = 3000) {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.style.cssText = `
+            background: ${this.getBackgroundColor(type)};
+            color: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            line-height: 1.4;
+        `;
+
+        toast.innerHTML = `
+            <i class="fas ${this.getIcon(type)}"></i>
+            <span>${message}</span>
+        `;
+
+        this.container.appendChild(toast);
+
+        // Show animation
+        setTimeout(() => {
+            toast.style.transform = 'translateX(0)';
+            toast.style.opacity = '1';
+        }, 100);
+
+        // Auto-remove
+        setTimeout(() => {
+            toast.style.transform = 'translateX(100%)';
+            toast.style.opacity = '0';
+            
             setTimeout(() => {
                 if (toast.parentNode) {
-                    toast.remove();
+                    toast.parentNode.removeChild(toast);
                 }
             }, 300);
-        }
-    }, duration);
-    
-    console.log(`📢 Toast (${type}): ${message}`);
-}
+        }, duration);
 
-// ================================
-// DATE/TIME HELPERS
-// ================================
-
-function formatDate(date, options = {}) {
-    if (!date) return '';
-    
-    const defaultOptions = {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    };
-    
-    const formatOptions = { ...defaultOptions, ...options };
-    
-    try {
-        const dateObj = date instanceof Date ? date : new Date(date);
-        return dateObj.toLocaleDateString('es-ES', formatOptions);
-    } catch (error) {
-        console.error('Error formatting date:', error);
-        return date.toString();
+        return toast;
     }
-}
 
-function formatTime(date) {
-    if (!date) return '';
-    
-    try {
-        const dateObj = date instanceof Date ? date : new Date(date);
-        return dateObj.toLocaleTimeString('es-ES', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    } catch (error) {
-        console.error('Error formatting time:', error);
-        return date.toString();
-    }
-}
-
-function timeAgo(date) {
-    if (!date) return '';
-    
-    try {
-        const dateObj = date instanceof Date ? date : new Date(date);
-        const now = new Date();
-        const diffInSeconds = Math.floor((now - dateObj) / 1000);
-        
-        if (diffInSeconds < 60) return 'Hace un momento';
-        if (diffInSeconds < 3600) return `Hace ${Math.floor(diffInSeconds / 60)} minutos`;
-        if (diffInSeconds < 86400) return `Hace ${Math.floor(diffInSeconds / 3600)} horas`;
-        if (diffInSeconds < 604800) return `Hace ${Math.floor(diffInSeconds / 86400)} días`;
-        
-        return formatDate(dateObj);
-    } catch (error) {
-        console.error('Error calculating time ago:', error);
-        return '';
-    }
-}
-
-// ================================
-// STRING HELPERS
-// ================================
-
-function truncateText(text, maxLength = 100, suffix = '...') {
-    if (!text || text.length <= maxLength) return text;
-    return text.substring(0, maxLength - suffix.length) + suffix;
-}
-
-function capitalizeFirst(text) {
-    if (!text) return '';
-    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-}
-
-function capitalizeWords(text) {
-    if (!text) return '';
-    return text.split(' ')
-        .map(word => capitalizeFirst(word))
-        .join(' ');
-}
-
-function slugify(text) {
-    if (!text) return '';
-    return text
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/[\s_-]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-}
-
-// ================================
-// NUMBER HELPERS
-// ================================
-
-function formatPrice(price, currency = 'MXN') {
-    if (price === null || price === undefined) return '';
-    
-    try {
-        return new Intl.NumberFormat('es-MX', {
-            style: 'currency',
-            currency: currency,
-            minimumFractionDigits: 2
-        }).format(price);
-    } catch (error) {
-        console.error('Error formatting price:', error);
-        return `$${price.toFixed(2)}`;
-    }
-}
-
-function formatNumber(number, options = {}) {
-    if (number === null || number === undefined) return '';
-    
-    try {
-        return new Intl.NumberFormat('es-MX', options).format(number);
-    } catch (error) {
-        console.error('Error formatting number:', error);
-        return number.toString();
-    }
-}
-
-function calculateDiscount(originalPrice, discountedPrice) {
-    if (!originalPrice || !discountedPrice || originalPrice <= discountedPrice) return 0;
-    return Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
-}
-
-// ================================
-// VALIDATION HELPERS
-// ================================
-
-function isValidEmail(email) {
-    if (!email) return false;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
-
-function isValidPhone(phone) {
-    if (!phone) return false;
-    const phoneRegex = /^[0-9]{10}$/;
-    return phoneRegex.test(phone.replace(/\D/g, ''));
-}
-
-function isValidPassword(password) {
-    if (!password) return false;
-    return password.length >= 6;
-}
-
-function validateRequired(value, fieldName = 'Campo') {
-    if (!value || value.toString().trim() === '') {
-        return `${fieldName} es obligatorio`;
-    }
-    return null;
-}
-
-// ================================
-// DOM HELPERS
-// ================================
-
-function createElement(tag, className = '', textContent = '') {
-    const element = document.createElement(tag);
-    if (className) element.className = className;
-    if (textContent) element.textContent = textContent;
-    return element;
-}
-
-function removeAllChildren(element) {
-    if (element) {
-        while (element.firstChild) {
-            element.removeChild(element.firstChild);
-        }
-    }
-}
-
-function toggleClass(element, className) {
-    if (element) {
-        element.classList.toggle(className);
-    }
-}
-
-function fadeIn(element, duration = 300) {
-    if (!element) return;
-    
-    element.style.opacity = '0';
-    element.style.display = 'block';
-    
-    const fadeInterval = setInterval(() => {
-        const opacity = parseFloat(element.style.opacity);
-        if (opacity < 1) {
-            element.style.opacity = (opacity + 0.1).toString();
-        } else {
-            clearInterval(fadeInterval);
-        }
-    }, duration / 10);
-}
-
-function fadeOut(element, duration = 300) {
-    if (!element) return;
-    
-    const fadeInterval = setInterval(() => {
-        const opacity = parseFloat(element.style.opacity);
-        if (opacity > 0) {
-            element.style.opacity = (opacity - 0.1).toString();
-        } else {
-            clearInterval(fadeInterval);
-            element.style.display = 'none';
-        }
-    }, duration / 10);
-}
-
-// ================================
-// ARRAY HELPERS
-// ================================
-
-function removeDuplicates(array, key = null) {
-    if (!Array.isArray(array)) return [];
-    
-    if (key) {
-        const seen = new Set();
-        return array.filter(item => {
-            const value = item[key];
-            if (seen.has(value)) return false;
-            seen.add(value);
-            return true;
-        });
-    }
-    
-    return [...new Set(array)];
-}
-
-function sortBy(array, key, direction = 'asc') {
-    if (!Array.isArray(array)) return [];
-    
-    return [...array].sort((a, b) => {
-        const aValue = a[key];
-        const bValue = b[key];
-        
-        if (aValue < bValue) return direction === 'asc' ? -1 : 1;
-        if (aValue > bValue) return direction === 'asc' ? 1 : -1;
-        return 0;
-    });
-}
-
-function groupBy(array, key) {
-    if (!Array.isArray(array)) return {};
-    
-    return array.reduce((groups, item) => {
-        const group = item[key];
-        if (!groups[group]) groups[group] = [];
-        groups[group].push(item);
-        return groups;
-    }, {});
-}
-
-// ================================
-// URL HELPERS
-// ================================
-
-function getUrlParameter(name) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(name);
-}
-
-function updateUrlParameter(key, value) {
-    const url = new URL(window.location);
-    url.searchParams.set(key, value);
-    window.history.replaceState({}, '', url);
-}
-
-function removeUrlParameter(key) {
-    const url = new URL(window.location);
-    url.searchParams.delete(key);
-    window.history.replaceState({}, '', url);
-}
-
-// ================================
-// DEBOUNCE/THROTTLE
-// ================================
-
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
+    getBackgroundColor(type) {
+        const colors = {
+            success: '#10b981',
+            error: '#ef4444',
+            warning: '#f59e0b',
+            info: '#3b82f6'
         };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-function throttle(func, limit) {
-    let inThrottle;
-    return function() {
-        const args = arguments;
-        const context = this;
-        if (!inThrottle) {
-            func.apply(context, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-        }
-    };
-}
-
-// ================================
-// DEVICE DETECTION
-// ================================
-
-function isMobile() {
-    return window.innerWidth <= 768;
-}
-
-function isTablet() {
-    return window.innerWidth > 768 && window.innerWidth <= 1024;
-}
-
-function isDesktop() {
-    return window.innerWidth > 1024;
-}
-
-function isTouchDevice() {
-    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-}
-
-// ================================
-// RANDOM HELPERS
-// ================================
-
-function randomId(length = 8) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
+        return colors[type] || colors.info;
     }
-    return result;
-}
 
-function randomColor() {
-    const colors = [
-        '#667eea', '#764ba2', '#f093fb', '#f5576c',
-        '#4facfe', '#00f2fe', '#43e97b', '#38f9d7',
-        '#ffecd2', '#fcb69f', '#a8edea', '#fed6e3'
-    ];
-    return colors[Math.floor(Math.random() * colors.length)];
+    getIcon(type) {
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            warning: 'fa-exclamation-triangle',
+            info: 'fa-info-circle'
+        };
+        return icons[type] || icons.info;
+    }
+
+    success(message, duration) {
+        return this.show(message, 'success', duration);
+    }
+
+    error(message, duration) {
+        return this.show(message, 'error', duration);
+    }
+
+    warning(message, duration) {
+        return this.show(message, 'warning', duration);
+    }
+
+    info(message, duration) {
+        return this.show(message, 'info', duration);
+    }
 }
 
 // ================================
-// LOADING STATES
+// MODAL SYSTEM
 // ================================
 
-function showLoading(text = 'Cargando...') {
-    const existingLoader = document.querySelector('.global-loader');
-    if (existingLoader) existingLoader.remove();
-    
-    const loader = createElement('div', 'global-loader');
-    loader.innerHTML = `
-        <div style="
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        ">
+class PetStyleModals {
+    constructor() {
+        this.activeModals = new Set();
+    }
+
+    show(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) {
+            console.error(`Modal ${modalId} not found`);
+            return false;
+        }
+
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+        this.activeModals.add(modalId);
+        
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+        
+        // Add close event listeners
+        this.addCloseListeners(modal);
+        
+        return true;
+    }
+
+    hide(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return false;
+
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+        this.activeModals.delete(modalId);
+        
+        // Restore body scroll if no modals active
+        if (this.activeModals.size === 0) {
+            document.body.style.overflow = 'auto';
+        }
+        
+        return true;
+    }
+
+    hideAll() {
+        this.activeModals.forEach(modalId => {
+            this.hide(modalId);
+        });
+    }
+
+    addCloseListeners(modal) {
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.hide(modal.id);
+            }
+        });
+
+        // Close on close button click
+        const closeButtons = modal.querySelectorAll('.modal-close, [data-modal-close]');
+        closeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                this.hide(modal.id);
+            });
+        });
+
+        // Close on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.activeModals.has(modal.id)) {
+                this.hide(modal.id);
+            }
+        });
+    }
+}
+
+// ================================
+// LOADING SYSTEM
+// ================================
+
+class PetStyleLoading {
+    show(target = 'body', message = 'Cargando...') {
+        const targetElement = typeof target === 'string' ? document.querySelector(target) : target;
+        if (!targetElement) return;
+
+        const loader = document.createElement('div');
+        loader.className = 'petstyle-loader';
+        loader.innerHTML = `
             <div style="
-                background: white;
-                padding: 2rem;
-                border-radius: 10px;
-                text-align: center;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 16px;
+                padding: 40px;
+                color: #6b7280;
             ">
                 <div style="
                     width: 40px;
                     height: 40px;
-                    border: 4px solid #e2e8f0;
-                    border-top: 4px solid #667eea;
+                    border: 3px solid #e5e7eb;
+                    border-top: 3px solid #3b82f6;
                     border-radius: 50%;
                     animation: spin 1s linear infinite;
-                    margin: 0 auto 1rem;
                 "></div>
-                <p style="color: #6b7280; margin: 0;">${text}</p>
+                <span>${message}</span>
             </div>
-        </div>
-    `;
-    
-    document.body.appendChild(loader);
-}
+        `;
 
-function hideLoading() {
-    const loader = document.querySelector('.global-loader');
-    if (loader) loader.remove();
-}
+        loader.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        `;
 
-// ================================
-// ERROR HANDLING
-// ================================
+        // Add spin animation if not exists
+        if (!document.getElementById('spin-keyframes')) {
+            const style = document.createElement('style');
+            style.id = 'spin-keyframes';
+            style.textContent = `
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
 
-function handleError(error, context = 'Application') {
-    console.error(`${context} Error:`, error);
-    
-    let message = 'Ha ocurrido un error inesperado';
-    
-    if (error.message) {
-        if (error.message.includes('network') || error.message.includes('fetch')) {
-            message = 'Error de conexión. Verifica tu internet.';
-        } else if (error.message.includes('404')) {
-            message = 'Recurso no encontrado.';
-        } else if (error.message.includes('500')) {
-            message = 'Error del servidor. Intenta más tarde.';
-        } else {
-            message = error.message;
+        targetElement.style.position = 'relative';
+        targetElement.appendChild(loader);
+
+        return loader;
+    }
+
+    hide(target = 'body') {
+        const targetElement = typeof target === 'string' ? document.querySelector(target) : target;
+        if (!targetElement) return;
+
+        const loader = targetElement.querySelector('.petstyle-loader');
+        if (loader) {
+            loader.remove();
         }
     }
-    
-    showToast(message, 'error');
-    return message;
 }
 
 // ================================
-// PERFORMANCE HELPERS
+// INITIALIZE SYSTEMS
 // ================================
 
-function measureTime(label) {
-    console.time(label);
-    return () => console.timeEnd(label);
-}
+// Create global instances
+const storage = new PetStyleStorage();
+const notifications = new PetStyleNotifications();
+const modals = new PetStyleModals();
+const loading = new PetStyleLoading();
 
-function lazy(fn) {
-    let result;
-    let hasRun = false;
+// Global utilities object
+const utils = {
+    storage,
+    notifications,
+    modals,
+    loading,
     
-    return function(...args) {
-        if (!hasRun) {
-            result = fn.apply(this, args);
-            hasRun = true;
-        }
-        return result;
-    };
-}
-
-// ================================
-// EXPORT ALL FUNCTIONS
-// ================================
-
-// Make functions globally available
-window.utils = {
-    // Storage
-    getLocalStorage,
-    setLocalStorage,
-    removeLocalStorage,
+    // Quick access methods
+    showToast: (message, type, duration) => notifications.show(message, type, duration),
+    showModal: (modalId) => modals.show(modalId),
+    hideModal: (modalId) => modals.hide(modalId),
+    showLoading: (target, message) => loading.show(target, message),
+    hideLoading: (target) => loading.hide(target),
     
-    // UI
-    showToast,
-    showLoading,
-    hideLoading,
+    // Helper functions
+    formatPrice: (price) => storage.formatPrice(price),
+    formatDate: (date) => storage.formatDate(date),
     
-    // Date/Time
-    formatDate,
-    formatTime,
-    timeAgo,
+    // Common DOM helpers
+    createElement: (tag, className, innerHTML) => {
+        const element = document.createElement(tag);
+        if (className) element.className = className;
+        if (innerHTML) element.innerHTML = innerHTML;
+        return element;
+    },
     
-    // Strings
-    truncateText,
-    capitalizeFirst,
-    capitalizeWords,
-    slugify,
-    
-    // Numbers
-    formatPrice,
-    formatNumber,
-    calculateDiscount,
-    
-    // Validation
-    isValidEmail,
-    isValidPhone,
-    isValidPassword,
-    validateRequired,
-    
-    // DOM
-    createElement,
-    removeAllChildren,
-    toggleClass,
-    fadeIn,
-    fadeOut,
-    
-    // Arrays
-    removeDuplicates,
-    sortBy,
-    groupBy,
-    
-    // URL
-    getUrlParameter,
-    updateUrlParameter,
-    removeUrlParameter,
-    
-    // Performance
-    debounce,
-    throttle,
-    measureTime,
-    lazy,
-    
-    // Device
-    isMobile,
-    isTablet,
-    isDesktop,
-    isTouchDevice,
-    
-    // Random
-    randomId,
-    randomColor,
-    
-    // Error handling
-    handleError
+    debounce: (func, wait) => {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
 };
 
-// Also make individual functions available globally for compatibility
-Object.assign(window, window.utils);
+// Export to global scope
+window.storage = storage;
+window.notifications = notifications;
+window.modals = modals;
+window.loading = loading;
+window.utils = utils;
 
-console.log('✅ Utils loaded successfully');
+// Auto-initialize counters when DOM loads
+document.addEventListener('DOMContentLoaded', () => {
+    storage.updateCounters();
+});
+
+// Sync between tabs
+window.addEventListener('storage', (e) => {
+    if (e.key && (e.key.includes('cart_') || e.key.includes('favorites_'))) {
+        storage.updateCounters();
+    }
+});
+
+console.log('✅ PetStyle Utils System loaded successfully');

@@ -5,135 +5,146 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PetStyle - Productos para Mascotas</title>
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Estilos principales -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/main.css">
 </head>
 <body>
-    <!-- CONTENEDOR PRINCIPAL -->
-    <div class="main-container">
-        
-        <!-- Header elegante -->
-        <header class="header">
-            <div class="logo">
-                PetStyle
-            </div>
-            <div class="user-greeting">
-                Accesorios únicos para tu mascota
-            </div>
-        </header>
-
-        <!-- Barra de búsqueda -->
-        <div class="search-section">
-            <div class="search-bar">
-                <input type="text" id="search-input" placeholder="Buscar productos...">
-            </div>
-        </div>
-
-        <!-- Categorías elegantes -->
-        <div class="categories-section">
-            <h3>Categorías</h3>
-            <div class="categories-scroll">
-                <div class="category-item active" data-category="">
-                    <span class="category-icon">⭐</span>
-                    <span>Todos</span>
-                </div>
-                <div class="category-item" data-category="6898049bdd53186ec08fd313">
-                    <span class="category-icon">🐕</span>
-                    <span>Perros</span>
-                </div>
-                <div class="category-item" data-category="6898049bdd53186ec08fd316">
-                    <span class="category-icon">🐱</span>
-                    <span>Gatos</span>
-                </div>
-                <div class="category-item" data-category="6898049bdd53186ec08fd319">
-                    <span class="category-icon">🦜</span>
-                    <span>Aves</span>
-                </div>
-                <div class="category-item" data-category="6898049bdd53186ec08fd31c">
-                    <span class="category-icon">🐟</span>
-                    <span>Peces</span>
-                </div>
-                <div class="category-item" data-category="6898049bdd53186ec08fd31f">
-                    <span class="category-icon">🎾</span>
-                    <span>Accesorios</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Filtros (ocultos en móvil) -->
-        <div class="filters-section">
-            <div class="sort-container">
-                <select id="sort-select">
-                    <option value="newest">Más recientes</option>
-                    <option value="price-low">Precio: Menor a mayor</option>
-                    <option value="price-high">Precio: Mayor a menor</option>
-                    <option value="name">Nombre A-Z</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Sección de productos premium -->
-        <div class="products-section">
-            <h3 id="products-title">Destacados</h3>
-            <div id="products-grid" class="products-grid">
-                <!-- Los productos se cargarán aquí -->
-                <div class="loading">
-                    <i class="fas fa-spinner"></i>
-                    <div>Cargando productos...</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Espaciador -->
-        <div class="bottom-spacer"></div>
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="loading-spinner hidden">
+        <div class="spinner"></div>
+        <p>Cargando productos...</p>
     </div>
 
-    <!-- Modal de producto premium -->
-    <div id="product-modal" class="modal-overlay">
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-paw"></i>
+                <span>PetStyle</span>
+            </div>
+            
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Buscar productos...">
+                <button id="search-btn"><i class="fas fa-search"></i></button>
+            </div>
+
+            <div class="user-actions">
+                <div class="favorites-icon">
+                    <i class="fas fa-heart"></i>
+                    <span id="favorites-count" class="count">0</span>
+                </div>
+                <div class="cart-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-count" class="count">0</span>
+                </div>
+                <div class="profile-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Categories Filter -->
+    <section class="categories-section">
+        <div class="container">
+            <div class="categories-filter">
+                <button class="category-btn active" data-category="all">Todos</button>
+                <button class="category-btn" data-category="perros">Perros</button>
+                <button class="category-btn" data-category="gatos">Gatos</button>
+                <button class="category-btn" data-category="alimentos">Alimentos</button>
+                <button class="category-btn" data-category="juguetes">Juguetes</button>
+                <button class="category-btn" data-category="accesorios">Accesorios</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Results Info -->
+            <div class="results-info">
+                <span id="results-count">Cargando productos...</span>
+            </div>
+
+            <!-- Products Grid -->
+            <div id="products-grid" class="products-grid">
+                <!-- Los productos se cargarán dinámicamente aquí -->
+            </div>
+
+            <!-- Pagination -->
+            <div id="pagination" class="pagination hidden">
+                <button id="prev-page" class="page-btn" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                    Anterior
+                </button>
+                <span id="page-info">Página 1 de 1</span>
+                <button id="next-page" class="page-btn" disabled>
+                    Siguiente
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="main.html" class="nav-item active">
+            <i class="fas fa-home"></i>
+            <span>Inicio</span>
+        </a>
+        <a href="favorites.html" class="nav-item">
+            <i class="fas fa-heart"></i>
+            <span>Favoritos</span>
+            <div id="nav-favorites-count" class="nav-count">0</div>
+        </a>
+        <a href="cart.html" class="nav-item">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Carrito</span>
+            <div id="nav-cart-count" class="nav-count">0</div>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Perfil</span>
+        </a>
+    </nav>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modal-title">Detalles del Producto</h2>
-                <button class="close-modal" onclick="closeProductModal()">
+                <button class="modal-close">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            
             <div class="modal-body">
-                <div class="modal-image">
-                    <img id="modal-image" src="" alt="Producto">
+                <div class="product-image">
+                    <img id="modal-product-image" src="" alt="">
                 </div>
-                
-                <div class="modal-info">
-                    <div class="modal-category" id="modal-category"></div>
-                    <h3 id="modal-name"></h3>
-                    <p id="modal-description"></p>
-                    
-                    <div class="modal-details">
-                        <div class="detail-item">
-                            <span class="label">SKU:</span>
-                            <span id="modal-sku"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">Stock:</span>
-                            <span id="modal-stock"></span>
-                        </div>
+                <div class="product-details">
+                    <h2 id="modal-product-name"></h2>
+                    <div class="product-price">
+                        <span id="modal-product-price"></span>
                     </div>
-                    
-                    <div class="modal-price-section">
-                        <div class="price" id="modal-price"></div>
+                    <div class="product-description">
+                        <p id="modal-product-description"></p>
+                    </div>
+                    <div class="product-stock">
+                        <span id="modal-product-stock"></span> disponibles
+                    </div>
+                    <div class="quantity-selector">
+                        <label>Cantidad:</label>
                         <div class="quantity-controls">
-                            <button onclick="decreaseQuantity()">-</button>
-                            <span id="modal-quantity">1</span>
-                            <button onclick="increaseQuantity()">+</button>
+                            <button id="quantity-minus">-</button>
+                            <input type="number" id="quantity-input" value="1" min="1">
+                            <button id="quantity-plus">+</button>
                         </div>
                     </div>
-                    
                     <div class="modal-actions">
-                        <button class="btn-favorite" id="modal-favorite-btn" onclick="toggleModalFavorite()">
-                            <i class="far fa-heart"></i>
+                        <button id="modal-add-to-favorites" class="btn btn-outline">
+                            <i class="fas fa-heart"></i>
+                            Favoritos
                         </button>
-                        <button class="btn-cart" onclick="addToCartFromModal()">
+                        <button id="modal-add-to-cart" class="btn btn-primary">
                             <i class="fas fa-shopping-cart"></i>
                             Agregar al Carrito
                         </button>
@@ -143,31 +154,13 @@
         </div>
     </div>
 
-    <!-- Bottom Navigation Premium -->
-    <nav class="bottom-nav">
-        <a href="main.html" class="nav-item active">
-            <i class="fas fa-home"></i>
-            <span>Inicio</span>
-        </a>
-        <a href="favorites.html" class="nav-item">
-            <i class="fas fa-heart"></i>
-            <span>Favoritos</span>
-            <div class="notification-badge" id="favorites-count">0</div>
-        </a>
-        <a href="cart.html" class="nav-item">
-            <i class="fas fa-shopping-cart"></i>
-            <span>Carrito</span>
-            <div class="notification-badge" id="cart-count">0</div>
-        </a>
-        <a href="profile.html" class="nav-item">
-            <i class="fas fa-user"></i>
-            <span>Perfil</span>
-        </a>
-    </nav>
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
 
-    <!-- Scripts -->
-<script src="../js/api.js"></script>
-<script src="../js/auth.js"></script>
-<script src="../js/main-page.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/main-page.js"></script>
 </body>
 </html>

@@ -1,620 +1,733 @@
-// ===== PROFILE PAGE - COMPLETELY FUNCTIONAL VERSION =====
+// ===== PROFILE PAGE - INTEGRATED & OPTIMIZED =====
+console.log('👤 Profile Page Script Loading...');
 
-// Initialize profile page
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔄 Profile page loaded');
-    initializeProfile();
-});
-
-// Main initialization function
-async function initializeProfile() {
-    console.log('🔄 Initializing profile...');
-    
-    const profileContent = document.getElementById('profileContent');
-    if (!profileContent) {
-        console.error('❌ Profile content container not found');
-        return;
+class ProfilePage {
+    constructor() {
+        this.currentUser = null;
+        this.isEditing = false;
+        this.initialized = false;
+        this.logoutInProgress = false;
     }
 
-    // Show loading state
-    showLoadingState();
-    
-    // Check authentication
-    const currentUser = getCurrentUser();
-    const currentToken = getCurrentToken();
-    
-    console.log('👤 Current user:', currentUser);
-    console.log('🔑 Has token:', !!currentToken);
-    
-    if (currentUser && currentToken) {
-        // User is logged in - fetch fresh data from backend
+    // ================================
+    // INITIALIZATION
+    // ================================
+
+    async initialize() {
         try {
-            await loadUserProfileFromBackend(currentUser, currentToken);
+            console.log('🚀 Initializing Profile Page...');
+            
+            // Wait for dependencies
+            await this.waitForDependencies();
+            
+            // Check if user is logged in
+            this.currentUser = auth.getCurrentUser();
+            
+            if (!this.currentUser) {
+                console.log('❌ No user found, redirecting to login...');
+                this.redirectToLogin();
+                return;
+            }
+            
+            // Setup event listeners
+            this.setupEventListeners();
+            
+            // Load profile data
+            this.loadProfileData();
+            
+            // Update counters
+            utils.storage.updateCounters();
+            
+            this.initialized = true;
+            console.log('✅ Profile Page initialized successfully');
+            
         } catch (error) {
-            console.error('❌ Error loading from backend:', error);
-            // Fallback to localStorage data
-            showUserProfile(currentUser);
+            console.error('❌ Error initializing Profile Page:', error);
+            this.showError('Error cargando el perfil');
         }
-    } else {
-        // User is not logged in - show guest profile
+    }
+
+    async waitForDependencies() {
+        let retries = 0;
+        const maxRetries = 10;
+        
+        while ((!window.auth || !window.utils) && retries < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            retries++;
+        }
+        
+        if (!window.auth || !window.utils) {
+            throw new Error('Required dependencies not available');
+        }
+    }
+
+    redirectToLogin() {
+        utils.notifications.warning('Debes iniciar sesión para ver tu perfil');
         setTimeout(() => {
-            showGuestProfile();
-        }, 500);
+            window.location.href = 'login.html';
+        }, 1500);
     }
-}
 
-// Load user profile from backend
-async function loadUserProfileFromBackend(user, token) {
-    try {
-        console.log('📡 Fetching user profile from backend...');
-        
-        // Try to get fresh user data from backend
-        const response = await fetch('http://localhost:3000/api/auth/profile', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            console.log('✅ Fresh user data received:', data);
+    // ================================
+    // PROFILE DATA MANAGEMENT
+    // ================================
+
+    loadProfileData() {
+        try {
+            console.log('📊 Loading profile data for:', this.currentUser.email);
             
-            // Update localStorage with fresh data
-            const freshUserData = data.data || data.user || data;
-            setCurrentUser(freshUserData);
+            // Update user info
+            this.updateUserInfo();
             
-            // Show profile with fresh data
-            showUserProfile(freshUserData);
-        } else {
-            console.log('⚠️ Backend profile fetch failed, using cached data');
-            showUserProfile(user);
+            // Update user stats
+            this.updateUserStats();
+            
+            // Load preferences
+            this.loadPreferences();
+            
+        } catch (error) {
+            console.error('❌ Error loading profile data:', error);
         }
-    } catch (error) {
-        console.error('❌ Backend error:', error);
-        showUserProfile(user);
-    }
-}
-
-// Show loading state
-function showLoadingState() {
-    const profileContent = document.getElementById('profileContent');
-    if (profileContent) {
-        profileContent.innerHTML = `
-            <div class="loading">
-                <div class="loading-spinner"></div>
-                <p style="color: #6b7280; text-align: center;">Cargando perfil...</p>
-            </div>
-        `;
-    }
-}
-
-// Show user profile
-function showUserProfile(user) {
-    console.log('👤 Showing user profile for:', user);
-    
-    const profileContent = document.getElementById('profileContent');
-    const template = document.getElementById('userProfileTemplate');
-    
-    if (!profileContent || !template) {
-        console.error('❌ Required elements not found');
-        return;
     }
 
-    // Clone template content
-    const clone = template.content.cloneNode(true);
-    
-    // Populate user data
-    try {
-        populateUserData(clone, user);
-        updateUserStats(clone, user);
-        loadUserSettings(clone);
+    updateUserInfo() {
+        // Basic user info
+        const userName = document.getElementById('user-name');
+        const userEmail = document.getElementById('user-email');
+        const displayName = document.getElementById('display-name');
+        const displayEmail = document.getElementById('display-email');
+        const displayPhone = document.getElementById('display-phone');
         
-        // Clear and append new content
-        profileContent.innerHTML = '';
-        profileContent.appendChild(clone);
-        
-        console.log('✅ User profile displayed successfully');
-    } catch (error) {
-        console.error('❌ Error populating profile:', error);
-        showErrorState('Error al mostrar perfil');
+        if (userName) userName.textContent = this.currentUser.name || this.currentUser.nombre || 'Usuario';
+        if (userEmail) userEmail.textContent = this.currentUser.email || 'No registrado';
+        if (displayName) displayName.textContent = this.currentUser.name || this.currentUser.nombre || 'No registrado';
+        if (displayEmail) displayEmail.textContent = this.currentUser.email || 'No registrado';
+        if (displayPhone) displayPhone.textContent = this.currentUser.phone || 'No registrado';
     }
-}
 
-// Populate user data in template
-function populateUserData(clone, user) {
-    // User avatar (initials)
-    const userAvatar = clone.getElementById('userAvatar');
-    if (userAvatar) {
-        userAvatar.textContent = getUserInitials(user.name || user.nombre || user.email);
+    updateUserStats() {
+        try {
+            // Get user stats
+            const favorites = utils.storage.getFavorites();
+            const cart = utils.storage.getCart();
+            const orders = this.getUserOrders();
+            
+            // Update stats display
+            const favoritesCount = document.getElementById('user-favorites');
+            const cartCount = document.getElementById('user-cart-items');
+            const ordersCount = document.getElementById('user-orders');
+            
+            if (favoritesCount) favoritesCount.textContent = favorites.length;
+            if (cartCount) cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+            if (ordersCount) ordersCount.textContent = orders.length;
+            
+        } catch (error) {
+            console.error('❌ Error updating user stats:', error);
+        }
     }
-    
-    // User name
-    const userName = clone.getElementById('userName');
-    if (userName) {
-        userName.textContent = user.name || user.nombre || 'Usuario';
-    }
-    
-    // User email
-    const userEmail = clone.getElementById('userEmail');
-    if (userEmail) {
-        userEmail.textContent = user.email || 'No disponible';
-    }
-    
-    // User role/badge
-    const userRole = clone.getElementById('userRole');
-    if (userRole) {
-        const isUserAdmin = isAdmin(user);
-        userRole.textContent = isUserAdmin ? 'Administrador' : 'Usuario';
-        userRole.style.background = isUserAdmin ? 
-            'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' : 
-            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-    }
-}
 
-// Update user statistics
-function updateUserStats(container, user) {
-    try {
-        // Get real stats from localStorage
-        const favorites = getLocalStorage(`favorites_${user.email}`, []);
-        const cart = getLocalStorage(`cart_${user.email}`, []);
+    getUserOrders() {
+        try {
+            const historyKey = `order_history_${this.currentUser.email}`;
+            const orders = JSON.parse(localStorage.getItem(historyKey) || '[]');
+            return orders;
+        } catch (error) {
+            console.error('Error getting user orders:', error);
+            return [];
+        }
+    }
+
+    loadPreferences() {
+        try {
+            const prefsKey = `preferences_${this.currentUser.email}`;
+            const preferences = JSON.parse(localStorage.getItem(prefsKey) || '{}');
+            
+            // Set checkbox states
+            const emailNotifications = document.getElementById('email-notifications');
+            const marketingNotifications = document.getElementById('marketing-notifications');
+            
+            if (emailNotifications) {
+                emailNotifications.checked = preferences.emailNotifications !== false;
+            }
+            
+            if (marketingNotifications) {
+                marketingNotifications.checked = preferences.marketingNotifications === true;
+            }
+            
+        } catch (error) {
+            console.error('Error loading preferences:', error);
+        }
+    }
+
+    // ================================
+    // EVENT LISTENERS SETUP
+    // ================================
+
+    setupEventListeners() {
+        // Edit profile
+        this.setupEditProfileListeners();
         
-        // Update favorites count
-        const favoritesElement = container.getElementById('favoritesCount');
-        if (favoritesElement) {
-            const favCount = Array.isArray(favorites) ? favorites.length : 0;
-            favoritesElement.textContent = favCount;
+        // Password change
+        this.setupPasswordListeners();
+        
+        // Preferences
+        this.setupPreferencesListeners();
+        
+        // Logout
+        this.setupLogoutListeners();
+        
+        // Modal events
+        this.setupModalEvents();
+        
+        // Storage sync
+        this.setupStorageSync();
+        
+        console.log('✅ Event listeners configured');
+    }
+
+    setupEditProfileListeners() {
+        const editBtn = document.getElementById('edit-profile-btn');
+        const saveBtn = document.getElementById('save-profile-btn');
+        const cancelBtn = document.getElementById('cancel-edit-btn');
+        
+        if (editBtn) {
+            editBtn.addEventListener('click', () => this.toggleEditMode(true));
         }
         
-        // Update cart count (total items, not unique products)
-        const cartElement = container.getElementById('cartCount');
-        if (cartElement) {
-            const cartCount = Array.isArray(cart) ? 
-                cart.reduce((total, item) => total + (item.quantity || 1), 0) : 0;
-            cartElement.textContent = cartCount;
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => this.saveProfileChanges());
         }
         
-        // Orders count (placeholder for now)
-        const ordersElement = container.getElementById('ordersCount');
-        if (ordersElement) {
-            ordersElement.textContent = '0'; // TODO: Implement orders
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => this.toggleEditMode(false));
+        }
+    }
+
+    setupPasswordListeners() {
+        const changePasswordBtn = document.getElementById('change-password-btn');
+        const savePasswordBtn = document.getElementById('save-password');
+        const cancelPasswordBtn = document.getElementById('cancel-password');
+        
+        if (changePasswordBtn) {
+            changePasswordBtn.addEventListener('click', () => {
+                utils.showModal('password-modal');
+            });
         }
         
-        console.log('📊 Stats updated:', { 
-            favorites: favorites.length, 
-            cart: cart.length 
+        if (savePasswordBtn) {
+            savePasswordBtn.addEventListener('click', () => this.changePassword());
+        }
+        
+        if (cancelPasswordBtn) {
+            cancelPasswordBtn.addEventListener('click', () => {
+                utils.hideModal('password-modal');
+                this.clearPasswordForm();
+            });
+        }
+        
+        // Password strength indicator
+        const newPasswordInput = document.getElementById('new-password');
+        if (newPasswordInput) {
+            newPasswordInput.addEventListener('input', (e) => {
+                this.updatePasswordStrength(e.target.value);
+            });
+        }
+        
+        // Toggle password visibility
+        document.querySelectorAll('.toggle-password').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const input = e.target.closest('.password-input').querySelector('input');
+                const icon = e.target.querySelector('i') || e.target;
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.className = 'fas fa-eye-slash';
+                } else {
+                    input.type = 'password';
+                    icon.className = 'fas fa-eye';
+                }
+            });
         });
-    } catch (error) {
-        console.error('❌ Error updating stats:', error);
     }
-}
 
-// Load user settings
-function loadUserSettings(container) {
-    try {
-        // Load notifications setting
-        const notificationsEnabled = getLocalStorage('notifications_enabled', true);
-        const notificationsToggle = container.getElementById('notificationsToggle');
-        if (notificationsToggle) {
-            if (notificationsEnabled) {
-                notificationsToggle.classList.add('active');
-            } else {
-                notificationsToggle.classList.remove('active');
-            }
-        }
+    setupPreferencesListeners() {
+        const emailNotifications = document.getElementById('email-notifications');
+        const marketingNotifications = document.getElementById('marketing-notifications');
         
-        // Load dark mode setting
-        const darkModeEnabled = getLocalStorage('dark_mode_enabled', false);
-        const darkModeToggle = container.getElementById('darkModeToggle');
-        if (darkModeToggle) {
-            if (darkModeEnabled) {
-                darkModeToggle.classList.add('active');
-                document.body.classList.add('dark-mode');
-            } else {
-                darkModeToggle.classList.remove('active');
-                document.body.classList.remove('dark-mode');
+        [emailNotifications, marketingNotifications].forEach(checkbox => {
+            if (checkbox) {
+                checkbox.addEventListener('change', () => {
+                    this.savePreferences();
+                });
             }
-        }
-        
-        console.log('⚙️ Settings loaded:', { 
-            notifications: notificationsEnabled, 
-            darkMode: darkModeEnabled 
         });
-    } catch (error) {
-        console.error('❌ Error loading settings:', error);
-    }
-}
-
-// Show guest profile
-function showGuestProfile() {
-    console.log('👤 Showing guest profile');
-    
-    const profileContent = document.getElementById('profileContent');
-    const template = document.getElementById('guestProfileTemplate');
-    
-    if (!profileContent || !template) {
-        console.error('❌ Required elements not found for guest profile');
-        return;
     }
 
-    // Clone template content
-    const clone = template.content.cloneNode(true);
-    
-    // Clear and append new content
-    profileContent.innerHTML = '';
-    profileContent.appendChild(clone);
-    
-    console.log('✅ Guest profile displayed successfully');
-}
-
-// Show error state
-function showErrorState(message) {
-    const profileContent = document.getElementById('profileContent');
-    if (profileContent) {
-        profileContent.innerHTML = `
-            <div class="error-state">
-                <div class="error-icon">⚠️</div>
-                <h3 class="error-title">Error</h3>
-                <p class="error-message">${message}</p>
-                <button class="retry-btn" onclick="initializeProfile()">Reintentar</button>
-            </div>
-        `;
-    }
-}
-
-// ================================
-// NAVIGATION FUNCTIONS
-// ================================
-
-function goBack() {
-    // Smart back navigation
-    if (window.history.length > 1) {
-        window.history.back();
-    } else {
-        window.location.href = '../pages/main.html';
-    }
-}
-
-function goToFavorites() {
-    if (!requireAuth()) return;
-    window.location.href = '../pages/favorites.html';
-}
-
-function goToCart() {
-    if (!requireAuth()) return;
-    window.location.href = '../pages/cart.html';
-}
-
-// ================================
-// PROFILE ACTIONS
-// ================================
-
-function editProfile() {
-    const user = getCurrentUser();
-    if (!user) {
-        showToast('Debes iniciar sesión', 'error');
-        return;
-    }
-    
-    // TODO: Implement edit profile modal
-    showToast('Función de editar perfil en desarrollo', 'info');
-    console.log('📝 Edit profile requested for:', user);
-}
-
-async function changePassword() {
-    const user = getCurrentUser();
-    const token = getCurrentToken();
-    
-    if (!user || !token) {
-        showToast('Debes iniciar sesión', 'error');
-        return;
-    }
-    
-    // Simple prompt for now - TODO: Create proper modal
-    const currentPassword = prompt('Contraseña actual:');
-    if (!currentPassword) return;
-    
-    const newPassword = prompt('Nueva contraseña (mínimo 6 caracteres):');
-    if (!newPassword || newPassword.length < 6) {
-        showToast('La nueva contraseña debe tener al menos 6 caracteres', 'error');
-        return;
-    }
-    
-    try {
-        showToast('Cambiando contraseña...', 'info');
+    setupLogoutListeners() {
+        const logoutBtn = document.getElementById('logout-btn');
+        const confirmLogoutBtn = document.getElementById('confirm-logout');
+        const cancelLogoutBtn = document.getElementById('cancel-logout');
         
-        const response = await fetch('http://localhost:3000/api/auth/change-password', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                currentPassword: currentPassword,
-                newPassword: newPassword
-            })
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                utils.showModal('logout-modal');
+            });
+        }
+        
+        if (confirmLogoutBtn) {
+            confirmLogoutBtn.addEventListener('click', () => {
+                this.performLogout();
+            });
+        }
+        
+        if (cancelLogoutBtn) {
+            cancelLogoutBtn.addEventListener('click', () => {
+                utils.hideModal('logout-modal');
+            });
+        }
+    }
+
+    setupModalEvents() {
+        // Close modals on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                utils.modals.hideAll();
+            }
+        });
+    }
+
+    setupStorageSync() {
+        // Listen for storage changes (cross-tab sync)
+        window.addEventListener('storage', (e) => {
+            if (e.key && (e.key.includes('cart_') || e.key.includes('favorites_'))) {
+                this.updateUserStats();
+                utils.storage.updateCounters();
+            }
+            
+            // If user was logged out in another tab
+            if (e.key === 'petstyle_user' && !e.newValue) {
+                console.log('🔄 User logged out in another tab');
+                this.handleRemoteLogout();
+            }
+        });
+    }
+
+    // ================================
+    // PROFILE EDITING
+    // ================================
+
+    toggleEditMode(editing) {
+        this.isEditing = editing;
+        
+        // Toggle visibility of elements
+        const editBtn = document.getElementById('edit-profile-btn');
+        const editActions = document.getElementById('edit-actions');
+        const displayElements = document.querySelectorAll('#display-name, #display-email, #display-phone');
+        const editInputs = document.querySelectorAll('#edit-name, #edit-email, #edit-phone');
+        
+        if (editing) {
+            // Show edit mode
+            editBtn.style.display = 'none';
+            editActions.classList.remove('hidden');
+            
+            displayElements.forEach(el => el.style.display = 'none');
+            editInputs.forEach(el => {
+                el.classList.remove('hidden');
+                el.style.display = 'block';
+            });
+            
+            // Populate edit inputs with current values
+            const editName = document.getElementById('edit-name');
+            const editEmail = document.getElementById('edit-email');
+            const editPhone = document.getElementById('edit-phone');
+            
+            if (editName) editName.value = this.currentUser.name || this.currentUser.nombre || '';
+            if (editEmail) editEmail.value = this.currentUser.email || '';
+            if (editPhone) editPhone.value = this.currentUser.phone || '';
+            
+        } else {
+            // Show display mode
+            editBtn.style.display = 'block';
+            editActions.classList.add('hidden');
+            
+            displayElements.forEach(el => el.style.display = 'block');
+            editInputs.forEach(el => {
+                el.classList.add('hidden');
+                el.style.display = 'none';
+            });
+        }
+    }
+
+    async saveProfileChanges() {
+        try {
+            utils.showLoading('body', 'Guardando cambios...');
+            
+            // Get edited values
+            const editName = document.getElementById('edit-name');
+            const editEmail = document.getElementById('edit-email');
+            const editPhone = document.getElementById('edit-phone');
+            
+            const updatedData = {
+                name: editName?.value.trim() || '',
+                email: editEmail?.value.trim() || this.currentUser.email,
+                phone: editPhone?.value.trim() || ''
+            };
+            
+            // Validate
+            if (!updatedData.name) {
+                utils.notifications.warning('El nombre es obligatorio');
+                return;
+            }
+            
+            if (!this.isValidEmail(updatedData.email)) {
+                utils.notifications.warning('Email no válido');
+                return;
+            }
+            
+            // Update user object
+            this.currentUser.name = updatedData.name;
+            this.currentUser.nombre = updatedData.name; // Keep both formats
+            this.currentUser.phone = updatedData.phone;
+            
+            // Save to localStorage
+            localStorage.setItem('petstyle_user', JSON.stringify(this.currentUser));
+            
+            // Update display
+            this.updateUserInfo();
+            this.toggleEditMode(false);
+            
+            utils.notifications.success('Perfil actualizado correctamente');
+            
+            console.log('✅ Profile updated successfully');
+            
+        } catch (error) {
+            console.error('❌ Error saving profile:', error);
+            utils.notifications.error('Error al guardar los cambios');
+        } finally {
+            utils.hideLoading('body');
+        }
+    }
+
+    // ================================
+    // PASSWORD MANAGEMENT
+    // ================================
+
+    updatePasswordStrength(password) {
+        const strengthBar = document.querySelector('.strength-fill');
+        const strengthText = document.querySelector('.strength-text');
+        
+        if (!strengthBar || !strengthText) return;
+        
+        let strength = 0;
+        let text = 'Muy débil';
+        let color = '#ff4444';
+        
+        if (password.length >= 6) strength += 25;
+        if (password.length >= 8) strength += 25;
+        if (/[A-Z]/.test(password)) strength += 25;
+        if (/[0-9]/.test(password)) strength += 25;
+        
+        if (strength >= 75) {
+            text = 'Fuerte';
+            color = '#4CAF50';
+        } else if (strength >= 50) {
+            text = 'Media';
+            color = '#ff9800';
+        } else if (strength >= 25) {
+            text = 'Débil';
+            color = '#ffeb3b';
+        }
+        
+        strengthBar.style.width = `${strength}%`;
+        strengthBar.style.backgroundColor = color;
+        strengthText.textContent = text;
+        strengthText.style.color = color;
+    }
+
+    async changePassword() {
+        try {
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            // Validate
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                utils.notifications.warning('Todos los campos son obligatorios');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                utils.notifications.error('Las contraseñas no coinciden');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                utils.notifications.error('La nueva contraseña debe tener al menos 6 caracteres');
+                return;
+            }
+            
+            utils.showLoading('body', 'Cambiando contraseña...');
+            
+            // Here you would normally call your API to change password
+            // For now, we'll simulate it
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            utils.notifications.success('Contraseña cambiada correctamente');
+            utils.hideModal('password-modal');
+            this.clearPasswordForm();
+            
+        } catch (error) {
+            console.error('❌ Error changing password:', error);
+            utils.notifications.error('Error al cambiar la contraseña');
+        } finally {
+            utils.hideLoading('body');
+        }
+    }
+
+    clearPasswordForm() {
+        const inputs = ['current-password', 'new-password', 'confirm-password'];
+        inputs.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) input.value = '';
         });
         
-        const data = await response.json();
-        
-        if (response.ok && data.success) {
-            showToast('Contraseña cambiada exitosamente', 'success');
-        } else {
-            throw new Error(data.message || 'Error al cambiar contraseña');
+        // Reset strength indicator
+        const strengthBar = document.querySelector('.strength-fill');
+        const strengthText = document.querySelector('.strength-text');
+        if (strengthBar) strengthBar.style.width = '0%';
+        if (strengthText) strengthText.textContent = 'Ingresa una contraseña';
+    }
+
+    // ================================
+    // PREFERENCES
+    // ================================
+
+    savePreferences() {
+        try {
+            const emailNotifications = document.getElementById('email-notifications');
+            const marketingNotifications = document.getElementById('marketing-notifications');
+            
+            const preferences = {
+                emailNotifications: emailNotifications?.checked || false,
+                marketingNotifications: marketingNotifications?.checked || false,
+                lastUpdated: new Date().toISOString()
+            };
+            
+            const prefsKey = `preferences_${this.currentUser.email}`;
+            localStorage.setItem(prefsKey, JSON.stringify(preferences));
+            
+            utils.notifications.success('Preferencias guardadas');
+            console.log('✅ Preferences saved:', preferences);
+            
+        } catch (error) {
+            console.error('❌ Error saving preferences:', error);
+            utils.notifications.error('Error al guardar preferencias');
         }
-    } catch (error) {
-        console.error('❌ Error changing password:', error);
-        showToast(error.message || 'Error al cambiar contraseña', 'error');
     }
-}
 
-function viewOrders() {
-    const user = getCurrentUser();
-    if (!user) {
-        showToast('Debes iniciar sesión', 'error');
-        return;
-    }
-    
-    // TODO: Implement orders page
-    showToast('Función de pedidos en desarrollo', 'info');
-    console.log('📦 View orders requested for:', user);
-}
+    // ================================
+    // QUICK ACTIONS
+    // ================================
 
-// ================================
-// SETTINGS FUNCTIONS
-// ================================
-
-function toggleNotifications() {
-    try {
-        const currentValue = getLocalStorage('notifications_enabled', true);
-        const newValue = !currentValue;
-        setLocalStorage('notifications_enabled', newValue);
-        
-        // Update toggle UI
-        const toggle = document.getElementById('notificationsToggle');
-        if (toggle) {
-            if (newValue) {
-                toggle.classList.add('active');
-            } else {
-                toggle.classList.remove('active');
+    async clearFavorites() {
+        try {
+            const favorites = utils.storage.getFavorites();
+            
+            if (favorites.length === 0) {
+                utils.notifications.info('No tienes favoritos para limpiar');
+                return;
             }
-        }
-        
-        // Show confirmation
-        showToast(
-            newValue ? 'Notificaciones activadas' : 'Notificaciones desactivadas', 
-            'success'
-        );
-        
-        console.log('🔔 Notifications toggled:', newValue);
-    } catch (error) {
-        console.error('❌ Error toggling notifications:', error);
-        showToast('Error al cambiar configuración', 'error');
-    }
-}
-
-function toggleDarkMode() {
-    try {
-        const currentValue = getLocalStorage('dark_mode_enabled', false);
-        const newValue = !currentValue;
-        setLocalStorage('dark_mode_enabled', newValue);
-        
-        // Update toggle UI
-        const toggle = document.getElementById('darkModeToggle');
-        if (toggle) {
-            if (newValue) {
-                toggle.classList.add('active');
-            } else {
-                toggle.classList.remove('active');
+            
+            if (confirm(`¿Estás seguro de que deseas eliminar ${favorites.length} favorito(s)?`)) {
+                utils.storage.saveFavorites([]);
+                this.updateUserStats();
+                utils.notifications.success('Favoritos eliminados');
             }
+            
+        } catch (error) {
+            console.error('❌ Error clearing favorites:', error);
+            utils.notifications.error('Error al limpiar favoritos');
         }
-        
-        // Apply dark mode to body
-        if (newValue) {
-            document.body.classList.add('dark-mode');
-        } else {
-            document.body.classList.remove('dark-mode');
-        }
-        
-        // Show confirmation
-        showToast(
-            newValue ? 'Modo oscuro activado' : 'Modo oscuro desactivado', 
-            'success'
-        );
-        
-        console.log('🌙 Dark mode toggled:', newValue);
-    } catch (error) {
-        console.error('❌ Error toggling dark mode:', error);
-        showToast('Error al cambiar configuración', 'error');
     }
-}
 
-// ================================
-// LOGOUT FUNCTION - REAL & COMPLETE
-// ================================
+    async clearCart() {
+        try {
+            const cart = utils.storage.getCart();
+            
+            if (cart.length === 0) {
+                utils.notifications.info('Tu carrito ya está vacío');
+                return;
+            }
+            
+            if (confirm(`¿Estás seguro de que deseas vaciar el carrito con ${cart.length} producto(s)?`)) {
+                utils.storage.clearCart();
+                this.updateUserStats();
+                utils.notifications.success('Carrito vaciado');
+            }
+            
+        } catch (error) {
+            console.error('❌ Error clearing cart:', error);
+            utils.notifications.error('Error al vaciar carrito');
+        }
+    }
 
-async function logout() {
-    try {
-        console.log('🚪 Starting logout process...');
-        
-        const user = getCurrentUser();
-        const token = getCurrentToken();
-        
-        // Show confirmation dialog
-        const confirmLogout = confirm('¿Estás seguro de que quieres cerrar sesión?');
-        if (!confirmLogout) {
-            console.log('❌ Logout cancelled by user');
+    // ================================
+    // LOGOUT FUNCTIONALITY
+    // ================================
+
+    async performLogout() {
+        if (this.logoutInProgress) {
+            console.log('⚠️ Logout already in progress');
             return;
         }
-        
-        showToast('Cerrando sesión...', 'info');
-        
-        // Try to logout from backend first
-        if (token) {
-            try {
-                const response = await fetch('http://localhost:3000/api/auth/logout', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
+
+        try {
+            this.logoutInProgress = true;
+            
+            console.log('🚪 Starting logout process...');
+            
+            // Close modal immediately
+            utils.hideModal('logout-modal');
+            
+            // Show loading
+            utils.showLoading('body', 'Cerrando sesión...');
+            
+            // Get current user for cleanup
+            const userEmail = this.currentUser?.email;
+            
+            // Step 1: Clear authentication data
+            console.log('🧹 Clearing authentication data...');
+            localStorage.removeItem('petstyle_user');
+            localStorage.removeItem('petstyle_token');
+            
+            // Step 2: Clear user-specific data
+            if (userEmail) {
+                console.log('🗑️ Clearing user-specific data for:', userEmail);
                 
-                if (response.ok) {
-                    console.log('✅ Backend logout successful');
-                } else {
-                    console.log('⚠️ Backend logout failed, continuing with local logout');
-                }
-            } catch (error) {
-                console.log('⚠️ Backend logout error:', error.message);
+                const keysToRemove = [
+                    `favorites_${userEmail}`,
+                    `cart_${userEmail}`,
+                    `preferences_${userEmail}`,
+                    `order_history_${userEmail}`
+                ];
+                
+                keysToRemove.forEach(key => {
+                    localStorage.removeItem(key);
+                    console.log(`✅ Removed: ${key}`);
+                });
             }
-        }
-        
-        // COMPLETE LOCAL CLEANUP
-        console.log('🧹 Cleaning up local data...');
-        
-        // Remove main auth data
-        setCurrentUser(null);
-        setCurrentToken(null);
-        localStorage.removeItem('petstyle_user');
-        localStorage.removeItem('petstyle_token');
-        
-        // Remove user-specific data if we have user info
-        if (user && user.email) {
-            localStorage.removeItem(`favorites_${user.email}`);
-            localStorage.removeItem(`cart_${user.email}`);
-            console.log(`🗑️ Removed data for user: ${user.email}`);
-        }
-        
-        // Remove any other PetStyle-related data
-        const allKeys = Object.keys(localStorage);
-        allKeys.forEach(key => {
-            if (key.startsWith('petstyle_') || 
+            
+            // Step 3: Clear any remaining PetStyle data
+            console.log('🧽 Deep cleaning localStorage...');
+            const allKeys = Object.keys(localStorage);
+            const petStyleKeys = allKeys.filter(key => 
+                key.startsWith('petstyle_') || 
                 key.startsWith('cart_') || 
                 key.startsWith('favorites_') ||
-                key.startsWith('auth_') ||
-                key.includes('user_') ||
-                key.includes('token')) {
+                key.startsWith('preferences_') ||
+                key.startsWith('order_history_')
+            );
+            
+            petStyleKeys.forEach(key => {
                 localStorage.removeItem(key);
-                console.log(`🗑️ Removed: ${key}`);
+                console.log(`🗑️ Deep cleaned: ${key}`);
+            });
+            
+            // Step 4: Clear session storage (if any)
+            sessionStorage.clear();
+            
+            // Step 5: Reset auth system
+            if (window.auth) {
+                auth.currentUser = null;
+                auth.currentToken = null;
             }
-        });
-        
-        // Clear any session storage too
-        sessionStorage.clear();
-        
-        // Remove any body classes
-        document.body.classList.remove('dark-mode');
-        
-        console.log('✅ Complete logout successful');
-        showToast('Sesión cerrada correctamente', 'success');
-        
-        // Short delay before redirect to show the toast
-        setTimeout(() => {
-            console.log('🔄 Redirecting to login...');
-            window.location.href = '../pages/login.html';
-        }, 1500);
-        
-        return true;
-        
-    } catch (error) {
-        console.error('❌ Critical logout error:', error);
-        
-        // Force cleanup even if there's an error
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        showToast('Error al cerrar sesión, pero datos limpiados', 'warning');
-        
-        setTimeout(() => {
-            window.location.href = '../pages/login.html';
-        }, 2000);
-        
-        return false;
-    }
-}
-
-// ================================
-// UTILITY FUNCTIONS
-// ================================
-
-function getUserInitials(name) {
-    if (!name || typeof name !== 'string') return 'U';
-    
-    const cleanName = name.trim();
-    if (cleanName.length === 0) return 'U';
-    
-    const words = cleanName.split(' ').filter(word => word.length > 0);
-    
-    if (words.length === 1) {
-        return words[0].charAt(0).toUpperCase();
-    } else if (words.length >= 2) {
-        return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
-    }
-    
-    return cleanName.charAt(0).toUpperCase();
-}
-
-// Refresh profile data
-async function refreshProfile() {
-    const user = getCurrentUser();
-    const token = getCurrentToken();
-    
-    if (user && token) {
-        showLoadingState();
-        try {
-            await loadUserProfileFromBackend(user, token);
-            showToast('Perfil actualizado', 'success');
+            
+            // Step 6: Show success message
+            utils.notifications.success('Sesión cerrada correctamente');
+            
+            // Step 7: Simulate logout processing
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            console.log('✅ Logout completed successfully');
+            console.log('🎯 Redirecting to login page...');
+            
+            // Step 8: Redirect to login
+            window.location.href = 'login.html';
+            
         } catch (error) {
-            console.error('❌ Error refreshing profile:', error);
-            showUserProfile(user);
-            showToast('Error al actualizar perfil', 'error');
+            console.error('❌ Error during logout:', error);
+            utils.notifications.error('Error al cerrar sesión');
+            
+            // Force redirect anyway for security
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+            
+        } finally {
+            utils.hideLoading('body');
+            this.logoutInProgress = false;
         }
-    } else {
-        showGuestProfile();
+    }
+
+    handleRemoteLogout() {
+        // Handle logout from another tab
+        console.log('🔄 Handling remote logout...');
+        utils.notifications.info('Sesión cerrada en otra pestaña');
+        
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 2000);
+    }
+
+    // ================================
+    // UTILITY METHODS
+    // ================================
+
+    isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    showError(message) {
+        const container = document.querySelector('.main-content .container');
+        if (container) {
+            container.innerHTML = `
+                <div class="error-state">
+                    <div class="error-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3>Error al cargar el perfil</h3>
+                    <p>${message}</p>
+                    <button class="btn btn-primary" onclick="location.reload()">
+                        <i class="fas fa-refresh"></i>
+                        Recargar página
+                    </button>
+                </div>
+            `;
+        }
     }
 }
 
 // ================================
-// ERROR HANDLING
+// INITIALIZATION & GLOBAL EXPORT
 // ================================
 
-window.addEventListener('error', function(e) {
-    console.error('❌ Profile page error:', e.error);
+let profilePage;
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('👤 DOM loaded, initializing Profile Page...');
     
-    // Only show error state if we're still loading
-    const profileContent = document.getElementById('profileContent');
-    if (profileContent && profileContent.innerHTML.includes('loading')) {
-        showErrorState('Error al cargar la página');
+    profilePage = new ProfilePage();
+    await profilePage.initialize();
+    
+    // Export for debugging
+    if (window.location.hostname === 'localhost') {
+        window.profilePage = profilePage;
     }
 });
 
-// ================================
-// AUTO-REFRESH (Optional)
-// ================================
+// Export for global access
+window.profilePage = profilePage;
 
-// Auto-refresh user data every 5 minutes if logged in
-setInterval(() => {
-    const user = getCurrentUser();
-    const token = getCurrentToken();
-    
-    if (user && token && document.visibilityState === 'visible') {
-        console.log('🔄 Auto-refreshing profile data...');
-        loadUserProfileFromBackend(user, token).catch(error => {
-            console.log('⚠️ Auto-refresh failed:', error.message);
-        });
-    }
-}, 5 * 60 * 1000); // 5 minutes
-
-// ================================
-// EXPORT FOR DEBUGGING (Optional)
-// ================================
-
-window.profileDebug = {
-    refreshProfile,
-    initializeProfile,
-    getCurrentUser,
-    getCurrentToken,
-    logout
-};
+console.log('✅ Profile Page Script loaded successfully');

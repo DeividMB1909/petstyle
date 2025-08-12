@@ -1,4 +1,4 @@
-// frontend/js/config.js
+// ===== PETSTYLE CONFIGURATION =====
 const CONFIG = {
     // URLs de API según el entorno
     API_BASE_URL: (() => {
