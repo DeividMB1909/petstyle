@@ -3,14 +3,19 @@ console.log('🔌 PetStyle API System Loading...');
 
 class PetStyleAPI {
     constructor() {
+        // ✅ CAMBIAR ESTA URL POR LA QUE TE DA PAGEKITE
         this.baseURL = 'https://petstyle.pagekite.me/';
+        
         this.endpoints = {
-            products: '/api/productos',
-            categories: '/api/categorias', 
+            products: '/api/productos',     // ✅ En español para coincidir con backend
+            categories: '/api/categorias',  // ✅ En español para coincidir con backend
             users: '/api/usuarios',
             auth: '/api/auth'
         };
         this.initialized = false;
+        
+        // Debug info
+        console.log('📍 API Base URL:', this.baseURL);
     }
 
     // ================================
@@ -22,6 +27,13 @@ class PetStyleAPI {
         
         try {
             console.log('🚀 Initializing API connection...');
+            
+            // Test connection first
+            const connectionTest = await this.testConnection();
+            if (!connectionTest) {
+                console.warn('⚠️ Backend connection failed, will try with each request');
+            }
+            
             await this.detectEndpoints();
             this.initialized = true;
             console.log('✅ API System initialized successfully');
@@ -43,6 +55,7 @@ class PetStyleAPI {
         for (const { key, routes } of testRoutes) {
             for (const route of routes) {
                 try {
+                    console.log(`🔍 Testing ${key} endpoint: ${route}`);
                     const response = await this.makeRequest('GET', route);
                     if (response.ok) {
                         this.endpoints[key] = route;
@@ -50,6 +63,7 @@ class PetStyleAPI {
                         break;
                     }
                 } catch (error) {
+                    console.log(`❌ ${route} not available:`, error.message);
                     // Continue testing other routes
                 }
             }
@@ -57,7 +71,7 @@ class PetStyleAPI {
     }
 
     async makeRequest(method, endpoint, data = null, requireAuth = false) {
-        const url = `${this.baseURL}${endpoint}`;
+        const url = `${this.baseURL}${endpoint.startsWith('/') ? endpoint.slice(1) : endpoint}`;
         
         const options = {
             method,
@@ -95,9 +109,11 @@ class PetStyleAPI {
             }
 
             if (!response.ok) {
-                throw new Error(responseData.message || `HTTP ${response.status}: ${responseData}`);
+                console.error(`❌ HTTP ${response.status}:`, responseData);
+                throw new Error(responseData.message || responseData.error || `HTTP ${response.status}: ${responseData}`);
             }
 
+            console.log(`✅ ${method} ${endpoint} successful`);
             return { ok: true, data: responseData, status: response.status };
             
         } catch (error) {
@@ -127,10 +143,17 @@ class PetStyleAPI {
             }
             
             console.log(`📦 Loaded ${products.length} products`);
+            
+            // Log first product for debugging
+            if (products.length > 0) {
+                console.log('📋 First product sample:', products[0]);
+            }
+            
             return products;
             
         } catch (error) {
             console.error('❌ Error loading products:', error);
+            // Return empty array instead of throwing, so app doesn't break
             return [];
         }
     }
@@ -220,6 +243,12 @@ class PetStyleAPI {
             }
             
             console.log(`📂 Loaded ${categories.length} categories`);
+            
+            // Log first category for debugging
+            if (categories.length > 0) {
+                console.log('📋 First category sample:', categories[0]);
+            }
+            
             return categories;
             
         } catch (error) {
@@ -342,9 +371,13 @@ class PetStyleAPI {
     // Test connection to backend
     async testConnection() {
         try {
-            const response = await fetch(`${this.baseURL}/health`);
-            return response.ok;
+            console.log('🔍 Testing backend connection...');
+            const response = await fetch(`${this.baseURL}health`);
+            const isOk = response.ok;
+            console.log(isOk ? '✅ Backend connection successful' : '❌ Backend connection failed');
+            return isOk;
         } catch (error) {
+            console.error('❌ Backend connection failed:', error.message);
             return false;
         }
     }
@@ -366,6 +399,7 @@ const api = new PetStyleAPI();
 
 // Auto-initialize when DOM loads
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('📄 DOM loaded, initializing API...');
     api.initialize().catch(error => {
         console.log('⚠️ API initialization failed, will retry on first use');
     });

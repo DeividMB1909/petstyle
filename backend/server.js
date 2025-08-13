@@ -14,20 +14,12 @@ const PORT = process.env.PORT || 3000;
 // ========================================
 const connectDB = async () => {
     try {
-        // Verificar que tenemos la URI
-        console.log('🔍 Verificando variables de entorno...');
-        console.log('📍 MONGODB_URI existe:', !!process.env.MONGODB_URI);
+        // Usar localhost como fallback si no hay MONGODB_URI
+        const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/petstyle_db';
         
-        if (!process.env.MONGODB_URI) {
-            throw new Error('MONGODB_URI no está definida en las variables de entorno');
-        }
+        console.log('🔍 Conectando a MongoDB...');
         
-        // Mostrar la URI sin credenciales (solo para debug)
-        const uriParts = process.env.MONGODB_URI.split('@');
-        const safePart = uriParts[1]; // Parte después de las credenciales
-        console.log('🔗 Conectando a:', `***@${safePart}`);
-        
-        const conn = await mongoose.connect(process.env.MONGODB_URI);
+        const conn = await mongoose.connect(mongoURI);
         
         console.log(`✅ MongoDB Conectado: ${conn.connection.host}`);
         console.log(`📊 Base de datos: ${conn.connection.name}`);
@@ -50,7 +42,6 @@ const connectDB = async () => {
     } catch (error) {
         console.error('❌ Error conectando a MongoDB:', error.message);
         console.log('⚠️  Continuando sin base de datos...');
-        // No terminar el proceso, solo loggear el error
     }
 };
 
@@ -61,25 +52,7 @@ connectDB();
 // ========================================
 // Configuración de CORS más permisiva
 app.use(cors({
-    origin: function (origin, callback) {
-        // Permitir requests sin origin (mobile apps, postman, etc.)
-        if (!origin) return callback(null, true);
-        
-        const allowedOrigins = [
-            'http://localhost:3000',
-            'http://localhost:8080',
-            'http://127.0.0.1:5500',
-            'http://127.0.0.1:3000',
-            'http://192.168.1.100:8080'
-        ];
-        
-        if (allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            console.log('Origen no permitido por CORS:', origin);
-            callback(null, true); // Temporal: permitir todos los orígenes
-        }
-    },
+    origin: true, // Permitir todos los orígenes temporalmente
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -161,25 +134,107 @@ app.get('/debug/db', async (req, res) => {
 });
 
 // ========================================
-// RUTAS DE API - CORREGIDAS EN ESPAÑOL
+// RUTAS DIRECTAS DE API (TEMPORAL - HASTA QUE SE ARREGLEN LOS CONTROLADORES)
 // ========================================
-const apiRoutes = require('./routes');
-const authRoutes = require('./routes/authRoutes');
-const uploadRoutes = require('./routes/uploadRoutes');
-const productRoutes = require('./routes/productRoutes');
 
-// RUTAS PRINCIPALES
-app.use('/api', apiRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/upload', uploadRoutes);
+// Ruta de productos
+app.get('/api/productos', async (req, res) => {
+    try {
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(500).json({ error: 'Base de datos no conectada' });
+        }
+        
+        const productos = await mongoose.connection.db.collection('products').find({}).toArray();
+        console.log(`📦 Enviando ${productos.length} productos`);
+        res.json(productos);
+        
+    } catch (error) {
+        console.error('❌ Error obteniendo productos:', error);
+        res.status(500).json({ error: 'Error obteniendo productos', details: error.message });
+    }
+});
 
-// ✅ RUTA DE PRODUCTOS CORREGIDA - EN ESPAÑOL
-app.use('/api/productos', productRoutes);
+// Ruta de producto específico
+app.get('/api/productos/:id', async (req, res) => {
+    try {
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(500).json({ error: 'Base de datos no conectada' });
+        }
+        
+        const { ObjectId } = require('mongodb');
+        const producto = await mongoose.connection.db.collection('products').findOne({
+            _id: new ObjectId(req.params.id)
+        });
+        
+        if (!producto) {
+            return res.status(404).json({ error: 'Producto no encontrado' });
+        }
+        
+        console.log(`📦 Enviando producto: ${producto.name || producto.nombre}`);
+        res.json(producto);
+        
+    } catch (error) {
+        console.error('❌ Error obteniendo producto:', error);
+        res.status(500).json({ error: 'Error obteniendo producto', details: error.message });
+    }
+});
 
-// Ruta para poblar datos de prueba
-const { SeedController } = require('./controllers');
-app.get('/seed', SeedController.seedDatabase);
-app.get('/stats', SeedController.getStats);
+// Ruta de categorías
+app.get('/api/categorias', async (req, res) => {
+    try {
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(500).json({ error: 'Base de datos no conectada' });
+        }
+        
+        const categorias = await mongoose.connection.db.collection('categories').find({}).toArray();
+        console.log(`📂 Enviando ${categorias.length} categorías`);
+        res.json(categorias);
+        
+    } catch (error) {
+        console.error('❌ Error obteniendo categorías:', error);
+        res.status(500).json({ error: 'Error obteniendo categorías', details: error.message });
+    }
+});
+
+// ========================================
+// RUTAS DE API OPCIONALES (SI EXISTEN LOS ARCHIVOS)
+// ========================================
+try {
+    const apiRoutes = require('./routes');
+    app.use('/api', apiRoutes);
+} catch (error) {
+    console.log('⚠️  Routes/index.js no encontrado, usando rutas directas');
+}
+
+try {
+    const authRoutes = require('./routes/authRoutes');
+    app.use('/api/auth', authRoutes);
+} catch (error) {
+    console.log('⚠️  AuthRoutes no encontrado');
+}
+
+try {
+    const uploadRoutes = require('./routes/uploadRoutes');
+    app.use('/api/upload', uploadRoutes);
+} catch (error) {
+    console.log('⚠️  UploadRoutes no encontrado');
+}
+
+try {
+    const productRoutes = require('./routes/productRoutes');
+    app.use('/api/products-admin', productRoutes); // Usar para rutas admin
+} catch (error) {
+    console.log('⚠️  ProductRoutes no encontrado');
+}
+
+// Ruta para poblar datos de prueba (opcional)
+try {
+    const { SeedController } = require('./controllers');
+    app.get('/seed', SeedController.seedDatabase);
+    app.get('/stats', SeedController.getStats);
+} catch (error) {
+    console.log('⚠️  SeedController no encontrado');
+}
 
 // ========================================
 // MANEJO DE ERRORES
@@ -192,11 +247,9 @@ app.use((req, res) => {
             'GET /',
             'GET /health',
             'GET /debug/db',
-            'GET /api',
             'GET /api/productos',
-            'POST /api/productos',
-            'PUT /api/productos/:id',
-            'DELETE /api/productos/:id',
+            'GET /api/productos/:id',
+            'GET /api/categorias',
             'POST /api/auth/login',
             'POST /api/auth/register'
         ]
@@ -211,6 +264,7 @@ app.listen(PORT, () => {
     console.log(`📚 API Base: http://localhost:${PORT}/api`);
     console.log(`🔑 Auth: http://localhost:${PORT}/api/auth`);
     console.log(`📦 Productos: http://localhost:${PORT}/api/productos`);
+    console.log(`📂 Categorías: http://localhost:${PORT}/api/categorias`);
     console.log(`🔍 Debug DB: http://localhost:${PORT}/debug/db`);
     console.log(`⚙️  Entorno: ${process.env.NODE_ENV || 'development'}`);
 });
